@@ -15,7 +15,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 QMAKE_LFLAGS += -no-pie
 
 # Select C++14
-QMAKE_CXXFLAGS += -std=c++14
+QMAKE_CXXFLAGS += -std=c++17
 
 TARGET = topino
 TEMPLATE = app
@@ -34,10 +34,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     src/main.cpp \
-    src/mainwindow.cpp
+    src/mainwindow.cpp \
+    src/iobserver.cpp \
+    src/topinodocument.cpp \
+    src/imageanalysisview.cpp
 
 HEADERS += \
-    include/mainwindow.h
+    include/mainwindow.h \
+    include/iobserver.h \
+    include/topinodocument.h \
+    include/imageanalysisview.h
 
 FORMS += \
     ui/mainwindow.ui
+
+RESOURCES += \
+    topino.qrc
