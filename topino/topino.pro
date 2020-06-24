@@ -37,13 +37,15 @@ SOURCES += \
     src/mainwindow.cpp \
     src/iobserver.cpp \
     src/topinodocument.cpp \
-    src/imageanalysisview.cpp
+    src/imageanalysisview.cpp \
+    ui/darkstyle/darkstyle.cpp
 
 HEADERS += \
     include/mainwindow.h \
     include/iobserver.h \
     include/topinodocument.h \
-    include/imageanalysisview.h
+    include/imageanalysisview.h \
+    ui/darkstyle/darkstyle.h
 
 FORMS += \
     ui/mainwindow.ui

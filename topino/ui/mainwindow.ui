@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>922</width>
-    <height>496</height>
+    <width>857</width>
+    <height>529</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>922</width>
+     <width>857</width>
      <height>22</height>
     </rect>
    </property>
@@ -131,7 +131,8 @@
   </action>
   <action name="action_AboutQt">
    <property name="icon">
-    <iconset theme="help-about"/>
+    <iconset theme="help-about">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>About Qt...</string>
@@ -139,7 +140,8 @@
   </action>
   <action name="action_AboutTopino">
    <property name="icon">
-    <iconset theme="help-about"/>
+    <iconset theme="help-about">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>About Topino...</string>
@@ -156,8 +158,8 @@
    <slot>onQuit()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>457</x>
-     <y>285</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
      <x>457</x>
@@ -220,8 +222,8 @@
    <slot>onNew()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>457</x>
-     <y>285</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
      <x>457</x>
