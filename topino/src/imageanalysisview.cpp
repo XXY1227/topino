@@ -1,7 +1,7 @@
 #include "include/imageanalysisview.h"
 
-ImageAnalysisView::ImageAnalysisView(QWidget *parent, TopinoDocument &document) :
-    QGraphicsView(parent), document(document) {
+ImageAnalysisView::ImageAnalysisView(QWidget *parent, TopinoDocument &doc) :
+    QGraphicsView(parent), document(doc) {
     setAlignment( Qt::AlignTop | Qt::AlignLeft );
 
     currentimage = new QGraphicsPixmapItem();
@@ -16,6 +16,7 @@ ImageAnalysisView::~ImageAnalysisView() {
 }
 
 void ImageAnalysisView::modelHasChanged() {
+    showImage(document.getImage());
 }
 
 void ImageAnalysisView::showImage(const QImage& image) {

@@ -12,7 +12,7 @@
 
 class ImageAnalysisView : public QGraphicsView, public IObserver {
   public:
-    ImageAnalysisView(QWidget *parent, TopinoDocument &document);
+    ImageAnalysisView(QWidget *parent, TopinoDocument &doc);
     ~ImageAnalysisView();
 
     void modelHasChanged();

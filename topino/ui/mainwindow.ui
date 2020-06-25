@@ -31,7 +31,9 @@
     <addaction name="action_Open"/>
     <addaction name="action_Save"/>
     <addaction name="action_Saveas"/>
-    <addaction name="action_Close"/>
+    <addaction name="separator"/>
+    <addaction name="action_Import_image"/>
+    <addaction name="action_Export_image"/>
     <addaction name="separator"/>
     <addaction name="action_Quit"/>
    </widget>
@@ -55,7 +57,6 @@
    <addaction name="action_New"/>
    <addaction name="action_Open"/>
    <addaction name="action_Save"/>
-   <addaction name="action_Close"/>
    <addaction name="action_Quit"/>
    <addaction name="separator"/>
    <addaction name="action_AboutTopino"/>
@@ -105,18 +106,6 @@
     <string>Ctrl+Alt+S</string>
    </property>
   </action>
-  <action name="action_Close">
-   <property name="icon">
-    <iconset theme="document-close">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Close</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+W</string>
-   </property>
-  </action>
   <action name="action_Quit">
    <property name="icon">
     <iconset theme="application-exit">
@@ -145,6 +134,16 @@
    </property>
    <property name="text">
     <string>About Topino...</string>
+   </property>
+  </action>
+  <action name="action_Import_image">
+   <property name="text">
+    <string>&amp;Import image...</string>
+   </property>
+  </action>
+  <action name="action_Export_image">
+   <property name="text">
+    <string>&amp;Export image...</string>
    </property>
   </action>
  </widget>
@@ -232,22 +231,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_Close</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onCloseFile()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>457</x>
-     <y>285</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>action_Save</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
@@ -279,6 +262,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>action_Import_image</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onImportImage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>428</x>
+     <y>264</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Export_image</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onExportImage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>428</x>
+     <y>264</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onQuit()</slot>
@@ -289,5 +304,7 @@
   <slot>onSave()</slot>
   <slot>onSaveAs()</slot>
   <slot>onCloseFile()</slot>
+  <slot>onImportImage()</slot>
+  <slot>onExportImage()</slot>
  </slots>
 </ui>

@@ -25,7 +25,8 @@ class MainWindow : public QMainWindow, public IObserver {
     void onOpen();
     void onSave();
     void onSaveAs();
-    void onCloseFile();
+    void onImportImage();
+    void onExportImage();
     void onQuit();
 
     void onAboutQt();
