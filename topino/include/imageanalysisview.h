@@ -6,6 +6,7 @@
 #include <QGraphicsSimpleTextItem>
 #include <QGraphicsPixmapItem>
 #include <QWheelEvent>
+#include <QRubberBand>
 
 #include "include/iobserver.h"
 #include "include/topinodocument.h"
@@ -20,14 +21,26 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     void showImage(const QImage &image);
 
     void resizeEvent(QResizeEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
+
+    void drawForeground(QPainter *painter, const QRectF &rect) override;
+
+    double getZoomFactor() const;
 
   private:
     TopinoDocument &document;
 
     QGraphicsScene *imagescene = nullptr;
     QGraphicsPixmapItem *currentimage = nullptr;
+
+    QPoint translateOrigin;
+
+    QPoint rubberBandOrigin;
+    QRubberBand *rubberBand = nullptr;
+
 };
 
 #endif // IMAGEANALYSISVIEW_H
