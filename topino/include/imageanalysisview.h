@@ -6,8 +6,8 @@
 #include <QGraphicsSimpleTextItem>
 #include <QGraphicsPixmapItem>
 #include <QWheelEvent>
-#include <QRubberBand>
 
+#include "include/circlerubberband.h"
 #include "include/iobserver.h"
 #include "include/topinodocument.h"
 
@@ -39,7 +39,7 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     QPoint translateOrigin;
 
     QPoint rubberBandOrigin;
-    QRubberBand *rubberBand = nullptr;
+    CircleRubberBand *rubberBand = nullptr;
 
 };
 

@@ -38,14 +38,16 @@ SOURCES += \
     src/iobserver.cpp \
     src/topinodocument.cpp \
     src/imageanalysisview.cpp \
-    ui/darkstyle/darkstyle.cpp
+    ui/darkstyle/darkstyle.cpp \
+    src/circlerubberband.cpp
 
 HEADERS += \
     include/mainwindow.h \
     include/iobserver.h \
     include/topinodocument.h \
     include/imageanalysisview.h \
-    ui/darkstyle/darkstyle.h
+    ui/darkstyle/darkstyle.h \
+    include/circlerubberband.h
 
 FORMS += \
     ui/mainwindow.ui

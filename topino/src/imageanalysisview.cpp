@@ -61,7 +61,7 @@ void ImageAnalysisView::mousePressEvent(QMouseEvent* event) {
         rubberBandOrigin = event->pos();
 
         if (rubberBand == nullptr)
-            rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
+            rubberBand = new CircleRubberBand(this);
 
         rubberBand->setGeometry(QRect(rubberBandOrigin, QSize()));
         rubberBand->show();

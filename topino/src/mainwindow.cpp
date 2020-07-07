@@ -5,9 +5,19 @@
 #include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), view(this, document) {
+    /* Basic layout/UI setup */
     ui->setupUi(this);
     setCentralWidget(&view);
 
+    /* Unfortunately, the layout designer of Qt Creator does not allow to add widgets to a toolbar; therefore,
+     * an empty widget with the QHBoxLayout (which is in turn designed/layouted in MainWindow.ui) is added to
+     * the toolbox-toolbar instead here */
+    QWidget *emptyWidget = new QWidget();
+    emptyWidget->setLayout(ui->layoutToolbox);
+    ui->toolbox->addWidget(emptyWidget);
+
+    /* The document is a reference to the model; here, all observers (mainwindow and view) are added, so that
+     * they get notified if the model changes */
     document.addObserver(this);
     document.addObserver(&view);
     document.notifyAllObserver();
