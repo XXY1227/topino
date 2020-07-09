@@ -12,6 +12,8 @@
 #include "include/topinodocument.h"
 
 class ImageAnalysisView : public QGraphicsView, public IObserver {
+    Q_OBJECT
+
   public:
     ImageAnalysisView(QWidget *parent, TopinoDocument &doc);
     ~ImageAnalysisView();
@@ -29,6 +31,11 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     void drawForeground(QPainter *painter, const QRectF &rect) override;
 
     double getZoomFactor() const;
+    void setZoomFactor(const double zoomTo);
+    void zoomByFactor(const double factor);
+
+  signals:
+    void viewHasChanged();
 
   private:
     TopinoDocument &document;

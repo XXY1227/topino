@@ -24,14 +24,32 @@ void ImageAnalysisView::modelHasChanged() {
 }
 
 void ImageAnalysisView::showImage(const QImage& image) {
+    /* If the image is empty, the zoom factor is set to 100% */
     if (image.isNull()) {
         currentimage->setPixmap(QPixmap());
-    } else {
-        currentimage->setPixmap(QPixmap::fromImage(image));
+        setZoomFactor(1.0);
+
+        return;
     }
 
-    fitInView(imagescene->itemsBoundingRect(), Qt::KeepAspectRatio);
-    update();
+    /* Extract Pixmap from image */
+    currentimage->setPixmap(QPixmap::fromImage(image));
+
+    /* Fit the image into the view, but make sure that the minimum and maximum zoom level is not violated */
+    fitInView(imagescene->itemsBoundingRect(), Qt::KeepAspectRatio);    
+
+    /* Zoom factor should be between 3.125% and 6400%. In contrast to the setZoomFactor function we can use
+     * more precise numbers here. */
+    double zoomFactor = getZoomFactor();
+
+    if (zoomFactor < 0.03) {
+        setZoomFactor(0.03125);
+    } else if (zoomFactor > 64.0) {
+        setZoomFactor(64.0);
+    }
+
+    /* Redraw view and tell everyone */
+    emit viewHasChanged();
 }
 
 void ImageAnalysisView::resizeEvent(QResizeEvent *event) {
@@ -104,20 +122,13 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
 void ImageAnalysisView::wheelEvent(QWheelEvent *event) {
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 
-    // Scale the view / do the zoom
-    double scaleFactor = 1.15;
-
-    if(event->delta() > 0) {
-        // Zoom in
-        scale(scaleFactor, scaleFactor);
+    /* Zoom In */
+    if (event->delta() > 0) {
+        zoomByFactor(2.0);
+    /* Zoom Out */
     } else {
-        // Zooming out
-        scale(1.0 / scaleFactor, 1.0 / scaleFactor);
+        zoomByFactor(0.5);
     }
-
-    setSceneRect(currentimage->boundingRect());
-
-    update();
 }
 
 void ImageAnalysisView::drawForeground(QPainter* painter, const QRectF& rect) {
@@ -135,4 +146,29 @@ void ImageAnalysisView::drawForeground(QPainter* painter, const QRectF& rect) {
 double ImageAnalysisView::getZoomFactor() const {
     /* Use determinant of the transformation matrix as the zoom factor (determinant = scaling of the _area_) */
     return transform().det();
+}
+
+void ImageAnalysisView::setZoomFactor(const double zoomTo) {
+    /* Zoom factor should be between 3.125% and 6400%. Due to double innaccuracies the check is actually less
+     * than 6500% (65.0) and greater than 3% (0.03). */
+    if ((zoomTo < 0.03) || (zoomTo > 65.0))
+        return;
+
+    /* New zoom factor over current zoom factor is the factor we need to scale the view; since we are using
+     * the area as the reference, the actual scale factor is the square root of the ratio! */
+    double scaleFactor = sqrt(zoomTo / getZoomFactor());
+    scale(scaleFactor, scaleFactor);
+
+    /* Adjust the scene, redraw the view, and tell everyone that the view has changed */
+    setSceneRect(currentimage->boundingRect());
+
+    //update();
+    emit viewHasChanged();
+}
+
+void ImageAnalysisView::zoomByFactor(const double factor) {
+    /* Technically the scale function allows simply to forward the factor; however, it scales by sides while
+     * factor is the scaling of the area; so, we just forward the factor to setZoomFactor, which also checks
+     * for the right range. */
+    setZoomFactor(getZoomFactor() * factor);
 }

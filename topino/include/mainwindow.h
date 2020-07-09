@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QLabel>
 
 #include "include/iobserver.h"
 #include "include/topinodocument.h"
@@ -18,7 +19,7 @@ class MainWindow : public QMainWindow, public IObserver {
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void modelHasChanged() final;
+    void modelHasChanged() final;    
 
   private slots:
     void onNew();
@@ -32,8 +33,12 @@ class MainWindow : public QMainWindow, public IObserver {
     void onAboutQt();
     void onAboutTopino();
 
+    void onViewHasChanged();
+
   private:
     Ui::MainWindow *ui;
+
+    QLabel zoomlabel;
 
     TopinoDocument document;
     ImageAnalysisView view;

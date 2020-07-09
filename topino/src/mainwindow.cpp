@@ -9,18 +9,30 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
     setCentralWidget(&view);
 
+    /* All tools are exclusive to select */
+    ui->action_group_tools->setExclusive(true);
+
+    /* Add a label to the zoom toolbar that is updated with the current zoom level */
+    zoomlabel.setText(tr("Zoom: 100%"));
+    //zoomlabel.setStyleSheet("QLabel {color: #B8B8B8;}");
+    ui->zoomBar->addWidget(&zoomlabel);
+
     /* Unfortunately, the layout designer of Qt Creator does not allow to add widgets to a toolbar; therefore,
      * an empty widget with the QHBoxLayout (which is in turn designed/layouted in MainWindow.ui) is added to
      * the toolbox-toolbar instead here */
-    QWidget *emptyWidget = new QWidget();
+    /*QWidget *emptyWidget = new QWidget();
     emptyWidget->setLayout(ui->layoutToolbox);
-    ui->toolbox->addWidget(emptyWidget);
+    ui->toolbox->addWidget(emptyWidget);*/
 
     /* The document is a reference to the model; here, all observers (mainwindow and view) are added, so that
      * they get notified if the model changes */
     document.addObserver(this);
     document.addObserver(&view);
     document.notifyAllObserver();
+
+    /* If the view has been updated (e.g. zoomed in or the like) we need to know this, too. Here we implemeted
+     * a signal-slot pair for this case */
+    connect(&view, SIGNAL(viewHasChanged()), this, SLOT(onViewHasChanged()));
 }
 
 MainWindow::~MainWindow() {
@@ -33,9 +45,12 @@ void MainWindow::modelHasChanged() {
     newtitle = document.getFilename() + (document.hasChanged() ? tr("*") : tr("")) + tr(" - Topino");
     setWindowTitle(newtitle);
 
-    /* TODO: Update statusbar */
-
     update();
+}
+
+void MainWindow::onViewHasChanged() {
+    /* Update zoom level */
+    zoomlabel.setText(QString("%1: %2%").arg(tr("Zoom")).arg(view.getZoomFactor()*100.0));
 }
 
 void MainWindow::onNew() {
