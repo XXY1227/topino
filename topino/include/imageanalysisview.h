@@ -46,7 +46,8 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     QPoint translateOrigin;
 
     QPoint rubberBandOrigin;
-    CircleRubberBand *rubberBand = nullptr;
+    QRubberBand *rubberBand = nullptr;
+
 
 };
 
