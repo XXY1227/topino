@@ -39,7 +39,8 @@ SOURCES += \
     src/topinodocument.cpp \
     src/imageanalysisview.cpp \
     ui/darkstyle/darkstyle.cpp \
-    src/circlerubberband.cpp
+    src/circlerubberband.cpp \
+    src/linerubberband.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -47,7 +48,8 @@ HEADERS += \
     include/topinodocument.h \
     include/imageanalysisview.h \
     ui/darkstyle/darkstyle.h \
-    include/circlerubberband.h
+    include/circlerubberband.h \
+    include/linerubberband.h
 
 FORMS += \
     ui/mainwindow.ui

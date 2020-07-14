@@ -7,6 +7,7 @@
 #include <QGraphicsPixmapItem>
 #include <QWheelEvent>
 
+#include "include/linerubberband.h"
 #include "include/circlerubberband.h"
 #include "include/iobserver.h"
 #include "include/topinodocument.h"
@@ -34,6 +35,15 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     void setZoomFactor(const double zoomTo);
     void zoomByFactor(const double factor);
 
+    enum tools {
+        selection = 0,
+        ruler = 1,
+        inletCircle = 2
+    };
+
+    ImageAnalysisView::tools getCurrentTool() const;
+    void setCurrentTool(const ImageAnalysisView::tools& value);
+
   signals:
     void viewHasChanged();
 
@@ -48,7 +58,7 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     QPoint rubberBandOrigin;
     QRubberBand *rubberBand = nullptr;
 
-
+    ImageAnalysisView::tools currentTool = ImageAnalysisView::tools::selection;
 };
 
 #endif // IMAGEANALYSISVIEW_H

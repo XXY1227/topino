@@ -36,7 +36,7 @@ void ImageAnalysisView::showImage(const QImage& image) {
     currentimage->setPixmap(QPixmap::fromImage(image));
 
     /* Fit the image into the view, but make sure that the minimum and maximum zoom level is not violated */
-    fitInView(imagescene->itemsBoundingRect(), Qt::KeepAspectRatio);    
+    fitInView(imagescene->itemsBoundingRect(), Qt::KeepAspectRatio);
 
     /* Zoom factor should be between 3.125% and 6400%. In contrast to the setZoomFactor function we can use
      * more precise numbers here. */
@@ -79,9 +79,9 @@ void ImageAnalysisView::mousePressEvent(QMouseEvent* event) {
         rubberBandOrigin = event->pos();
 
         if (rubberBand == nullptr)
-            rubberBand = new CircleRubberBand(this);
+            rubberBand = new LineRubberBand(this);
 
-        rubberBand->setGeometry(QRect(rubberBandOrigin, QSize()));        
+        rubberBand->setGeometry(QRect(rubberBandOrigin, QSize()));
         rubberBand->show();
     }
 
@@ -125,7 +125,7 @@ void ImageAnalysisView::wheelEvent(QWheelEvent *event) {
     /* Zoom In */
     if (event->delta() > 0) {
         zoomByFactor(2.0);
-    /* Zoom Out */
+        /* Zoom Out */
     } else {
         zoomByFactor(0.5);
     }
@@ -171,4 +171,12 @@ void ImageAnalysisView::zoomByFactor(const double factor) {
      * factor is the scaling of the area; so, we just forward the factor to setZoomFactor, which also checks
      * for the right range. */
     setZoomFactor(getZoomFactor() * factor);
+}
+
+ImageAnalysisView::tools ImageAnalysisView::getCurrentTool() const {
+    return currentTool;
+}
+
+void ImageAnalysisView::setCurrentTool(const ImageAnalysisView::tools& value) {
+    currentTool = value;
 }

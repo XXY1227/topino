@@ -14,7 +14,7 @@ class CircleRubberBand : public QRubberBand {
     void paintEvent(QPaintEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
 
-private:
+  private:
     QBrush backgroundBrush;
     QPen borderPen;
     int borderWidth;
