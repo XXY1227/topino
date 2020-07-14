@@ -18,12 +18,12 @@ ImageAnalysisView::~ImageAnalysisView() {
 }
 
 void ImageAnalysisView::modelHasChanged() {
-    showImage(document.getImage());
+    setImage(document.getImage());
 
     setSceneRect(currentimage->boundingRect());
 }
 
-void ImageAnalysisView::showImage(const QImage& image) {
+void ImageAnalysisView::setImage(const QImage& image) {
     /* If the image is empty, the zoom factor is set to 100% */
     if (image.isNull()) {
         currentimage->setPixmap(QPixmap());
@@ -53,6 +53,7 @@ void ImageAnalysisView::showImage(const QImage& image) {
 }
 
 void ImageAnalysisView::resizeEvent(QResizeEvent *event) {
+    /* Make sure that resizing checks and shows scrollbars if needed */
     setResizeAnchor(QGraphicsView::AnchorViewCenter);
 
     QRectF viewrect = contentsRect();
@@ -66,31 +67,51 @@ void ImageAnalysisView::resizeEvent(QResizeEvent *event) {
     setSceneRect(currentimage->boundingRect());
 
     QGraphicsView::resizeEvent(event);
+
+    emit viewHasChanged();
 }
 
 void ImageAnalysisView::mousePressEvent(QMouseEvent* event) {
-    /* Translation event: press and hold middle mouse button to move around */
-    if (event->button() == Qt::MiddleButton) {
+    /* Translation event: press and hold right mouse button to move around; this works regardless of the tool */
+    if (event->buttons() == Qt::RightButton) {
         translateOrigin = event->pos();
     }
 
-    /* Selection event: press and hold left mouse button to start selection/rubber band process */
-    if (event->button() == Qt::LeftButton) {
-        rubberBandOrigin = event->pos();
+    switch (currentTool) {
+    /* Selection event for selection, ruler, and inlet tools: press and hold left mouse button to
+     * start selection/rubber band process */
+    case tools::selection:
+    case tools::ruler:
+    case tools::inletCircle:
+        if (event->button() == Qt::LeftButton) {
+            rubberBandOrigin = event->pos();
 
-        if (rubberBand == nullptr)
-            rubberBand = new LineRubberBand(this);
+            if (rubberBand == nullptr) {
+                switch (currentTool) {
+                case tools::ruler:
+                    rubberBand = new LineRubberBand(this);
+                    break;
+                case tools::inletCircle:
+                    rubberBand = new CircleRubberBand(this);
+                    break;
+                default:
+                    rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
+                    break;
+                }
+            }
 
-        rubberBand->setGeometry(QRect(rubberBandOrigin, QSize()));
-        rubberBand->show();
+            rubberBand->setGeometry(QRect(rubberBandOrigin, QSize()));
+            rubberBand->show();
+        }
+        break;
     }
 
     QGraphicsView::mousePressEvent(event);
 }
 
 void ImageAnalysisView::mouseMoveEvent(QMouseEvent* event) {
-    /* Translation event: moving the mouse around while holding (only!) the middle mouse button */
-    if (event->buttons() == Qt::MidButton) {
+    /* Translation event: moving the mouse around while holding (only!) the right mouse button */
+    if (event->buttons() == Qt::RightButton) {
         QPointF oldpoint = mapToScene(translateOrigin);
         QPointF newpoint = mapToScene(event->pos());
         QPointF translation = newpoint - oldpoint;
@@ -99,23 +120,43 @@ void ImageAnalysisView::mouseMoveEvent(QMouseEvent* event) {
         translateOrigin = event->pos();
     }
 
-    /* Selection event */
-    if (event->buttons() == Qt::LeftButton) {
-        if (rubberBand)
-            rubberBand->setGeometry(QRect(rubberBandOrigin, event->pos()).normalized());
+    switch (currentTool) {
+    /* Selection event for selection, ruler, and inlet tools: press and hold left mouse button to
+     * start selection/rubber band process */
+    case tools::selection:
+    case tools::ruler:
+    case tools::inletCircle:
+        if (event->buttons() == Qt::LeftButton) {
+            if (rubberBand)
+                rubberBand->setGeometry(QRect(rubberBandOrigin, event->pos()).normalized());
+        }
+        break;
     }
 
     QGraphicsView::mouseMoveEvent(event);
 }
 
 void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
-    if (event->button() == Qt::LeftButton) {
-        if (rubberBand) {
-            rubberBand->hide();
-            qDebug("Rubber band released at %d %d %d %d", rubberBand->geometry().x(), rubberBand->geometry().y(),
-                   rubberBand->geometry().width(), rubberBand->geometry().height());
+    switch (currentTool) {
+    /* Selection event for selection, ruler, and inlet tools: press and hold left mouse button to
+     * start selection/rubber band process */
+    case tools::selection:
+    case tools::ruler:
+    case tools::inletCircle:
+        if (event->button() == Qt::LeftButton) {
+            if (rubberBand) {
+                rubberBand->hide();
+                qDebug("Rubber band released at %d %d %d %d", rubberBand->geometry().x(), rubberBand->geometry().y(),
+                       rubberBand->geometry().width(), rubberBand->geometry().height());
+
+                /* Delete this rubber band and free it */
+                delete rubberBand;
+                rubberBand = nullptr;
+            }
         }
+        break;
     }
+
     return QGraphicsView::mouseReleaseEvent(event);
 }
 
@@ -131,16 +172,10 @@ void ImageAnalysisView::wheelEvent(QWheelEvent *event) {
     }
 }
 
-void ImageAnalysisView::drawForeground(QPainter* painter, const QRectF& rect) {
-    QGraphicsView::drawForeground(painter, rect);
+bool ImageAnalysisView::viewportEvent(QEvent* event) {
+    emit viewHasChanged();
 
-    /* Temporary Zoom factor view */
-    QTransform trf = transform();
-    painter->setTransform(QTransform());
-
-    painter->drawText(QRect(10,10, 100, 50), QString("Zoom: %1%").arg(getZoomFactor()*100.0));
-
-    painter->setTransform(trf);
+    return QGraphicsView::viewportEvent(event);
 }
 
 double ImageAnalysisView::getZoomFactor() const {

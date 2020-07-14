@@ -235,7 +235,7 @@
       </widget>
      </item>
      <item row="0" column="0" rowspan="4">
-      <widget class="QGraphicsView" name="miniview">
+      <widget class="QGraphicsView" name="miniView">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>3</horstretch>
@@ -823,6 +823,54 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>action_selection_tool</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolSelection()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_ruler_tool</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolRuler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_inlet_tool</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolInletCircle()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onQuit()</slot>
@@ -835,5 +883,8 @@
   <slot>onCloseFile()</slot>
   <slot>onImportImage()</slot>
   <slot>onExportImage()</slot>
+  <slot>onToolSelection()</slot>
+  <slot>onToolRuler()</slot>
+  <slot>onToolInletCircle()</slot>
  </slots>
 </ui>

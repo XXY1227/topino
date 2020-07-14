@@ -17,12 +17,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //zoomlabel.setStyleSheet("QLabel {color: #B8B8B8;}");
     ui->zoomBar->addWidget(&zoomlabel);
 
-    /* Unfortunately, the layout designer of Qt Creator does not allow to add widgets to a toolbar; therefore,
-     * an empty widget with the QHBoxLayout (which is in turn designed/layouted in MainWindow.ui) is added to
-     * the toolbox-toolbar instead here */
-    /*QWidget *emptyWidget = new QWidget();
-    emptyWidget->setLayout(ui->layoutToolbox);
-    ui->toolbox->addWidget(emptyWidget);*/
+    /* Prepare the thumbnail miniview */
+    miniImage = new QGraphicsPixmapItem();
+    miniScene = new QGraphicsScene(ui->miniView->contentsRect(), ui->miniView);
+    miniRect = new QGraphicsRectItem();
+    miniScene->addItem(miniImage);
+    miniScene->addItem(miniRect);
+    ui->miniView->setAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
+    ui->miniView->setScene(miniScene);
+    ui->miniView->installEventFilter(this);
+
+    /* Prepare the angulagram micro view */
+    angulascene = new QGraphicsScene(ui->microView->contentsRect(), ui->microView);
 
     /* The document is a reference to the model; here, all observers (mainwindow and view) are added, so that
      * they get notified if the model changes */
@@ -39,11 +45,43 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
+bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
+    /* Events for the miniview */
+    if (dynamic_cast<QGraphicsView*>(watched) && (watched == ui->miniView)) {
+        /* Miniview: click mouse to change the view viewport */
+        if (event->type() == QEvent::MouseButtonPress) {
+            QMouseEvent *mevent = dynamic_cast<QMouseEvent*>(event);
+            view.centerOn(ui->miniView->mapToScene(mevent->pos()));
+        }
+    }
+
+    return QMainWindow::eventFilter(watched, event);
+}
+
+
 void MainWindow::modelHasChanged() {
     /* Set title of the main window to include the filename and an asterisk */
     QString newtitle;
     newtitle = document.getFilename() + (document.hasChanged() ? tr("*") : tr("")) + tr(" - Topino");
     setWindowTitle(newtitle);
+
+    /* Set image for the mini and micro view */
+    miniImage->setPixmap(QPixmap());
+    if (!document.getImage().isNull()) {
+        /* Extract Pixmap from image */
+        miniImage->setPixmap(QPixmap::fromImage(document.getImage()));
+
+        /* Adjust rect; the pen width needs to be scaled with the whole scene, otherwise it will
+         * not be visible; 1% of the whole width is ok */
+        QPen minipen = QPen(QColor(255,0,0));
+        minipen.setWidth(int(miniImage->boundingRect().width() * 0.01));
+        miniRect->setPen(minipen);
+        miniRect->setRect(miniImage->boundingRect());
+
+        /* Fit the image into the view */
+        ui->miniView->fitInView(miniScene->itemsBoundingRect(), Qt::KeepAspectRatio);
+        ui->miniView->setSceneRect(miniImage->boundingRect());
+    }
 
     update();
 }
@@ -51,6 +89,18 @@ void MainWindow::modelHasChanged() {
 void MainWindow::onViewHasChanged() {
     /* Update zoom level */
     zoomlabel.setText(QString("%1: %2%").arg(tr("Zoom")).arg(view.getZoomFactor()*100.0));
+
+    /* Set the view rectangle */
+    QRectF viewport = view.mapToScene(view.viewport()->geometry()).boundingRect();
+    if (!viewport.contains(miniImage->boundingRect())) {
+        miniRect->setRect(viewport);
+    } else {
+        miniRect->setRect(miniImage->boundingRect());
+    }
+}
+
+void MainWindow::changeTool(ImageAnalysisView::tools tool) {
+    view.setCurrentTool(tool);
 }
 
 void MainWindow::onNew() {

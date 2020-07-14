@@ -19,7 +19,9 @@ class MainWindow : public QMainWindow, public IObserver {
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void modelHasChanged() final;    
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
+    void modelHasChanged() final;
 
   private slots:
     void onNew();
@@ -33,6 +35,16 @@ class MainWindow : public QMainWindow, public IObserver {
     void onAboutQt();
     void onAboutTopino();
 
+    void onToolSelection() {
+        changeTool(ImageAnalysisView::selection);
+    }
+    void onToolRuler() {
+        changeTool(ImageAnalysisView::ruler);
+    }
+    void onToolInletCircle() {
+        changeTool(ImageAnalysisView::inletCircle);
+    }
+
     void onViewHasChanged();
 
   private:
@@ -42,6 +54,15 @@ class MainWindow : public QMainWindow, public IObserver {
 
     TopinoDocument document;
     ImageAnalysisView view;
+
+    /* Stuff for the mini/micro views on the top right corner */
+    QGraphicsScene *miniScene = nullptr;
+    QGraphicsPixmapItem *miniImage = nullptr;
+    QGraphicsRectItem *miniRect = nullptr;
+
+    QGraphicsScene *angulascene = nullptr;
+
+    void changeTool(ImageAnalysisView::tools tool);
 };
 
 #endif // MAINWINDOW_H
