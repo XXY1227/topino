@@ -40,6 +40,8 @@ TopinoData::ParsingError TopinoData::loadImageObject(QXmlStreamReader& xml) {
             bytes = QByteArray::fromBase64(bytes);
             image = QImage::fromData(bytes, "PNG");
 
+            qDebug("Image loaded with format %d", image.format());
+
             if (image.isNull())
                 return ParsingError::CouldNotLoadImage;
         } else {
