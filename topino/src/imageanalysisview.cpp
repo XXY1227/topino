@@ -84,8 +84,6 @@ void ImageAnalysisView::mousePressEvent(QMouseEvent* event) {
     case tools::ruler:
     case tools::inletCircle:
         if (event->button() == Qt::LeftButton) {
-            rubberBandOrigin = event->pos();
-
             if (rubberBand == nullptr) {
                 switch (currentTool) {
                 case tools::ruler:
@@ -95,12 +93,13 @@ void ImageAnalysisView::mousePressEvent(QMouseEvent* event) {
                     rubberBand = new CircleRubberBand(this);
                     break;
                 default:
-                    rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
+                    rubberBand = new TopinoRubberBand(this);
                     break;
                 }
             }
 
-            rubberBand->setGeometry(QRect(rubberBandOrigin, QSize()));
+            //rubberBand->setGeometry(QRect(rubberBandOrigin, QSize()));
+            rubberBand->setSrcPoint(event->pos());
             rubberBand->show();
         }
         break;
@@ -128,7 +127,8 @@ void ImageAnalysisView::mouseMoveEvent(QMouseEvent* event) {
     case tools::inletCircle:
         if (event->buttons() == Qt::LeftButton) {
             if (rubberBand)
-                rubberBand->setGeometry(QRect(rubberBandOrigin, event->pos()).normalized());
+                //rubberBand->setGeometry(QRect(rubberBandOrigin, event->pos()).normalized());
+                rubberBand->setDestPoint(event->pos());
         }
         break;
     }

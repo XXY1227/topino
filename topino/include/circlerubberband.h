@@ -6,18 +6,24 @@
 #include <QPaintEvent>
 #include <QResizeEvent>
 
-class CircleRubberBand : public QRubberBand {
+#include "include/topinorubberband.h"
+
+class CircleRubberBand : public TopinoRubberBand {
   public:
     CircleRubberBand(QWidget *parent = nullptr);
     ~CircleRubberBand();
 
+    void setDestPoint(const QPoint& value) override;
+
     void paintEvent(QPaintEvent *event) override;
-    void resizeEvent(QResizeEvent *event) override;
 
   private:
+    QBrush markerBrush;
     QBrush backgroundBrush;
     QPen borderPen;
-    int borderWidth;
+    int circleRadius = 0;
+    int markerRadius = 10;
+    int borderWidth = 2;
 };
 
 #endif // CIRCLERUBBERBAND_H

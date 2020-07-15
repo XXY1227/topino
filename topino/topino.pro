@@ -40,7 +40,8 @@ SOURCES += \
     src/imageanalysisview.cpp \
     ui/darkstyle/darkstyle.cpp \
     src/circlerubberband.cpp \
-    src/linerubberband.cpp
+    src/linerubberband.cpp \
+    src/topinorubberband.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -49,7 +50,8 @@ HEADERS += \
     include/imageanalysisview.h \
     ui/darkstyle/darkstyle.h \
     include/circlerubberband.h \
-    include/linerubberband.h
+    include/linerubberband.h \
+    include/topinorubberband.h
 
 FORMS += \
     ui/mainwindow.ui

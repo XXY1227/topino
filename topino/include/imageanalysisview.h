@@ -7,6 +7,7 @@
 #include <QGraphicsPixmapItem>
 #include <QWheelEvent>
 
+#include "include/topinorubberband.h"
 #include "include/linerubberband.h"
 #include "include/circlerubberband.h"
 #include "include/iobserver.h"
@@ -55,7 +56,7 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     QPoint translateOrigin;
 
     QPoint rubberBandOrigin;
-    QRubberBand *rubberBand = nullptr;
+    TopinoRubberBand *rubberBand = nullptr;
 
     ImageAnalysisView::tools currentTool = ImageAnalysisView::tools::selection;
 };

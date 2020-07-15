@@ -5,7 +5,9 @@
 #include <QPainter>
 #include <QPaintEvent>
 
-class LineRubberBand : public QRubberBand {
+#include "include/topinorubberband.h"
+
+class LineRubberBand : public TopinoRubberBand {
   public:
     LineRubberBand(QWidget *parent = nullptr);
     ~LineRubberBand();
@@ -14,7 +16,6 @@ class LineRubberBand : public QRubberBand {
 
   private:
     QBrush terminalBrush;
-    int offset;
     QPen linePen;
     int lineWidth;
 };
