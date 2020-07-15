@@ -18,7 +18,7 @@ ImageAnalysisView::~ImageAnalysisView() {
 }
 
 void ImageAnalysisView::modelHasChanged() {
-    setImage(document.getImage());
+    setImage(document.getData().getImage());
 
     setSceneRect(currentimage->boundingRect());
 }
@@ -127,7 +127,6 @@ void ImageAnalysisView::mouseMoveEvent(QMouseEvent* event) {
     case tools::inletCircle:
         if (event->buttons() == Qt::LeftButton) {
             if (rubberBand)
-                //rubberBand->setGeometry(QRect(rubberBandOrigin, event->pos()).normalized());
                 rubberBand->setDestPoint(event->pos());
         }
         break;

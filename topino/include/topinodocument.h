@@ -1,7 +1,8 @@
 #ifndef TOPINODOCUMENT_H
 #define TOPINODOCUMENT_H
 
-#include <include/iobserver.h>
+#include "include/iobserver.h"
+#include "include/topinodata.h"
 
 #include <QString>
 #include <QImage>
@@ -28,8 +29,7 @@ class TopinoDocument {
         FileNotFound = 2,
         FileNameOrPathNotSet = 3,
         CouldNotOpen = 4,
-        CouldNotLoadImage = 5,
-        ParsingError = 6
+        ParsingError = 5
     };
 
     FileError loadFromXML(const QString &xmlfilename );
@@ -44,11 +44,15 @@ class TopinoDocument {
     void setFullFilename(const QString& value);
     bool hasFileName() const;
 
-    QImage getImage() const;
-    void setImage(const QImage& value);
+    const TopinoData& getData() const;
+    void getData(TopinoData &value) const;
+    void setData(const TopinoData& value);
 
   private:
     std::vector<IObserver*> observers;
+
+    /* This is the version string saved in the document file; currently not checked */
+    QString version = "1.0";
 
     /* True if file has been changed since the last save/open/create */
     bool changed = false;
@@ -57,8 +61,8 @@ class TopinoDocument {
     QString filename;
     QString path;
 
-    /* TODO: Move to data object */
-    QImage image;
+    /* Data object that includes the data methods */
+    TopinoData data;
 
     /* Reads the <topino> object from an XML file */
     FileError readTopinoXML(QXmlStreamReader &xml);

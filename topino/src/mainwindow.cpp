@@ -67,9 +67,10 @@ void MainWindow::modelHasChanged() {
 
     /* Set image for the mini and micro view */
     miniImage->setPixmap(QPixmap());
-    if (!document.getImage().isNull()) {
+    QImage image = document.getData().getImage();
+    if (!image.isNull()) {
         /* Extract Pixmap from image */
-        miniImage->setPixmap(QPixmap::fromImage(document.getImage()));
+        miniImage->setPixmap(QPixmap::fromImage(image));
 
         /* Adjust rect; the pen width needs to be scaled with the whole scene, otherwise it will
          * not be visible; 1% of the whole width is ok */
@@ -209,7 +210,10 @@ void MainWindow::onImportImage() {
         return;
     }
 
-    document.setImage(img);
+    /* Modify data */
+    TopinoData data; document.getData(data);
+    data.setImage(img);
+    document.setData(data);
     document.notifyAllObserver();
 }
 

@@ -155,12 +155,18 @@ bool TopinoDocument::hasFileName() const {
     return (filename.length() > 0 && path.length() > 0);
 }
 
-QImage TopinoDocument::getImage() const {
-    return image;
+const TopinoData &TopinoDocument::getData() const {
+    /* For fast access a const reference is given */
+    return data;
 }
 
-void TopinoDocument::setImage(const QImage& value) {
-    image = value;
+void TopinoDocument::getData(TopinoData& value) const {
+    /* Copy data to the given reference */
+    value = data;
+}
+
+void TopinoDocument::setData(const TopinoData& value) {
+    data = value;
     modify();
 }
 
@@ -169,17 +175,7 @@ TopinoDocument::FileError TopinoDocument::readTopinoXML(QXmlStreamReader& xml) {
     while (xml.readNextStartElement()) {
         qDebug("Found element %s in XML...", xml.name().toString().toStdString().c_str());
 
-        /* The source image is saved as base64 encoded PNG */
-        if(xml.name() == "sourceImage") {
-            QString text = xml.readElementText();
-            QByteArray bytes;
-            bytes.append(text);
-            bytes = QByteArray::fromBase64(bytes);
-            image = QImage::fromData(bytes, "PNG");
-
-            if (image.isNull())
-                return FileError::CouldNotLoadImage;
-        } else {
+        if (data.loadObject(xml) == TopinoData::ParsingError::IgnoredElement) {
             xml.skipCurrentElement();
         }
     }
@@ -188,13 +184,12 @@ TopinoDocument::FileError TopinoDocument::readTopinoXML(QXmlStreamReader& xml) {
 }
 
 TopinoDocument::FileError TopinoDocument::saveTopinoXML(QXmlStreamWriter& xml) {
+    /* Document header <topino> with <version> element */
     xml.writeStartElement("topino");
+    xml.writeTextElement("version", version);
 
-    /* Convert the image (through a QBuffer) to a base64 encoded PNG and write it down as text element */
-    QByteArray bytes;
-    QBuffer buffer(&bytes);
-    image.save(&buffer, "PNG");
-    xml.writeTextElement("sourceImage", bytes.toBase64());
+    /* Save image object */
+    data.saveImageObject(xml);
 
     xml.writeEndElement();
 

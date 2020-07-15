@@ -4,7 +4,6 @@
 #include <QRubberBand>
 #include <QPainter>
 #include <QPaintEvent>
-#include <QResizeEvent>
 
 #include "include/topinorubberband.h"
 

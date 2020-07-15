@@ -41,7 +41,8 @@ SOURCES += \
     ui/darkstyle/darkstyle.cpp \
     src/circlerubberband.cpp \
     src/linerubberband.cpp \
-    src/topinorubberband.cpp
+    src/topinorubberband.cpp \
+    src/topinodata.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -51,7 +52,8 @@ HEADERS += \
     ui/darkstyle/darkstyle.h \
     include/circlerubberband.h \
     include/linerubberband.h \
-    include/topinorubberband.h
+    include/topinorubberband.h \
+    include/topinodata.h
 
 FORMS += \
     ui/mainwindow.ui
