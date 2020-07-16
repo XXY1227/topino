@@ -42,7 +42,8 @@ SOURCES += \
     src/circlerubberband.cpp \
     src/linerubberband.cpp \
     src/topinorubberband.cpp \
-    src/topinodata.cpp
+    src/topinodata.cpp \
+    src/rulertoolitem.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -53,7 +54,8 @@ HEADERS += \
     include/circlerubberband.h \
     include/linerubberband.h \
     include/topinorubberband.h \
-    include/topinodata.h
+    include/topinodata.h \
+    include/rulertoolitem.h
 
 FORMS += \
     ui/mainwindow.ui

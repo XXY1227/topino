@@ -46,6 +46,7 @@ class MainWindow : public QMainWindow, public IObserver {
     }
 
     void onViewHasChanged();
+    void onSelectionHasChanged();
 
   private:
     Ui::MainWindow *ui;

@@ -13,6 +13,8 @@
 #include "include/iobserver.h"
 #include "include/topinodocument.h"
 
+#include "include/rulertoolitem.h"
+
 class ImageAnalysisView : public QGraphicsView, public IObserver {
     Q_OBJECT
 
@@ -22,6 +24,8 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
 
     void modelHasChanged();
 
+    void resetView();
+
     void setImage(const QImage &image);
 
     void resizeEvent(QResizeEvent *event) override;
@@ -30,6 +34,8 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
     bool viewportEvent(QEvent *event) override;
+
+    void onSelectionChange();
 
     double getZoomFactor() const;
     void setZoomFactor(const double zoomTo);
@@ -46,6 +52,7 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
 
   signals:
     void viewHasChanged();
+    void selectionHasChanged();
 
   private:
     TopinoDocument &document;

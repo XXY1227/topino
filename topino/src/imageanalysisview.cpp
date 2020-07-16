@@ -10,8 +10,13 @@ ImageAnalysisView::ImageAnalysisView(QWidget *parent, TopinoDocument &doc) :
 
     imagescene = new QGraphicsScene(contentsRect(), this);
     imagescene->addItem(currentimage);
+    currentimage->setEnabled(false);
+    currentimage->setFlags(0);
 
     setScene(imagescene);
+
+    /* Check if selection changed and eventually propagate */
+    connect(imagescene, &QGraphicsScene::selectionChanged, this, &ImageAnalysisView::onSelectionChange);
 }
 
 ImageAnalysisView::~ImageAnalysisView() {
@@ -21,6 +26,20 @@ void ImageAnalysisView::modelHasChanged() {
     setImage(document.getData().getImage());
 
     setSceneRect(currentimage->boundingRect());
+}
+
+void ImageAnalysisView::resetView() {
+    /* Resets the view by clearing all items from the scenes, setting the tool to the first one, etc */
+    imagescene->clear();
+
+    currentimage = new QGraphicsPixmapItem();
+    imagescene->addItem(currentimage);
+    currentimage->setEnabled(false);
+    currentimage->setFlags(0);
+
+    setCurrentTool(tools::selection);
+
+    emit viewHasChanged();
 }
 
 void ImageAnalysisView::setImage(const QImage& image) {
@@ -77,6 +96,10 @@ void ImageAnalysisView::mousePressEvent(QMouseEvent* event) {
         translateOrigin = event->pos();
     }
 
+    /* Ignore the tool behaviour if the user clicked on anything other than the background (image) */
+    if (itemAt(event->pos()) != nullptr && itemAt(event->pos()) != currentimage)
+        return QGraphicsView::mousePressEvent(event);
+
     switch (currentTool) {
     /* Selection event for selection, ruler, and inlet tools: press and hold left mouse button to
      * start selection/rubber band process */
@@ -98,8 +121,8 @@ void ImageAnalysisView::mousePressEvent(QMouseEvent* event) {
                 }
             }
 
-            //rubberBand->setGeometry(QRect(rubberBandOrigin, QSize()));
             rubberBand->setSrcPoint(event->pos());
+            rubberBand->setDestPoint(event->pos());
             rubberBand->show();
         }
         break;
@@ -123,6 +146,16 @@ void ImageAnalysisView::mouseMoveEvent(QMouseEvent* event) {
     /* Selection event for selection, ruler, and inlet tools: press and hold left mouse button to
      * start selection/rubber band process */
     case tools::selection:
+        if (event->buttons() == Qt::LeftButton) {
+            if (rubberBand) {
+                rubberBand->setDestPoint(event->pos());
+
+                QPainterPath path;
+                path.addRect(QRect(rubberBand->getSrcPoint(), rubberBand->getDestPoint()));
+                imagescene->setSelectionArea(mapToScene(path));
+            }
+        }
+        break;
     case tools::ruler:
     case tools::inletCircle:
         if (event->buttons() == Qt::LeftButton) {
@@ -139,8 +172,44 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
     switch (currentTool) {
     /* Selection event for selection, ruler, and inlet tools: press and hold left mouse button to
      * start selection/rubber band process */
-    case tools::selection:
     case tools::ruler:
+        if (event->button() == Qt::LeftButton) {
+            if (rubberBand) {
+                rubberBand->hide();
+
+                qDebug("Release ruler at %d, %d to %d, %d",
+                       rubberBand->getSrcPoint().x(), rubberBand->getSrcPoint().y(),
+                       rubberBand->getDestPoint().x(), rubberBand->getDestPoint().y());
+
+                /* Check if there is already a ruler tool item in the scene, if yes, delete it
+                 * before creating a new one */
+                for (auto iter = items().begin(); iter != items().end(); ++iter) {
+                    RulerToolItem *item = dynamic_cast<RulerToolItem*>(*iter);
+                    if (item != nullptr) {
+                        imagescene->removeItem(item);
+                        break;
+                    }
+                }
+
+                /* Create a new tool, select it, and switch back to the selection tool */
+                RulerToolItem *tool = new RulerToolItem();
+                tool->setLine(QLine(mapToScene(rubberBand->getSrcPoint()).toPoint(),
+                                    mapToScene(rubberBand->getDestPoint()).toPoint()));
+                imagescene->addItem(tool);
+                QPainterPath path;
+                path.addRect(tool->boundingRect());
+                imagescene->setSelectionArea(path);
+                setCurrentTool(tools::selection);
+
+                /* Delete this rubber band and free it */
+                delete rubberBand;
+                rubberBand = nullptr;
+
+                emit viewHasChanged();
+            }
+        }
+        break;
+    case tools::selection:
     case tools::inletCircle:
         if (event->button() == Qt::LeftButton) {
             if (rubberBand) {
@@ -175,6 +244,10 @@ bool ImageAnalysisView::viewportEvent(QEvent* event) {
     emit viewHasChanged();
 
     return QGraphicsView::viewportEvent(event);
+}
+
+void ImageAnalysisView::onSelectionChange() {
+    emit selectionHasChanged();
 }
 
 double ImageAnalysisView::getZoomFactor() const {

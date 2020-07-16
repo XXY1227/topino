@@ -17,6 +17,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //zoomlabel.setStyleSheet("QLabel {color: #B8B8B8;}");
     ui->zoomBar->addWidget(&zoomlabel);
 
+    /* Hide all docking tools */
+    ui->dockRulerTool->hide();
+
     /* Prepare the thumbnail miniview */
     miniImage = new QGraphicsPixmapItem();
     miniScene = new QGraphicsScene(ui->miniView->contentsRect(), ui->miniView);
@@ -39,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     /* If the view has been updated (e.g. zoomed in or the like) we need to know this, too. Here we implemeted
      * a signal-slot pair for this case */
     connect(&view, SIGNAL(viewHasChanged()), this, SLOT(onViewHasChanged()));
+    connect(&view, SIGNAL(selectionHasChanged()), this, SLOT(onSelectionHasChanged()));
 }
 
 MainWindow::~MainWindow() {
@@ -98,6 +102,31 @@ void MainWindow::onViewHasChanged() {
     } else {
         miniRect->setRect(miniImage->boundingRect());
     }
+
+    /* Set the current tool based on the view */
+    switch(view.getCurrentTool()) {
+    case ImageAnalysisView::tools::selection:
+        ui->action_selection_tool->setChecked(true);
+        break;
+    case ImageAnalysisView::tools::ruler:
+        ui->action_ruler_tool->setChecked(true);
+        break;
+    case ImageAnalysisView::tools::inletCircle:
+        ui->action_inlet_tool->setChecked(true);
+        break;
+    }
+}
+
+void MainWindow::onSelectionHasChanged() {
+    qDebug("Mainwindow: Selection changed");
+
+    /* First hide all dock windows */
+    ui->dockRulerTool->hide();
+
+    /* Check all selected items  */
+    for (auto iter = view.scene()->selectedItems().begin(); iter != view.scene()->selectedItems().end(); ++iter) {
+
+    }
 }
 
 void MainWindow::changeTool(ImageAnalysisView::tools tool) {
@@ -120,7 +149,9 @@ void MainWindow::onNew() {
         }
     }
 
-    /* Create an empty document, override the old one, notify everyone */
+    /* Create an empty document, override the old one, reset the view, notify everyone */
+    view.resetView();
+
     document = TopinoDocument();
     document.addObserver(this);
     document.addObserver(&view);
@@ -161,7 +192,9 @@ void MainWindow::onOpen() {
         return;
     }
 
-    /* Only override the open document if loading of the new document was successful */
+    /* Only override the open document if loading of the new document was successful; don't forget to reset
+     * the view! */
+    view.resetView();
     document = newdoc;
     document.addObserver(this);
     document.addObserver(&view);
@@ -211,7 +244,8 @@ void MainWindow::onImportImage() {
     }
 
     /* Modify data */
-    TopinoData data; document.getData(data);
+    TopinoData data;
+    document.getData(data);
     data.setImage(img);
     document.setData(data);
     document.notifyAllObserver();
