@@ -17,8 +17,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     //zoomlabel.setStyleSheet("QLabel {color: #B8B8B8;}");
     ui->zoomBar->addWidget(&zoomlabel);
 
-    /* Hide all docking tools */
-    ui->dockRulerTool->hide();
+    /* Prepare all things for the object properties */
+    ui->propertiesPages->setCurrentIndex(objectPages::general);
+    updateObjectPage(objectPages::general);
 
     /* Prepare the thumbnail miniview */
     miniImage = new QGraphicsPixmapItem();
@@ -69,6 +70,9 @@ void MainWindow::modelHasChanged() {
     newtitle = document.getFilename() + (document.hasChanged() ? tr("*") : tr("")) + tr(" - Topino");
     setWindowTitle(newtitle);
 
+    /* Update the general page of the object properties dock widget */
+    updateObjectPage(objectPages::general);
+
     /* Set image for the mini and micro view */
     miniImage->setPixmap(QPixmap());
     QImage image = document.getData().getImage();
@@ -118,12 +122,31 @@ void MainWindow::onViewHasChanged() {
 }
 
 void MainWindow::onSelectionHasChanged() {
-    qDebug("Mainwindow: Selection changed");
+    int selitems = view.scene()->selectedItems().size();
 
-    /* First hide all dock windows */
-    ui->dockRulerTool->hide();
+    /* Nothing selected -> show general page */
+    if (selitems == 0) {
+        ui->propertiesPages->setCurrentIndex(objectPages::general);
+        return;
+    }
 
-    /* Check all selected items  */
+    /* Exactly one item selected: find the type, select and update the respective object page */
+    if (selitems == 1) {
+        /* This is not really the best OO implementation, but straightforward; in future it might be replaced
+         * by visitor pattern or the like */
+        QGraphicsItem *widget = view.scene()->selectedItems()[0];
+        RulerToolItem *ruler = dynamic_cast<RulerToolItem*>(widget);
+
+        /* Ruler tool selected */
+        if (ruler != nullptr) {
+            updateObjectPage(objectPages::ruler);
+            ui->propertiesPages->setCurrentIndex(objectPages::ruler);
+        }
+
+        return;
+    }
+
+    /* More items are selected: check all selected items and count the different types  */
     for (auto iter = view.scene()->selectedItems().begin(); iter != view.scene()->selectedItems().end(); ++iter) {
 
     }
@@ -131,6 +154,45 @@ void MainWindow::onSelectionHasChanged() {
 
 void MainWindow::changeTool(ImageAnalysisView::tools tool) {
     view.setCurrentTool(tool);
+}
+
+void MainWindow::updateObjectPage(MainWindow::objectPages page)
+{
+    const TopinoData &data = document.getData();
+
+    /* This function updates the information on the respective page of the object properties dock widget */
+    switch (page) {
+        case general:
+            /* First page: general document properties, image sizes, etc. */
+            if (!data.getImage().isNull()) {
+                ui->propImageDimension->setText(QString("%1 × %2 Px²").
+                                                arg(data.getImage().width()).
+                                                arg(data.getImage().height()));
+            } else {
+                ui->propImageDimension->setText("---");
+            }
+            break;
+        case multiple:
+            /* Second page: multiple objects of multiple types selected; we do not test here, just update */
+            ui->propObjectsAmount->setText(QString("%1 objects selected").arg(view.scene()->selectedItems().size()));
+            break;
+        case ruler:
+            /* Third page: ruler properties */
+            if (view.scene()->selectedItems().size() == 1) {
+                QGraphicsItem *widget = view.scene()->selectedItems()[0];
+                RulerToolItem *ruler = dynamic_cast<RulerToolItem*>(widget);
+
+                if (ruler != nullptr) {
+                    QPoint p1 = ruler->mapToScene(ruler->getLine().p1().toPoint()).toPoint();
+                    QPoint p2 = ruler->mapToScene(ruler->getLine().p2().toPoint()).toPoint();
+                    ui->propRulerP1->setText(QString("%1, %2").arg(p1.x()).arg(p1.y()));
+                    ui->propRulerP2->setText(QString("%1, %2").arg(p2.x()).arg(p2.y()));
+                    ui->propRulerLength->setText(QString("%1 pixel").arg(
+                                                     QString::number(ruler->getLine().length(), 'f', 1)));
+                }
+            }
+            break;
+    }
 }
 
 void MainWindow::onNew() {

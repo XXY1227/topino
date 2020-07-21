@@ -192,7 +192,7 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
                 }
 
                 /* Create a new tool, select it, and switch back to the selection tool */
-                RulerToolItem *tool = new RulerToolItem();
+                RulerToolItem *tool = new RulerToolItem(0);
                 tool->setLine(QLine(mapToScene(rubberBand->getSrcPoint()).toPoint(),
                                     mapToScene(rubberBand->getDestPoint()).toPoint()));
                 imagescene->addItem(tool);

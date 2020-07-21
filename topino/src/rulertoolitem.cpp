@@ -1,6 +1,6 @@
 #include "include/rulertoolitem.h"
 
-RulerToolItem::RulerToolItem(QGraphicsItem* parent) : QGraphicsLineItem(parent) {
+RulerToolItem::RulerToolItem(int newitemid, QGraphicsItem* parent) : TopinoGraphicsItem(newitemid, parent) {
     setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
 
     /* Set standard visual appearance of this rubberband */
@@ -13,12 +13,11 @@ RulerToolItem::RulerToolItem(QGraphicsItem* parent) : QGraphicsLineItem(parent) 
 }
 
 RulerToolItem::~RulerToolItem() {
-
 }
 
 QRectF RulerToolItem::boundingRect() const {
-    QPoint p1 = line().toLine().p1();
-    QPoint p2 = line().toLine().p2();
+    QPoint p1 = getLine().toLine().p1();
+    QPoint p2 = getLine().toLine().p2();
 
     return QRectF(qMin(p1.x(), p2.x()) - offset, qMin(p1.y(), p2.y()) - offset,
                   qAbs(p1.x() - p2.x()) + 2 * offset, qAbs(p1.y() - p2.y()) + 2 * offset);
@@ -27,7 +26,7 @@ QRectF RulerToolItem::boundingRect() const {
 bool RulerToolItem::contains(const QPointF& point) const {
     return inTerminalPoint1(point.toPoint()) ||
            inTerminalPoint2(point.toPoint()) ||
-           QGraphicsLineItem::contains(point);
+           QGraphicsItem::contains(point);
 }
 
 void RulerToolItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) {
@@ -37,8 +36,8 @@ void RulerToolItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt
     /* Draw a circle inside the given square (enforced by resizeEvent) instead of the default behaviour */
     painter->setRenderHint(QPainter::Antialiasing);
 
-    QPoint p1 = line().toLine().p1();
-    QPoint p2 = line().toLine().p2();
+    QPoint p1 = getLine().toLine().p1();
+    QPoint p2 = getLine().toLine().p2();
 
     /* Drawing line */
     painter->setPen(linePen);
@@ -60,8 +59,8 @@ void RulerToolItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt
 }
 
 QPainterPath RulerToolItem::shape() const {
-    QPoint p1 = line().toLine().p1();
-    QPoint p2 = line().toLine().p2();
+    QPoint p1 = getLine().toLine().p1();
+    QPoint p2 = getLine().toLine().p2();
     QPainterPath path;
 
     path.addEllipse(p1, offset, offset);
@@ -70,6 +69,18 @@ QPainterPath RulerToolItem::shape() const {
     path.lineTo(p2);
 
     return path;
+}
+
+QLineF RulerToolItem::getLine() const {
+    return line;
+}
+
+void RulerToolItem::setLine(const QLineF& value) {
+    line = value;
+}
+
+TopinoGraphicsItem::itemtype RulerToolItem::getItemType() const {
+    return itemtype::ruler;
 }
 
 bool RulerToolItem::inTerminalPoint1(const QPoint& point) const {

@@ -5,9 +5,11 @@
 #include <QGraphicsItem>
 #include <QGraphicsLineItem>
 
-class RulerToolItem : public QGraphicsLineItem {
+#include "include/topinographicsitem.h"
+
+class RulerToolItem : public TopinoGraphicsItem {
   public:
-    RulerToolItem(QGraphicsItem *parent = nullptr);
+    RulerToolItem(int newitemid, QGraphicsItem *parent = nullptr);
     ~RulerToolItem();
 
     bool contains(const QPointF &point) const override;
@@ -15,7 +17,13 @@ class RulerToolItem : public QGraphicsLineItem {
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0) override;
     QPainterPath shape() const override;
 
+    QLineF getLine() const;
+    void setLine(const QLineF& value);
+
+    itemtype getItemType() const override;
+
   private:
+    QLineF line;
     QBrush terminalBrush;
     QPen linePen;
     int lineWidth;

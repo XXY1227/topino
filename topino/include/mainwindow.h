@@ -49,6 +49,12 @@ class MainWindow : public QMainWindow, public IObserver {
     void onSelectionHasChanged();
 
   private:
+    enum objectPages {
+        general = 0,
+        multiple = 1,
+        ruler = 2
+    };
+
     Ui::MainWindow *ui;
 
     QLabel zoomlabel;
@@ -64,6 +70,8 @@ class MainWindow : public QMainWindow, public IObserver {
     QGraphicsScene *angulascene = nullptr;
 
     void changeTool(ImageAnalysisView::tools tool);
+
+    void updateObjectPage(objectPages page);
 };
 
 #endif // MAINWINDOW_H
