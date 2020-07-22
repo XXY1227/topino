@@ -183,16 +183,18 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
 
                 /* Check if there is already a ruler tool item in the scene, if yes, delete it
                  * before creating a new one */
-                for (auto iter = items().begin(); iter != items().end(); ++iter) {
+                /*for (auto iter = items().begin(); iter != items().end(); ++iter) {
                     RulerToolItem *item = dynamic_cast<RulerToolItem*>(*iter);
                     if (item != nullptr) {
                         imagescene->removeItem(item);
                         break;
                     }
-                }
+                }*/
 
-                /* Create a new tool, select it, and switch back to the selection tool */
+                /* Create a new tool, select it, and switch back to the selection tool; for now, scale
+                 * it to 0.2% of the image width */
                 RulerToolItem *tool = new RulerToolItem(0);
+                tool->setScaling(currentimage->pixmap().width() * 0.002);
                 tool->setLine(QLine(mapToScene(rubberBand->getSrcPoint()).toPoint(),
                                     mapToScene(rubberBand->getDestPoint()).toPoint()));
                 imagescene->addItem(tool);

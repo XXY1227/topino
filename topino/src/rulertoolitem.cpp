@@ -47,7 +47,7 @@ void RulerToolItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt
     /* Drawing selection rectangle */
     if (isSelected()) {
         painter->setBrush(Qt::NoBrush);
-        painter->setPen(QPen(Qt::white, 1, Qt::DashLine));
+        painter->setPen(QPen(Qt::white, lineWidth / 2, Qt::DashLine));
         painter->drawPath(shape());
     }
 }
@@ -88,6 +88,14 @@ void RulerToolItem::setLine(const QLineF& value) {
 
 TopinoGraphicsItem::itemtype RulerToolItem::getItemType() const {
     return itemtype::ruler;
+}
+
+void RulerToolItem::updateScale() {
+    double scaling = getScaling();
+
+    offset = offset * scaling;
+    lineWidth = lineWidth * scaling;
+    linePen.setWidth(lineWidth);
 }
 
 void RulerToolItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {

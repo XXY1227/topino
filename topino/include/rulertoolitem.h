@@ -23,6 +23,7 @@ class RulerToolItem : public TopinoGraphicsItem {
     void setLine(const QLineF& value);
 
     itemtype getItemType() const override;
+    void updateScale() override;
 
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;

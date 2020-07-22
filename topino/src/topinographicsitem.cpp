@@ -14,3 +14,12 @@ int TopinoGraphicsItem::getItemid() const {
 void TopinoGraphicsItem::setItemid(int value) {
     itemid = value;
 }
+
+double TopinoGraphicsItem::getScaling() const {
+    return scaling;
+}
+
+void TopinoGraphicsItem::setScaling(double value) {
+    scaling = value;
+    updateScale();
+}
