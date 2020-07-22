@@ -1,9 +1,12 @@
 #ifndef RULERTOOLITEM_H
 #define RULERTOOLITEM_H
 
+#include <QtMath>
+#include <QCursor>
 #include <QPainter>
 #include <QGraphicsItem>
-#include <QGraphicsLineItem>
+#include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
 
 #include "include/topinographicsitem.h"
 
@@ -12,7 +15,6 @@ class RulerToolItem : public TopinoGraphicsItem {
     RulerToolItem(int newitemid, QGraphicsItem *parent = nullptr);
     ~RulerToolItem();
 
-    bool contains(const QPointF &point) const override;
     QRectF boundingRect() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0) override;
     QPainterPath shape() const override;
@@ -22,15 +24,27 @@ class RulerToolItem : public TopinoGraphicsItem {
 
     itemtype getItemType() const override;
 
+    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+
   private:
+    enum parts {
+        none = 0,
+        point1 = 1,
+        point2 = 2,
+        middleline = 3
+    };
+
+    parts partClicked = parts::none;
+
     QLineF line;
     QBrush terminalBrush;
     QPen linePen;
     int lineWidth;
     int offset = 0;
 
-    bool inTerminalPoint1(const QPoint &point) const;
-    bool inTerminalPoint2(const QPoint &point) const;
+    bool inTerminalPoint(const QPointF &termPoint, const QPointF &pos) const;
 };
 
 #endif // RULERTOOLITEM_H

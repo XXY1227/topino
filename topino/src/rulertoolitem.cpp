@@ -23,12 +23,6 @@ QRectF RulerToolItem::boundingRect() const {
                   qAbs(p1.x() - p2.x()) + 2 * offset, qAbs(p1.y() - p2.y()) + 2 * offset);
 }
 
-bool RulerToolItem::contains(const QPointF& point) const {
-    return inTerminalPoint1(point.toPoint()) ||
-           inTerminalPoint2(point.toPoint()) ||
-           QGraphicsItem::contains(point);
-}
-
 void RulerToolItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) {
     Q_UNUSED(option);
     Q_UNUSED(widget);
@@ -36,8 +30,8 @@ void RulerToolItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt
     /* Draw a circle inside the given square (enforced by resizeEvent) instead of the default behaviour */
     painter->setRenderHint(QPainter::Antialiasing);
 
-    QPoint p1 = getLine().toLine().p1();
-    QPoint p2 = getLine().toLine().p2();
+    QPoint p1 = line.toLine().p1();
+    QPoint p2 = line.toLine().p2();
 
     /* Drawing line */
     painter->setPen(linePen);
@@ -54,21 +48,34 @@ void RulerToolItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt
     if (isSelected()) {
         painter->setBrush(Qt::NoBrush);
         painter->setPen(QPen(Qt::white, 1, Qt::DashLine));
-        painter->drawPolygon(boundingRect());
+        painter->drawPath(shape());
     }
 }
 
 QPainterPath RulerToolItem::shape() const {
-    QPoint p1 = getLine().toLine().p1();
-    QPoint p2 = getLine().toLine().p2();
+    /* Create the shape out of the invidual elements, first the two circles at the end */
     QPainterPath path;
+    QPoint p1 = line.toLine().p1();
+    QPoint p2 = line.toLine().p2();
 
     path.addEllipse(p1, offset, offset);
     path.addEllipse(p2, offset, offset);
-    path.moveTo(p1);
-    path.lineTo(p2);
 
-    return path;
+    /* Calculate the points for the bounding rectangle of the line; it is a little bit
+     * wider than the actual line, so that the user does not exactly have to click on
+     * the 1px-line */
+    QPainterPath pathLine;
+    double radAngle = line.angle() * M_PI / 180;
+    double dx = offset * sin(radAngle);
+    double dy = offset * cos(radAngle);
+
+    pathLine.moveTo(p1.x() + dx, p1.y() + dy);
+    pathLine.lineTo(p2.x() + dx, p2.y() + dy);
+    pathLine.lineTo(p2.x() - dx, p2.y() - dy);
+    pathLine.lineTo(p1.x() - dx, p1.y() - dy);
+
+    /* Unify the areas from the middle part and the two circles at the end */
+    return path.united(pathLine).simplified();
 }
 
 QLineF RulerToolItem::getLine() const {
@@ -83,12 +90,56 @@ TopinoGraphicsItem::itemtype RulerToolItem::getItemType() const {
     return itemtype::ruler;
 }
 
-bool RulerToolItem::inTerminalPoint1(const QPoint& point) const {
-    return QRect(0, 0, 2 * offset, 2 * offset).contains(point);
+void RulerToolItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    /* Clicked in one of the terminal points of the ruler? Then remember this
+     * for future mouse events */
+    if (event->buttons() & Qt::LeftButton) {
+        if (inTerminalPoint(line.p1(), event->pos())) {
+            qDebug("clicked in first point");
+            partClicked = parts::point1;
+            setCursor(QCursor(Qt::SizeAllCursor));
+        } else if (inTerminalPoint(line.p2(), event->pos())) {
+            qDebug("clicked in second point");
+            partClicked = parts::point2;
+            setCursor(QCursor(Qt::SizeAllCursor));
+        }
+    }
+
+    /* Continue with processing (this handles selection etc.) */
+    QGraphicsItem::mousePressEvent(event);
 }
 
-bool RulerToolItem::inTerminalPoint2(const QPoint& point) const {
-    return QRect(boundingRect().width() - 2 * offset, boundingRect().height() - 2 * offset,
-                 boundingRect().width(), boundingRect().height()).contains(point);
+
+void RulerToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
+    /* Depending on which part clicked, the position of the points is updated */
+    switch (partClicked) {
+    case parts::point1:
+        line.setP1(event->pos());
+        break;
+    case parts::point2:
+        line.setP2(event->pos());
+        break;
+    default:
+        event->ignore();
+        break;
+    }
+
+    /* Update the scene (drawing etc.) */
+    scene()->update();
 }
+
+void RulerToolItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+    /* Release the part clicked; return mouse cursor to normal version */
+    partClicked = parts::none;
+    setCursor(QCursor(Qt::ArrowCursor));
+
+    /* Process all release events */
+    QGraphicsItem::mouseReleaseEvent(event);
+}
+
+bool RulerToolItem::inTerminalPoint(const QPointF& termPoint, const QPointF& pos) const {
+    return QRectF(termPoint.x() - offset, termPoint.y() - offset, 2 * offset, 2 * offset).contains(pos);
+
+}
+
 
