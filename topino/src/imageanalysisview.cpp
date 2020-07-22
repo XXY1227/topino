@@ -197,6 +197,8 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
                 tool->setScaling(currentimage->pixmap().width() * 0.002);
                 tool->setLine(QLine(mapToScene(rubberBand->getSrcPoint()).toPoint(),
                                     mapToScene(rubberBand->getDestPoint()).toPoint()));
+                /* Connect it to the event chain */
+                connect(tool, &TopinoGraphicsItem::itemHasChanged, this, &ImageAnalysisView::onItemChanged);
                 imagescene->addItem(tool);
                 QPainterPath path;
                 path.addRect(tool->boundingRect());
@@ -250,6 +252,14 @@ bool ImageAnalysisView::viewportEvent(QEvent* event) {
 
 void ImageAnalysisView::onSelectionChange() {
     emit selectionHasChanged();
+}
+
+void ImageAnalysisView::onItemChanged(const TopinoGraphicsItem* item) {
+    if (item == nullptr)
+        return;
+
+    qDebug("View: Item %d changed", item->getItemid());
+    emit itemHasChanged(item->getItemid());
 }
 
 double ImageAnalysisView::getZoomFactor() const {

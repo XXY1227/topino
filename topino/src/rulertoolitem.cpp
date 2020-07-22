@@ -1,7 +1,9 @@
 #include "include/rulertoolitem.h"
 
 RulerToolItem::RulerToolItem(int newitemid, QGraphicsItem* parent) : TopinoGraphicsItem(newitemid, parent) {
-    setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
+    setFlags(QGraphicsItem::ItemIsSelectable |
+             QGraphicsItem::ItemIsMovable |
+             QGraphicsItem::ItemSendsGeometryChanges);
 
     /* Set standard visual appearance of this rubberband */
     terminalBrush = QBrush(QColor(0, 135, 215));
@@ -132,8 +134,9 @@ void RulerToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
         break;
     }
 
-    /* Update the scene (drawing etc.) */
+    /* Update the scene (drawing etc.) and emit signal to view*/
     scene()->update();
+    emit itemHasChanged(this);
 }
 
 void RulerToolItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {

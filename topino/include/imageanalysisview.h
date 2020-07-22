@@ -7,12 +7,14 @@
 #include <QGraphicsPixmapItem>
 #include <QWheelEvent>
 
+
 #include "include/topinorubberband.h"
 #include "include/linerubberband.h"
 #include "include/circlerubberband.h"
 #include "include/iobserver.h"
 #include "include/topinodocument.h"
 
+#include "include/topinographicsitem.h"
 #include "include/rulertoolitem.h"
 
 class ImageAnalysisView : public QGraphicsView, public IObserver {
@@ -33,9 +35,10 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
-    bool viewportEvent(QEvent *event) override;
+    bool viewportEvent(QEvent *event) override;    
 
     void onSelectionChange();
+    void onItemChanged(const TopinoGraphicsItem* item);
 
     double getZoomFactor() const;
     void setZoomFactor(const double zoomTo);
@@ -53,6 +56,7 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
   signals:
     void viewHasChanged();
     void selectionHasChanged();
+    void itemHasChanged(int itemID);
 
   private:
     TopinoDocument &document;

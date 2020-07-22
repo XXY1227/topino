@@ -47,6 +47,7 @@ class MainWindow : public QMainWindow, public IObserver {
 
     void onViewHasChanged();
     void onSelectionHasChanged();
+    void onItemHasChanged(int itemID);
 
   private:
     enum objectPages {

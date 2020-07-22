@@ -42,8 +42,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     /* If the view has been updated (e.g. zoomed in or the like) we need to know this, too. Here we implemeted
      * a signal-slot pair for this case */
-    connect(&view, SIGNAL(viewHasChanged()), this, SLOT(onViewHasChanged()));
-    connect(&view, SIGNAL(selectionHasChanged()), this, SLOT(onSelectionHasChanged()));
+    connect(&view, &ImageAnalysisView::viewHasChanged, this, &MainWindow::onViewHasChanged);
+    connect(&view, &ImageAnalysisView::selectionHasChanged, this, &MainWindow::onSelectionHasChanged);
+    connect(&view, &ImageAnalysisView::itemHasChanged, this, &MainWindow::onItemHasChanged);
 }
 
 MainWindow::~MainWindow() {
@@ -152,46 +153,49 @@ void MainWindow::onSelectionHasChanged() {
     }
 }
 
+void MainWindow::onItemHasChanged(int itemID) {
+    qDebug("Main windows: item %d has changed", itemID);
+}
+
 void MainWindow::changeTool(ImageAnalysisView::tools tool) {
     view.setCurrentTool(tool);
 }
 
-void MainWindow::updateObjectPage(MainWindow::objectPages page)
-{
+void MainWindow::updateObjectPage(MainWindow::objectPages page) {
     const TopinoData &data = document.getData();
 
     /* This function updates the information on the respective page of the object properties dock widget */
     switch (page) {
-        case general:
-            /* First page: general document properties, image sizes, etc. */
-            if (!data.getImage().isNull()) {
-                ui->propImageDimension->setText(QString("%1 × %2 Px²").
-                                                arg(data.getImage().width()).
-                                                arg(data.getImage().height()));
-            } else {
-                ui->propImageDimension->setText("---");
-            }
-            break;
-        case multiple:
-            /* Second page: multiple objects of multiple types selected; we do not test here, just update */
-            ui->propObjectsAmount->setText(QString("%1 objects selected").arg(view.scene()->selectedItems().size()));
-            break;
-        case ruler:
-            /* Third page: ruler properties */
-            if (view.scene()->selectedItems().size() == 1) {
-                QGraphicsItem *widget = view.scene()->selectedItems()[0];
-                RulerToolItem *ruler = dynamic_cast<RulerToolItem*>(widget);
+    case general:
+        /* First page: general document properties, image sizes, etc. */
+        if (!data.getImage().isNull()) {
+            ui->propImageDimension->setText(QString("%1 × %2 Px²").
+                                            arg(data.getImage().width()).
+                                            arg(data.getImage().height()));
+        } else {
+            ui->propImageDimension->setText("---");
+        }
+        break;
+    case multiple:
+        /* Second page: multiple objects of multiple types selected; we do not test here, just update */
+        ui->propObjectsAmount->setText(QString("%1 objects selected").arg(view.scene()->selectedItems().size()));
+        break;
+    case ruler:
+        /* Third page: ruler properties */
+        if (view.scene()->selectedItems().size() == 1) {
+            QGraphicsItem *widget = view.scene()->selectedItems()[0];
+            RulerToolItem *ruler = dynamic_cast<RulerToolItem*>(widget);
 
-                if (ruler != nullptr) {
-                    QPoint p1 = ruler->mapToScene(ruler->getLine().p1().toPoint()).toPoint();
-                    QPoint p2 = ruler->mapToScene(ruler->getLine().p2().toPoint()).toPoint();
-                    ui->propRulerP1->setText(QString("%1, %2").arg(p1.x()).arg(p1.y()));
-                    ui->propRulerP2->setText(QString("%1, %2").arg(p2.x()).arg(p2.y()));
-                    ui->propRulerLength->setText(QString("%1 pixel").arg(
-                                                     QString::number(ruler->getLine().length(), 'f', 1)));
-                }
+            if (ruler != nullptr) {
+                QPoint p1 = ruler->mapToScene(ruler->getLine().p1().toPoint()).toPoint();
+                QPoint p2 = ruler->mapToScene(ruler->getLine().p2().toPoint()).toPoint();
+                ui->propRulerP1->setText(QString("%1, %2").arg(p1.x()).arg(p1.y()));
+                ui->propRulerP2->setText(QString("%1, %2").arg(p2.x()).arg(p2.y()));
+                ui->propRulerLength->setText(QString("%1 pixel").arg(
+                                                 QString::number(ruler->getLine().length(), 'f', 1)));
             }
-            break;
+        }
+        break;
     }
 }
 

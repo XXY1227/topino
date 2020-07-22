@@ -2,8 +2,11 @@
 #define TOPINOGRAPHICSITEM_H
 
 #include <QGraphicsItem>
+#include <QGraphicsObject>
 
-class TopinoGraphicsItem : public QGraphicsItem {
+class TopinoGraphicsItem : public QGraphicsObject {
+    Q_OBJECT
+
   public:
     TopinoGraphicsItem(int newitemid, QGraphicsItem *parent = nullptr);
     ~TopinoGraphicsItem();
@@ -31,6 +34,13 @@ class TopinoGraphicsItem : public QGraphicsItem {
      * always draws in a reasonable size on the image */
     double getScaling() const;
     void setScaling(double value);
+
+  protected:
+    /* If the item properties are changed, propagate this information upwards */
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+
+  signals:
+    void itemHasChanged(const TopinoGraphicsItem *item);
 
   private:
     int itemid = 0;

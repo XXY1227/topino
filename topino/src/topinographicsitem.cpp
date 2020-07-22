@@ -1,6 +1,6 @@
 #include "include/topinographicsitem.h"
 
-TopinoGraphicsItem::TopinoGraphicsItem(int newitemid, QGraphicsItem* parent) : QGraphicsItem(parent) {
+TopinoGraphicsItem::TopinoGraphicsItem(int newitemid, QGraphicsItem* parent) : QGraphicsObject(parent) {
     itemid = newitemid;
 }
 
@@ -22,4 +22,14 @@ double TopinoGraphicsItem::getScaling() const {
 void TopinoGraphicsItem::setScaling(double value) {
     scaling = value;
     updateScale();
+}
+
+QVariant TopinoGraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
+    /* Item has changed, send a signal */
+    if (change == QGraphicsItem::ItemPositionHasChanged) {
+        emit itemHasChanged(this);
+    }
+
+    /* Otherwise proceed with the normal handling of this event handler */
+    return QGraphicsObject::itemChange(change, value);
 }
