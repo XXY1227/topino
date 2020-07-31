@@ -1,7 +1,13 @@
 #include "include/topinographicsitem.h"
 
 TopinoGraphicsItem::TopinoGraphicsItem(int newitemid, QGraphicsItem* parent) : QGraphicsObject(parent) {
+    /* Set item ID */
     itemid = newitemid;
+
+    /* Prepare selection pen; important bit here is the cosmetic value that stops scaling the pen width
+     * from scaling with item/scene/viewport etc. */
+    penSelection = QPen(Qt::white, 1, Qt::DashLine);
+    penSelection.setCosmetic(true);
 }
 
 TopinoGraphicsItem::~TopinoGraphicsItem() {

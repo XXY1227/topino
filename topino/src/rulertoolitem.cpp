@@ -49,7 +49,7 @@ void RulerToolItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt
     /* Drawing selection rectangle */
     if (isSelected()) {
         painter->setBrush(Qt::NoBrush);
-        painter->setPen(QPen(Qt::white, lineWidth / 2, Qt::DashLine));
+        painter->setPen(penSelection);
         painter->drawPath(shape());
     }
 }

@@ -1,6 +1,7 @@
 #ifndef TOPINOGRAPHICSITEM_H
 #define TOPINOGRAPHICSITEM_H
 
+#include <QPen>
 #include <QGraphicsItem>
 #include <QGraphicsObject>
 
@@ -36,6 +37,10 @@ class TopinoGraphicsItem : public QGraphicsObject {
     void setScaling(double value);
 
   protected:
+    /* Pen used to draw the selection line; it should be the same for all items and
+     * purely cosmetic (not scaling at all). */
+    QPen penSelection;
+
     /* If the item properties are changed, propagate this information upwards */
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
@@ -43,8 +48,12 @@ class TopinoGraphicsItem : public QGraphicsObject {
     void itemHasChanged(const TopinoGraphicsItem *item);
 
   private:
+    /* Given item ID that links the graphical representation to the respective data item
+     * in the model */
     int itemid = 0;
-    double scaling = 1.0f;
+
+    /* Scaling factor used for scaling the item dimensions reasonably on the image */
+    double scaling = 1.0f;    
 };
 
 #endif // TOPINOGRAPHICSITEM_H

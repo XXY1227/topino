@@ -30,21 +30,27 @@ class RulerToolItem : public TopinoGraphicsItem {
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
   private:
+    /* Individual parts of the rubber item to keep track of what the user is interacting with
+     * at the moment. */
     enum parts {
         none = 0,
         point1 = 1,
         point2 = 2,
         middleline = 3
     };
-
     parts partClicked = parts::none;
 
+    /* Line itself is defined as float line to position and interact with it more exactly */
     QLineF line;
+
+    /* Brushes, pens, and options/dimensions used to draw the rubber item */
     QBrush terminalBrush;
     QPen linePen;
+
     int lineWidth;
     int offset = 0;
 
+    /* Checks if the given position is _inside_ on of the terminal points or not */
     bool inTerminalPoint(const QPointF &termPoint, const QPointF &pos) const;
 };
 
