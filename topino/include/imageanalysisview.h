@@ -16,6 +16,7 @@
 
 #include "include/topinographicsitem.h"
 #include "include/rulertoolitem.h"
+#include "include/polarcircletoolitem.h"
 
 class ImageAnalysisView : public QGraphicsView, public IObserver {
     Q_OBJECT

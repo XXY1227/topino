@@ -172,6 +172,21 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
     switch (currentTool) {
     /* Selection event for selection, ruler, and inlet tools: press and hold left mouse button to
      * start selection/rubber band process */
+    case tools::selection:
+        if (event->button() == Qt::LeftButton) {
+            if (rubberBand) {
+                rubberBand->hide();
+                qDebug("Rubber band released at %d %d %d %d", rubberBand->geometry().x(), rubberBand->geometry().y(),
+                       rubberBand->geometry().width(), rubberBand->geometry().height());
+            }
+
+            /* Delete this rubber band and free it */
+            delete rubberBand;
+            rubberBand = nullptr;
+
+            emit viewHasChanged();
+        }
+        break;
     case tools::ruler:
         if (event->button() == Qt::LeftButton) {
             if (rubberBand) {
@@ -213,7 +228,6 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
             }
         }
         break;
-    case tools::selection:
     case tools::inletCircle:
         if (event->button() == Qt::LeftButton) {
             if (rubberBand) {
@@ -221,9 +235,28 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
                 qDebug("Rubber band released at %d %d %d %d", rubberBand->geometry().x(), rubberBand->geometry().y(),
                        rubberBand->geometry().width(), rubberBand->geometry().height());
 
+                PolarCircleToolItem *tool = new PolarCircleToolItem(0);
+                tool->setScaling(currentimage->pixmap().width() * 0.002);
+                QPointF srcPoint = mapToScene(rubberBand->getSrcPoint());
+                QPointF destPoint = mapToScene(rubberBand->getDestPoint());
+                tool->setOrigin(srcPoint);
+                tool->setInnerRadius(qSqrt(qPow(srcPoint.x() - destPoint.x(), 2.0) + qPow(srcPoint.y() - destPoint.y(), 2.0)));
+                tool->setOuterRadius(currentimage->pixmap().width() / 2);
+                tool->setSegments(3);
+
+                /* Connect it to the event chain */
+                connect(tool, &TopinoGraphicsItem::itemHasChanged, this, &ImageAnalysisView::onItemChanged);
+                imagescene->addItem(tool);
+                QPainterPath path;
+                path.addRect(tool->boundingRect());
+                imagescene->setSelectionArea(path);
+                setCurrentTool(tools::selection);
+
                 /* Delete this rubber band and free it */
                 delete rubberBand;
                 rubberBand = nullptr;
+
+                emit viewHasChanged();
             }
         }
         break;

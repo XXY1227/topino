@@ -6,7 +6,7 @@ RulerToolItem::RulerToolItem(int newitemid, QGraphicsItem* parent) : TopinoGraph
              QGraphicsItem::ItemSendsGeometryChanges);
 
     /* Set standard visual appearance of this rubberband */
-    terminalBrush = QBrush(QColor(0, 135, 215));
+    terminalBrush = QBrush(QColor(0, 135, 215, 128));
     linePen = QPen(QColor(0, 135, 215));
     lineWidth = 2;
     linePen.setWidth(lineWidth);
@@ -29,7 +29,6 @@ void RulerToolItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    /* Draw a circle inside the given square (enforced by resizeEvent) instead of the default behaviour */
     painter->setRenderHint(QPainter::Antialiasing);
 
     QPoint p1 = line.toLine().p1();

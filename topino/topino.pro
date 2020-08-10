@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets charts
 
 # This flag is needed to prevent gcc from producing "shared object"
 # binary files. Such shared object files are wrongly identfied as
@@ -44,7 +44,8 @@ SOURCES += \
     src/topinorubberband.cpp \
     src/topinodata.cpp \
     src/rulertoolitem.cpp \
-    src/topinographicsitem.cpp
+    src/topinographicsitem.cpp \
+    src/polarcircletoolitem.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -57,7 +58,8 @@ HEADERS += \
     include/topinorubberband.h \
     include/topinodata.h \
     include/rulertoolitem.h \
-    include/topinographicsitem.h
+    include/topinographicsitem.h \
+    include/polarcircletoolitem.h
 
 FORMS += \
     ui/mainwindow.ui
