@@ -29,6 +29,8 @@ class RulerToolItem : public TopinoGraphicsItem {
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
+    void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
+
   private:
     /* Individual parts of the rubber item to keep track of what the user is interacting with
      * at the moment. */

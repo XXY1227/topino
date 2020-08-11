@@ -5,6 +5,8 @@ RulerToolItem::RulerToolItem(int newitemid, QGraphicsItem* parent) : TopinoGraph
              QGraphicsItem::ItemIsMovable |
              QGraphicsItem::ItemSendsGeometryChanges);
 
+    setAcceptHoverEvents(true);
+
     /* Set standard visual appearance of this rubberband */
     terminalBrush = QBrush(QColor(0, 135, 215, 128));
     linePen = QPen(QColor(0, 135, 215));
@@ -106,16 +108,14 @@ void RulerToolItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
         if (inTerminalPoint(line.p1(), event->pos())) {
             qDebug("clicked in first point");
             partClicked = parts::point1;
-            setCursor(QCursor(Qt::SizeAllCursor));
         } else if (inTerminalPoint(line.p2(), event->pos())) {
             qDebug("clicked in second point");
             partClicked = parts::point2;
-            setCursor(QCursor(Qt::SizeAllCursor));
         }
     }
 
     /* Continue with processing (this handles selection etc.) */
-    QGraphicsItem::mousePressEvent(event);
+    TopinoGraphicsItem::mousePressEvent(event);
 }
 
 
@@ -129,7 +129,8 @@ void RulerToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
         line.setP2(event->pos());
         break;
     default:
-        event->ignore();
+        /* If clicked just on the line part, run the default movement-code */
+        TopinoGraphicsItem::mouseMoveEvent(event);
         break;
     }
 
@@ -141,15 +142,26 @@ void RulerToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 void RulerToolItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     /* Release the part clicked; return mouse cursor to normal version */
     partClicked = parts::none;
-    setCursor(QCursor(Qt::ArrowCursor));
 
     /* Process all release events */
-    QGraphicsItem::mouseReleaseEvent(event);
+    TopinoGraphicsItem::mouseReleaseEvent(event);
+}
+
+void RulerToolItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
+{
+    TopinoGraphicsItem::hoverMoveEvent(event);
+
+    /* Adjust cursor when over terminal points to a grabbing hand / 4-direction-moving arrow
+     * depending on platform */
+    if (inTerminalPoint(line.p1(), event->pos()) || inTerminalPoint(line.p2(), event->pos())) {
+        setCursor(QCursor(Qt::SizeAllCursor));
+    } else {
+        setCursor(QCursor(Qt::ArrowCursor));
+    }
 }
 
 bool RulerToolItem::inTerminalPoint(const QPointF& termPoint, const QPointF& pos) const {
     return QRectF(termPoint.x() - offset, termPoint.y() - offset, 2 * offset, 2 * offset).contains(pos);
-
 }
 
 
