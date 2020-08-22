@@ -38,6 +38,7 @@ void ImageAnalysisView::resetView() {
     currentimage->setFlags(0);
 
     setCurrentTool(tools::selection);
+    setZoomFactor(1.0);
 
     emit viewHasChanged();
 }
