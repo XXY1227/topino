@@ -188,8 +188,9 @@ TopinoDocument::FileError TopinoDocument::saveTopinoXML(QXmlStreamWriter& xml) {
     xml.writeStartElement("topino");
     xml.writeTextElement("version", version);
 
-    /* Save image object */
+    /* Save all the data objects */
     data.saveImageObject(xml);
+    data.saveCoordinateObject(xml);
 
     xml.writeEndElement();
 

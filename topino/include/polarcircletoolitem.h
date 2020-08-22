@@ -46,7 +46,7 @@ class PolarCircleToolItem : public virtual TopinoGraphicsItem {
     bool drawSegments;
     void calculateSegmentSize();
 
-    /* This is the angular zero axis (relative to 9'o clock), and the min and max angle to draw;
+    /* This is the angular zero axis (relative to 3'o clock), and the min and max angle to draw;
      * all angles are given in degree; every diffAngle a line is drawn from the inner circle to
      * the outer one */
     int zeroAngle;

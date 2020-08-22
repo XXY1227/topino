@@ -25,8 +25,20 @@ class TopinoData {
     ParsingError loadImageObject(QXmlStreamReader& xml);
     void saveImageObject(QXmlStreamWriter& xml);
 
+    ParsingError loadCoordinateObject(QXmlStreamReader& xml);
+    void saveCoordinateObject(QXmlStreamWriter& xml);
+
   private:
+    /* Original and unmodified image */
     QImage image;
+
+    /* Polar coordinate system: origin coordinates on image, neutral plane angle (given in degrees),
+     * and if direction of increasing angles is counterClockwise (true/false) */
+    QPointF origin;
+    int neutralAngle;
+    bool counterClockwise;
+
+    void createCoordinateSystem();
 };
 
 #endif // TOPINODATA_H
