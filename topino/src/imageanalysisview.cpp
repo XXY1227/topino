@@ -191,40 +191,23 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
     case tools::ruler:
         if (event->button() == Qt::LeftButton) {
             if (rubberBand) {
-                rubberBand->hide();
+                /* Check again if it is a line rubber band and create the tool if yes */
+                LineRubberBand *band = dynamic_cast<LineRubberBand *>(rubberBand);
+                if (band != nullptr) {
+                    /* Create the actual tool, select it, and return to selection tool */
+                    RulerToolItem *tool = createRulerToolItem(*band);
 
-                qDebug("Release ruler at %d, %d to %d, %d",
-                       rubberBand->getSrcPoint().x(), rubberBand->getSrcPoint().y(),
-                       rubberBand->getDestPoint().x(), rubberBand->getDestPoint().y());
+                    QPainterPath path; path.addRect(tool->boundingRect());
+                    imagescene->setSelectionArea(path);
 
-                /* Check if there is already a ruler tool item in the scene, if yes, delete it
-                 * before creating a new one */
-                /*for (auto iter = items().begin(); iter != items().end(); ++iter) {
-                    RulerToolItem *item = dynamic_cast<RulerToolItem*>(*iter);
-                    if (item != nullptr) {
-                        imagescene->removeItem(item);
-                        break;
-                    }
-                }*/
+                    setCurrentTool(tools::selection);
+                }
 
-                /* Create a new tool, select it, and switch back to the selection tool; for now, scale
-                 * it to 0.2% of the image width */
-                RulerToolItem *tool = new RulerToolItem(0);
-                tool->setScaling(currentimage->pixmap().width() * 0.002);
-                tool->setLine(QLine(mapToScene(rubberBand->getSrcPoint()).toPoint(),
-                                    mapToScene(rubberBand->getDestPoint()).toPoint()));
-                /* Connect it to the event chain */
-                connect(tool, &TopinoGraphicsItem::itemHasChanged, this, &ImageAnalysisView::onItemChanged);
-                imagescene->addItem(tool);
-                QPainterPath path;
-                path.addRect(tool->boundingRect());
-                imagescene->setSelectionArea(path);
-                setCurrentTool(tools::selection);
-
-                /* Delete this rubber band and free it */
+                /* Delete the rubber band itself and free it */
                 delete rubberBand;
                 rubberBand = nullptr;
 
+                /* View has definitely changed */
                 emit viewHasChanged();
             }
         }
@@ -332,4 +315,42 @@ ImageAnalysisView::tools ImageAnalysisView::getCurrentTool() const {
 
 void ImageAnalysisView::setCurrentTool(const ImageAnalysisView::tools& value) {
     currentTool = value;
+}
+
+RulerToolItem* ImageAnalysisView::createRulerToolItem(const LineRubberBand& band) {
+    /* First of all we remove all other ruler tools (only one allowed!) */
+    deleteToolItemByType(TopinoGraphicsItem::itemtype::ruler);
+
+    /* Create a new tool, scale it to 0.2% of the image width, and connect it to the event chain */
+    RulerToolItem *tool = new RulerToolItem(0);
+    tool->setScaling(currentimage->pixmap().width() * 0.002);
+    tool->setLine(QLine(mapToScene(band.getSrcPoint()).toPoint(),
+                        mapToScene(band.getDestPoint()).toPoint()));
+    imagescene->addItem(tool);
+    connect(tool, &TopinoGraphicsItem::itemHasChanged, this, &ImageAnalysisView::onItemChanged);
+
+    return tool;
+}
+
+void ImageAnalysisView::deleteToolItemByType(TopinoGraphicsItem::itemtype type) {
+    QList<TopinoGraphicsItem *> delitems;
+
+    /* Search all items in the scene and add them to the del-list if they are
+     * of the respective type; important is here that we create a temporary
+     * QList and not call items() every time - otherwise the iterator will not
+     * be constant/fitting and the dynamic cast will crash. See C++ reference:
+     * https://en.cppreference.com/w/cpp/language/range-for#Temporary_range_expression */
+    QList<QGraphicsItem *> items = this->items();
+    for(auto iter = items.begin(); iter != items.end(); ++iter) {
+        TopinoGraphicsItem *item = dynamic_cast<TopinoGraphicsItem *>(*iter);
+
+        if ((item != nullptr) && (item->getItemType() == type)) {
+            delitems.push_back(item);
+        }
+    }
+
+    /* Delete now all items we found */
+    for(auto iter = delitems.begin(); iter != delitems.end(); ++iter) {
+        scene()->removeItem(*iter);
+    }
 }

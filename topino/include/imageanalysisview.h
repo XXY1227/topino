@@ -3,6 +3,7 @@
 
 #include <QGraphicsView>
 #include <QScrollBar>
+#include <QGraphicsItem>
 #include <QGraphicsSimpleTextItem>
 #include <QGraphicsPixmapItem>
 #include <QWheelEvent>
@@ -36,7 +37,7 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
-    bool viewportEvent(QEvent *event) override;    
+    bool viewportEvent(QEvent *event) override;
 
     void onSelectionChange();
     void onItemChanged(const TopinoGraphicsItem* item);
@@ -60,17 +61,25 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     void itemHasChanged(int itemID);
 
   private:
+    /* Reference to the document to get/set data */
     TopinoDocument &document;
 
+    /* The basic scene object + the image at the bottom */
     QGraphicsScene *imagescene = nullptr;
     QGraphicsPixmapItem *currentimage = nullptr;
 
+    /* Point used for translating/moving the scene by mouse */
     QPoint translateOrigin;
 
+    /* Rubber band data */
     QPoint rubberBandOrigin;
     TopinoRubberBand *rubberBand = nullptr;
 
+    /* Tool data and functions */
     ImageAnalysisView::tools currentTool = ImageAnalysisView::tools::selection;
+
+    RulerToolItem* createRulerToolItem(const LineRubberBand &band);
+    void deleteToolItemByType(TopinoGraphicsItem::itemtype type);
 };
 
 #endif // IMAGEANALYSISVIEW_H
