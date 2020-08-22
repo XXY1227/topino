@@ -19,6 +19,30 @@ void TopinoData::setImage(const QImage& value) {
     createCoordinateSystem();
 }
 
+QPointF TopinoData::getCoordOrigin() const {
+    return origin;
+}
+
+void TopinoData::setCoordOrigin(const QPointF& value) {
+    origin = value;
+}
+
+int TopinoData::getCoordNeutralAngle() const {
+    return neutralAngle;
+}
+
+void TopinoData::setCoordNeutralAngle(int value) {
+    neutralAngle = value;
+}
+
+bool TopinoData::getCoordCounterClockwise() const {
+    return counterClockwise;
+}
+
+void TopinoData::setCoordCounterClockwise(bool value) {
+    counterClockwise = value;
+}
+
 TopinoData::ParsingError TopinoData::loadObject(QXmlStreamReader& xml) {
     /* Central function that loads the respective object depending on the name of the current
      * XML element; this function gets usually called by the document object */

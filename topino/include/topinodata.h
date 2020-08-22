@@ -17,9 +17,20 @@ class TopinoData {
         CouldNotLoadImage = 2
     };
 
+    /* Setter and getter for data objects */
     QImage getImage() const;
     void setImage(const QImage& value);
 
+    QPointF getCoordOrigin() const;
+    void setCoordOrigin(const QPointF& value);
+
+    int getCoordNeutralAngle() const;
+    void setCoordNeutralAngle(int value);
+
+    bool getCoordCounterClockwise() const;
+    void setCoordCounterClockwise(bool value);
+
+    /* XML functions for loading and saving */
     ParsingError loadObject(QXmlStreamReader& xml);
 
     ParsingError loadImageObject(QXmlStreamReader& xml);
