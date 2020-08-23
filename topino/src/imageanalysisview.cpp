@@ -191,18 +191,15 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
     case tools::ruler:
         if (event->button() == Qt::LeftButton) {
             if (rubberBand) {
-                /* Check again if it is a line rubber band and create the tool if yes */
-                LineRubberBand *band = dynamic_cast<LineRubberBand *>(rubberBand);
-                if (band != nullptr) {
-                    /* Create the actual tool, select it, and return to selection tool */
-                    RulerToolItem *tool = createRulerToolItem(mapToScene(band->getSrcPoint()), mapToScene(band->getDestPoint()));
+                /* Create the actual tool, select it, and return to selection tool */
+                RulerToolItem *tool = createRulerToolItem(mapToScene(rubberBand->getSrcPoint()),
+                                                          mapToScene(rubberBand->getDestPoint()));
 
-                    QPainterPath path;
-                    path.addRect(tool->boundingRect());
-                    imagescene->setSelectionArea(path);
+                QPainterPath path;
+                path.addRect(tool->boundingRect());
+                imagescene->setSelectionArea(path);
 
-                    setCurrentTool(tools::selection);
-                }
+                setCurrentTool(tools::selection);
 
                 /* Delete the rubber band itself and free it */
                 delete rubberBand;
@@ -215,22 +212,18 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
         break;
     case tools::inletCircle:
         if (event->button() == Qt::LeftButton) {
-            if (rubberBand) {
-                /* Check again if it is a circular rubber band and create the tool if yes */
-                CircleRubberBand *band = dynamic_cast<CircleRubberBand *>(rubberBand);
-                if (band != nullptr) {
-                    /* Create the actual tool, select it, and return to selection tool */
-                    QPointF srcPoint = mapToScene(band->getSrcPoint());
-                    QPointF destPoint = mapToScene(band->getDestPoint());
-                    int radius = qSqrt(qPow(srcPoint.x() - destPoint.x(), 2.0) + qPow(srcPoint.y() - destPoint.y(), 2.0));
-                    PolarCircleToolItem *tool = createInletToolItem(srcPoint, radius, true);
+            if (rubberBand) {                
+                /* Create the actual tool, select it, and return to selection tool */
+                QPointF srcPoint = mapToScene(rubberBand->getSrcPoint());
+                QPointF destPoint = mapToScene(rubberBand->getDestPoint());
+                int radius = qSqrt(qPow(srcPoint.x() - destPoint.x(), 2.0) + qPow(srcPoint.y() - destPoint.y(), 2.0));
+                PolarCircleToolItem *tool = createInletToolItem(srcPoint, radius, true);
 
-                    QPainterPath path;
-                    path.addRect(tool->boundingRect());
-                    imagescene->setSelectionArea(path);
+                QPainterPath path;
+                path.addRect(tool->boundingRect());
+                imagescene->setSelectionArea(path);
 
-                    setCurrentTool(tools::selection);
-                }
+                setCurrentTool(tools::selection);
 
                 /* Delete this rubber band and free it */
                 delete rubberBand;
