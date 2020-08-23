@@ -40,7 +40,8 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     bool viewportEvent(QEvent *event) override;
 
     void onSelectionChange();
-    void onItemChanged(const TopinoGraphicsItem* item);
+    void onItemPosChanged(const TopinoGraphicsItem* item);
+    void onItemDataChanged(const TopinoGraphicsItem* item);
 
     double getZoomFactor() const;
     void setZoomFactor(const double zoomTo);
@@ -82,6 +83,8 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
 
     RulerToolItem* createRulerToolItem(QPointF srcPoint, QPointF destPoint);
     PolarCircleToolItem* createInletToolItem(QPointF srcPoint, int radius, bool addToDocument = false);
+
+    void synchronizeInletToolItem(const PolarCircleToolItem *item);
 
     int counterToolItemByType(TopinoGraphicsItem::itemtype type);
     void deleteToolItemByType(TopinoGraphicsItem::itemtype type);

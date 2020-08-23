@@ -193,7 +193,7 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
             if (rubberBand) {
                 /* Create the actual tool, select it, and return to selection tool */
                 RulerToolItem *tool = createRulerToolItem(mapToScene(rubberBand->getSrcPoint()),
-                                                          mapToScene(rubberBand->getDestPoint()));
+                                      mapToScene(rubberBand->getDestPoint()));
 
                 QPainterPath path;
                 path.addRect(tool->boundingRect());
@@ -212,7 +212,7 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
         break;
     case tools::inletCircle:
         if (event->button() == Qt::LeftButton) {
-            if (rubberBand) {                
+            if (rubberBand) {
                 /* Create the actual tool, select it, and return to selection tool */
                 QPointF srcPoint = mapToScene(rubberBand->getSrcPoint());
                 QPointF destPoint = mapToScene(rubberBand->getDestPoint());
@@ -260,12 +260,30 @@ void ImageAnalysisView::onSelectionChange() {
     emit selectionHasChanged();
 }
 
-void ImageAnalysisView::onItemChanged(const TopinoGraphicsItem* item) {
+void ImageAnalysisView::onItemPosChanged(const TopinoGraphicsItem* item) {
     if (item == nullptr)
         return;
 
-    qDebug("View: Item %d changed", item->getItemid());
+    qDebug("View: Item pos %d of type %d changed", item->getItemid(), item->getItemType());
+
     emit itemHasChanged(item->getItemid());
+}
+
+void ImageAnalysisView::onItemDataChanged(const TopinoGraphicsItem* item) {
+    if (item == nullptr)
+        return;
+
+    qDebug("View: Item data %d of type %d changed", item->getItemid(), item->getItemType());
+
+    /* Check what the item is */
+    switch (item->getItemType()) {
+    /* Update the inlet item of the document */
+    case TopinoGraphicsItem::itemtype::inlet:
+        synchronizeInletToolItem(dynamic_cast<const PolarCircleToolItem*>(item));
+        break;
+    default:
+        break;
+    }
 }
 
 double ImageAnalysisView::getZoomFactor() const {
@@ -314,8 +332,8 @@ void ImageAnalysisView::createToolsFromDocument() {
 
     for(auto iter = indata.begin(); iter != indata.end(); ++iter) {
         PolarCircleToolItem *tool = createInletToolItem((*iter).coord, (*iter).radius);
+        tool->setItemid((*iter).ID);
 
-        qDebug("Add ID %d. MainID = %d", (*iter).ID, data.getMainInletID());
         if (data.getMainInletID() == (*iter).ID) {
             tool->showSegments(true);
         } else {
@@ -335,12 +353,13 @@ RulerToolItem* ImageAnalysisView::createRulerToolItem(QPointF srcPoint, QPointF 
     tool->setScaling(currentimage->pixmap().width() * 0.002);
     tool->setLine(QLineF(srcPoint, destPoint));
     imagescene->addItem(tool);
-    connect(tool, &TopinoGraphicsItem::itemHasChanged, this, &ImageAnalysisView::onItemChanged);
+    connect(tool, &TopinoGraphicsItem::itemPosChanged, this, &ImageAnalysisView::onItemPosChanged);
+    connect(tool, &TopinoGraphicsItem::itemDataChanged, this, &ImageAnalysisView::onItemDataChanged);
 
     return tool;
 }
 
-PolarCircleToolItem*ImageAnalysisView::createInletToolItem(QPointF srcPoint, int radius, bool addToDocument) {
+PolarCircleToolItem* ImageAnalysisView::createInletToolItem(QPointF srcPoint, int radius, bool addToDocument) {
     /* Create a new tool, scale it to 0.2% of the image width, and connect it to the event chain */
     PolarCircleToolItem *tool = new PolarCircleToolItem(0);
     tool->setScaling(currentimage->pixmap().width() * 0.002);
@@ -368,6 +387,7 @@ PolarCircleToolItem*ImageAnalysisView::createInletToolItem(QPointF srcPoint, int
         /* Create a document inlet object, receive ID, and connect to the tool */
         TopinoData data = document.getData();
         int ID = data.updateInlet(indata, true);
+        qDebug("Created new inlet with ID %d", ID);
         tool->setItemid(ID);
 
         /* If no other inlet has been created yet, this will be the main inlet */
@@ -381,9 +401,39 @@ PolarCircleToolItem*ImageAnalysisView::createInletToolItem(QPointF srcPoint, int
 
     /* Add the tool itself to the scene and connect it to the event chain */
     imagescene->addItem(tool);
-    connect(tool, &TopinoGraphicsItem::itemHasChanged, this, &ImageAnalysisView::onItemChanged);
+    connect(tool, &TopinoGraphicsItem::itemPosChanged, this, &ImageAnalysisView::onItemPosChanged);
+    connect(tool, &TopinoGraphicsItem::itemDataChanged, this, &ImageAnalysisView::onItemDataChanged);
 
     return tool;
+}
+
+void ImageAnalysisView::synchronizeInletToolItem(const PolarCircleToolItem* item) {
+    if (item == nullptr)
+        return;
+
+    qDebug("Synchronize data for ID %d", item->getItemid());
+
+    TopinoData data = document.getData();
+
+    /* Update data for every inlet type */
+    TopinoData::InletData indata;
+    indata.ID = item->getItemid();    
+    indata.coord = item->getOrigin();
+    indata.radius = item->getInnerRadius();
+
+    qDebug("Coordinates: %.0f x %.0f", indata.coord.x(), indata.coord.y());
+
+    /* Only for main inlets */
+    if (indata.ID == data.getMainInletID()) {
+        data.setCoordNeutralAngle(item->getZeroAngle());
+        data.setCoordMinAngle(item->getMinAngle());
+        data.setCoordMaxAngle(item->getMaxAngle());
+        data.setCoordCounterClockwise(item->getCounterClockwise());
+    }
+
+    /* Update */
+    data.updateInlet(indata);
+    document.setData(data);
 }
 
 int ImageAnalysisView::counterToolItemByType(TopinoGraphicsItem::itemtype type) {

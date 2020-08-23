@@ -36,6 +36,12 @@ class TopinoData {
     int getCoordNeutralAngle() const;
     void setCoordNeutralAngle(int value);
 
+    int getCoordMinAngle() const;
+    void setCoordMinAngle(int value);
+
+    int getCoordMaxAngle() const;
+    void setCoordMaxAngle(int value);
+
     bool getCoordCounterClockwise() const;
     void setCoordCounterClockwise(bool value);
 
@@ -59,7 +65,7 @@ class TopinoData {
     ParsingError loadInletObject(QXmlStreamReader& xml);
     void saveInletObject(QXmlStreamWriter& xml, const InletData &data);
 
-  private:
+    private:
     /* Original and unmodified image */
     QImage image;
 
@@ -67,6 +73,8 @@ class TopinoData {
      * and if direction of increasing angles is counterClockwise (true/false) */
     int mainInletID;
     int neutralAngle;
+    int minAngle;
+    int maxAngle;
     bool counterClockwise;
 
     /* List of inlets */

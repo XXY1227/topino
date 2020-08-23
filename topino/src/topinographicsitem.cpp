@@ -33,7 +33,7 @@ void TopinoGraphicsItem::setScaling(double value) {
 QVariant TopinoGraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
     /* Item has changed, send a signal */
     if (change == QGraphicsItem::ItemPositionHasChanged) {
-        emit itemHasChanged(this);
+        emit itemPosChanged(this);
     }
 
     /* Otherwise proceed with the normal handling of this event handler */

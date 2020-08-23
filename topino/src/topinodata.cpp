@@ -5,6 +5,8 @@ TopinoData::TopinoData() {
 
     mainInletID = 0;
     neutralAngle = -90;
+    minAngle = -30;
+    maxAngle = +30;
     counterClockwise = false;
 }
 
@@ -46,6 +48,22 @@ void TopinoData::setCoordNeutralAngle(int value) {
     neutralAngle = value;
 }
 
+int TopinoData::getCoordMinAngle() const {
+    return minAngle;
+}
+
+void TopinoData::setCoordMinAngle(int value) {
+    minAngle = value;
+}
+
+int TopinoData::getCoordMaxAngle() const {
+    return maxAngle;
+}
+
+void TopinoData::setCoordMaxAngle(int value) {
+    maxAngle = value;
+}
+
 bool TopinoData::getCoordCounterClockwise() const {
     return counterClockwise;
 }
@@ -67,7 +85,13 @@ int TopinoData::updateInlet(const TopinoData::InletData& data, bool create) {
     for (auto iter = inlets.begin(); iter != inlets.end(); ++iter) {
         /* If the data ID is found, simply overwrite the data with the new data */
         if ((*iter).ID == data.ID) {
+            qDebug("Data: updating inlet %d", data.ID);
+            qDebug("      new coordinates: %.0f x %.0f", data.coord.x(), data.coord.y());
+            qDebug("      before the update: %.0f x %.0f", inlets[iter - inlets.begin()].coord.x(),
+                    inlets[iter - inlets.begin()].coord.y());
             inlets[iter - inlets.begin()] = data;
+            qDebug("      after the update: %.0f x %.0f", inlets[iter - inlets.begin()].coord.x(),
+                    inlets[iter - inlets.begin()].coord.y());
             return data.ID;
         }
     }
@@ -168,6 +192,10 @@ TopinoData::ParsingError TopinoData::loadCoordinateObject(QXmlStreamReader& xml)
 
         if (xml.name() == "neutralAngle") {
             neutralAngle = content.toInt();
+        } else if (xml.name() == "minAngle") {
+            minAngle = content.toInt();
+        } else if (xml.name() == "maxAngle") {
+            maxAngle = content.toInt();
         } else if (xml.name() == "counterClockwise") {
             counterClockwise = (content.compare("true") == 0);
         } else {
@@ -184,6 +212,8 @@ void TopinoData::saveCoordinateObject(QXmlStreamWriter& xml) {
     xml.writeStartElement("coordinateSystem");
 
     xml.writeTextElement("neutralAngle", QString::number(neutralAngle));
+    xml.writeTextElement("minAngle", QString::number(minAngle));
+    xml.writeTextElement("maxAngle", QString::number(maxAngle));
     xml.writeTextElement("counterClockwise", counterClockwise ? "true" : "false");
 
     xml.writeEndElement();
@@ -280,4 +310,6 @@ void TopinoData::saveInletObject(QXmlStreamWriter& xml, const InletData &data) {
 
     xml.writeEndElement();
 }
+
+
 

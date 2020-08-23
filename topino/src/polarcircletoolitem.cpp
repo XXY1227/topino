@@ -6,6 +6,8 @@ PolarCircleToolItem::PolarCircleToolItem(int newitemid, QGraphicsItem* parent) :
              QGraphicsItem::ItemIsMovable |
              QGraphicsItem::ItemSendsGeometryChanges);
 
+    setAcceptHoverEvents(true);
+
     /* Set standard angles to draw */
     zeroAngle = -90;
     minAngle = -30;
@@ -69,8 +71,8 @@ void PolarCircleToolItem::paint(QPainter* painter, const QStyleOptionGraphicsIte
         painter->setPen(coordlinePen);
         painter->setBrush(Qt::NoBrush);
         for (int c = 1; c < segments; ++c ) {
-            painter->drawArc(origin.x() - segmentSize * c, origin.y() - segmentSize * c,
-                             2 * segmentSize * c, 2 * segmentSize * c,
+            painter->drawArc(origin.x() - innerRadius - segmentSize * c, origin.y() - innerRadius - segmentSize * c,
+                             2 * segmentSize * c + innerRadius * 2, 2 * segmentSize * c + innerRadius * 2,
                              adjustAngleAbs(minAngle), adjustAngleRel(maxAngle - minAngle));
         }
     }
@@ -124,6 +126,73 @@ void PolarCircleToolItem::updateScale() {
     coordlinePen.setWidth(coordlineWidth);
 }
 
+void PolarCircleToolItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    /* Clicked in one of the terminal points of the ruler? Then remember this
+     * for future mouse events */
+    if (event->buttons() & Qt::LeftButton) {
+        if (inOriginCenter(event->pos())) {
+            partClicked = parts::center;
+        } else if (inOriginBorder(event->pos())) {
+            partClicked = parts::centerBorder;
+        }
+    }
+
+    /* Continue with processing (this handles selection etc.) */
+    TopinoGraphicsItem::mousePressEvent(event);
+}
+
+void PolarCircleToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
+    /* Calculcate distance from origin point */
+    double distance = qSqrt(qPow(origin.x() - event->pos().x(), 2.0) + qPow(origin.y() - event->pos().y(), 2.0));
+
+    /* Depending on which part clicked, the position of the points is updated */
+    switch (partClicked) {
+    case parts::center:
+        origin = event->pos();
+        break;
+    case parts::centerBorder:
+        innerRadius = distance;
+        break;
+    default:
+        /* If clicked just on the line part, run the default movement-code */
+        TopinoGraphicsItem::mouseMoveEvent(event);
+        break;
+    }
+
+    /* Update segments here, regardless off they are drawn/showing or not */
+    calculateBoundingRect();
+    calculateSegmentSize();
+
+    /* Update the scene (drawing etc.) and emit signal to view*/
+    scene()->update();
+    emit itemPosChanged(this);
+}
+
+void PolarCircleToolItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+    /* Release the part clicked */
+    partClicked = parts::none;
+
+    /* Send notice that the data of this tool changed */
+    emit itemDataChanged(this);
+
+    /* Continue with processing (this handles selection etc.) */
+    TopinoGraphicsItem::mouseReleaseEvent(event);
+}
+
+void PolarCircleToolItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event) {
+    TopinoGraphicsItem::hoverMoveEvent(event);
+
+    /* Adjust cursor when over terminal points to a grabbing hand / 4-direction-moving arrow
+     * depending on platform */
+    if (inOriginCenter(event->pos())) {
+        setCursor(QCursor(Qt::SizeAllCursor));
+    } else if (inOriginBorder(event->pos())) {
+        setCursor(QCursor(Qt::SizeHorCursor));
+    } else {
+        setCursor(QCursor(Qt::ArrowCursor));
+    }
+}
+
 QPointF PolarCircleToolItem::getOrigin() const {
     return origin;
 }
@@ -156,6 +225,8 @@ int PolarCircleToolItem::getInnerRadius() const {
 
 void PolarCircleToolItem::setInnerRadius(int value) {
     innerRadius = value;
+    calculateBoundingRect();
+    calculateSegmentSize();
 }
 
 int PolarCircleToolItem::getOuterRadius() const {
@@ -177,6 +248,57 @@ void PolarCircleToolItem::calculateSegmentSize() {
          * segements */
         segmentSize = (outerRadius - innerRadius) / segments;
     }
+}
+
+bool PolarCircleToolItem::getCounterClockwise() const {
+    return counterClockwise;
+}
+
+void PolarCircleToolItem::setCounterClockwise(bool value) {
+    counterClockwise = value;
+}
+
+bool PolarCircleToolItem::inOriginCenter(const QPointF& pos) const {
+    /* Origin center is defined as inside the circle with half radius */
+    return (qSqrt(qPow(origin.x() - pos.x(), 2.0) + qPow(origin.y() - pos.y(), 2.0)) <= (innerRadius/2.0));
+}
+
+bool PolarCircleToolItem::inOriginBorder(const QPointF& pos) const {
+    /* Origin center border is around the the innerRadius +- linewidth/2 */
+    double distance = qSqrt(qPow(origin.x() - pos.x(), 2.0) + qPow(origin.y() - pos.y(), 2.0));
+    return (distance >= (innerRadius - coordlineWidth) && (distance <= (innerRadius + coordlineWidth)));
+}
+
+int PolarCircleToolItem::getDiffAngle() const {
+    return diffAngle;
+}
+
+void PolarCircleToolItem::setDiffAngle(int value) {
+    diffAngle = value;
+}
+
+int PolarCircleToolItem::getMaxAngle() const {
+    return maxAngle;
+}
+
+void PolarCircleToolItem::setMaxAngle(int value) {
+    maxAngle = value;
+}
+
+int PolarCircleToolItem::getMinAngle() const {
+    return minAngle;
+}
+
+void PolarCircleToolItem::setMinAngle(int value) {
+    minAngle = value;
+}
+
+int PolarCircleToolItem::getZeroAngle() const {
+    return zeroAngle;
+}
+
+void PolarCircleToolItem::setZeroAngle(int value) {
+    zeroAngle = value;
 }
 
 int PolarCircleToolItem::adjustAngleAbs(int visualAngle) const {

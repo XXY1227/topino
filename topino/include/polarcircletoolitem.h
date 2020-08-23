@@ -1,8 +1,12 @@
 #ifndef POLARCIRCLETOOLITEM_H
 #define POLARCIRCLETOOLITEM_H
 
+#include <QtMath>
+#include <QCursor>
 #include <QPainter>
 #include <QGraphicsItem>
+#include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
 
 #include "topinographicsitem.h"
 
@@ -17,6 +21,12 @@ class PolarCircleToolItem : public virtual TopinoGraphicsItem {
 
     itemtype getItemType() const override;
     void updateScale() override;
+
+    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+
+    void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
 
     QPointF getOrigin() const;
     void setOrigin(const QPointF& value);
@@ -33,7 +43,38 @@ class PolarCircleToolItem : public virtual TopinoGraphicsItem {
     int getOuterRadius() const;
     void setOuterRadius(int value);
 
+    int getZeroAngle() const;
+    void setZeroAngle(int value);
+
+    int getMinAngle() const;
+    void setMinAngle(int value);
+
+    int getMaxAngle() const;
+    void setMaxAngle(int value);
+
+    int getDiffAngle() const;
+    void setDiffAngle(int value);
+
+    bool getCounterClockwise() const;
+    void setCounterClockwise(bool value);
+
   private:
+    /* Individual parts of the rubber item to keep track of what the user is interacting with
+     * at the moment. */
+    enum parts {
+        none = 0,
+        center = 1,
+        centerBorder = 2,
+        segmentTop = 3,
+        segmentRight = 4,
+        segmentLeft = 5
+    };
+    parts partClicked = parts::none;
+
+    /* Check if the given coordinates are inside different parts of the tool */
+    bool inOriginCenter(const QPointF &pos) const;
+    bool inOriginBorder(const QPointF &pos) const;
+
     /* These are the dimensions used for drawing the inner circle (= the actual inlet) and the segments
      * on top of it */
     int offset;

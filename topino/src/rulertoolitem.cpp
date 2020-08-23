@@ -106,10 +106,8 @@ void RulerToolItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
      * for future mouse events */
     if (event->buttons() & Qt::LeftButton) {
         if (inTerminalPoint(line.p1(), event->pos())) {
-            qDebug("clicked in first point");
             partClicked = parts::point1;
         } else if (inTerminalPoint(line.p2(), event->pos())) {
-            qDebug("clicked in second point");
             partClicked = parts::point2;
         }
     }
@@ -136,12 +134,15 @@ void RulerToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 
     /* Update the scene (drawing etc.) and emit signal to view*/
     scene()->update();
-    emit itemHasChanged(this);
+    emit itemPosChanged(this);
 }
 
 void RulerToolItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
-    /* Release the part clicked; return mouse cursor to normal version */
+    /* Release the part clicked */
     partClicked = parts::none;
+
+    /* Send notice that the data of this tool changed */
+    emit itemDataChanged(this);
 
     /* Process all release events */
     TopinoGraphicsItem::mouseReleaseEvent(event);

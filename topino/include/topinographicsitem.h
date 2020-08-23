@@ -45,7 +45,8 @@ class TopinoGraphicsItem : public QGraphicsObject {
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
   signals:
-    void itemHasChanged(const TopinoGraphicsItem *item);
+    void itemPosChanged(const TopinoGraphicsItem *item);
+    void itemDataChanged(const TopinoGraphicsItem *item);
 
   private:
     /* Given item ID that links the graphical representation to the respective data item
