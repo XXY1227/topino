@@ -75,6 +75,7 @@ int TopinoData::updateInlet(const TopinoData::InletData& data, bool create) {
     /* Was not found, but caller wants to create anyway; in this case, we
      * ignore the ID of the data given and use our own */
     if (create) {
+        qDebug("Inlets: %d", inlets.size());
         TopinoData::InletData newData = data;
         newData.ID = nextInletID;
         inlets.append(newData);
@@ -205,6 +206,7 @@ TopinoData::ParsingError TopinoData::loadInletsObject(QXmlStreamReader& xml) {
 }
 
 void TopinoData::saveInletsObject(QXmlStreamWriter& xml) {
+    qDebug("Saving %d inlets...", inlets.size());
     /* Save each inlet */
     xml.writeStartElement("inlets");
 
@@ -259,6 +261,8 @@ TopinoData::ParsingError TopinoData::loadInletObject(QXmlStreamReader& xml) {
 }
 
 void TopinoData::saveInletObject(QXmlStreamWriter& xml, const InletData &data) {
+    qDebug("saving inlet with ID %d", data.ID);
+
     xml.writeStartElement("inlet");
 
     /* This inlet is the main inlet, so mark it! */

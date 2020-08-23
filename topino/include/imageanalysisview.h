@@ -81,7 +81,7 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     ImageAnalysisView::tools currentTool = ImageAnalysisView::tools::selection;
 
     RulerToolItem* createRulerToolItem(QPointF srcPoint, QPointF destPoint);
-    PolarCircleToolItem* createInletToolItem(QPointF srcPoint, int radius);
+    PolarCircleToolItem* createInletToolItem(QPointF srcPoint, int radius, bool addToDocument = false);
 
     int counterToolItemByType(TopinoGraphicsItem::itemtype type);
     void deleteToolItemByType(TopinoGraphicsItem::itemtype type);

@@ -223,7 +223,7 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
                     QPointF srcPoint = mapToScene(band->getSrcPoint());
                     QPointF destPoint = mapToScene(band->getDestPoint());
                     int radius = qSqrt(qPow(srcPoint.x() - destPoint.x(), 2.0) + qPow(srcPoint.y() - destPoint.y(), 2.0));
-                    PolarCircleToolItem *tool = createInletToolItem(srcPoint, radius);
+                    PolarCircleToolItem *tool = createInletToolItem(srcPoint, radius, true);
 
                     QPainterPath path;
                     path.addRect(tool->boundingRect());
@@ -322,7 +322,11 @@ void ImageAnalysisView::createToolsFromDocument() {
     for(auto iter = indata.begin(); iter != indata.end(); ++iter) {
         PolarCircleToolItem *tool = createInletToolItem((*iter).coord, (*iter).radius);
 
-
+        if (data.getMainInletID() == (*iter).ID) {
+            tool->showSegments(true);
+        } else {
+            tool->showSegments(false);
+        }
     }
 
     emit viewHasChanged();
@@ -342,7 +346,7 @@ RulerToolItem* ImageAnalysisView::createRulerToolItem(QPointF srcPoint, QPointF 
     return tool;
 }
 
-PolarCircleToolItem*ImageAnalysisView::createInletToolItem(QPointF srcPoint, int radius) {
+PolarCircleToolItem*ImageAnalysisView::createInletToolItem(QPointF srcPoint, int radius, bool addToDocument) {
     /* Create a new tool, scale it to 0.2% of the image width, and connect it to the event chain */
     PolarCircleToolItem *tool = new PolarCircleToolItem(0);
     tool->setScaling(currentimage->pixmap().width() * 0.002);
@@ -352,27 +356,33 @@ PolarCircleToolItem*ImageAnalysisView::createInletToolItem(QPointF srcPoint, int
     tool->setOuterRadius(currentimage->pixmap().width() / 2);
     tool->setSegments(3);
 
-    /* Create an inlet item and add it to the document */
-    TopinoData::InletData indata;
-    indata.ID = 0;
-    indata.coord = srcPoint;
-    indata.radius = radius;
-
-    /* Create a document inlet object, receive ID, and connect to the tool */
-    TopinoData data = document.getData();
-    int ID = data.updateInlet(indata, true);
-    tool->setItemid(ID);
-
     /* If there are already other inlets out there, then new ones will not show any segments but
      * only the cirlce itself; only one inlet will be the "main" inlet and used for origins */
-    if (counterToolItemByType(TopinoGraphicsItem::itemtype::inlet) > 0) {
+    int count = counterToolItemByType(TopinoGraphicsItem::itemtype::inlet);
+
+    if (count > 0) {
         tool->showSegments(false);
-    } else {
-        data.setMainInletID(ID);
     }
 
-    /* Add the new inlet data to the document */
-    document.setData(data);
+    /* Create an inlet item and add it to the document - if needed */
+    if (addToDocument) {
+        TopinoData::InletData indata;
+        indata.ID = 0;
+        indata.coord = srcPoint;
+        indata.radius = radius;
+
+        /* Create a document inlet object, receive ID, and connect to the tool */
+        TopinoData data = document.getData();
+        int ID = data.updateInlet(indata, true);
+        tool->setItemid(ID);
+
+        if (count > 0) {
+            data.setMainInletID(ID);
+        }
+
+        /* Add the new inlet data to the document */
+        document.setData(data);
+    }
 
     /* Add the tool itself to the scene and connect it to the event chain */
     imagescene->addItem(tool);

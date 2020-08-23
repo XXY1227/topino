@@ -267,6 +267,10 @@ void MainWindow::onOpen() {
     document.addObserver(this);
     document.addObserver(&view);
     document.notifyAllObserver();
+
+    /* Create objects from the document and set the document to saved state */
+    view.createToolsFromDocument();
+    document.saveChanges();
 }
 
 void MainWindow::onSave() {
