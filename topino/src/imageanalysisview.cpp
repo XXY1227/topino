@@ -322,6 +322,7 @@ void ImageAnalysisView::createToolsFromDocument() {
     for(auto iter = indata.begin(); iter != indata.end(); ++iter) {
         PolarCircleToolItem *tool = createInletToolItem((*iter).coord, (*iter).radius);
 
+        qDebug("Add ID %d. MainID = %d", (*iter).ID, data.getMainInletID());
         if (data.getMainInletID() == (*iter).ID) {
             tool->showSegments(true);
         } else {
@@ -376,7 +377,8 @@ PolarCircleToolItem*ImageAnalysisView::createInletToolItem(QPointF srcPoint, int
         int ID = data.updateInlet(indata, true);
         tool->setItemid(ID);
 
-        if (count > 0) {
+        /* If no other inlet has been created yet, this will be the main inlet */
+        if (count == 0) {
             data.setMainInletID(ID);
         }
 

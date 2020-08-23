@@ -221,6 +221,10 @@ TopinoData::ParsingError TopinoData::loadInletObject(QXmlStreamReader& xml) {
     /* Prepare data */
     TopinoData::InletData data;
 
+    /* Check if the attribute for main inlet is here; has to be checked here, otherwise
+     * it will check the subitems for the attribute instead */
+    bool isMainInlet = xml.attributes().hasAttribute("mainInlet");
+
     /* Read all elements of the inlet object and fill in the respective members; only
      * non main inlets are created this way! */
     while (xml.readNextStartElement()) {
@@ -251,7 +255,7 @@ TopinoData::ParsingError TopinoData::loadInletObject(QXmlStreamReader& xml) {
         /* Has attribute to be the main inlet? then save this; there can only be one main
          * inlet and if the file has more than one defined, the last one read will be the
          * main inlet */
-        if (xml.attributes().hasAttribute("mainInlet")) {
+        if (isMainInlet) {
             mainInletID = data.ID;
         }
     }
