@@ -191,6 +191,7 @@ TopinoDocument::FileError TopinoDocument::saveTopinoXML(QXmlStreamWriter& xml) {
     /* Save all the data objects */
     data.saveImageObject(xml);
     data.saveCoordinateObject(xml);
+    data.saveInletsObject(xml);
 
     xml.writeEndElement();
 

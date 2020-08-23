@@ -55,6 +55,8 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     ImageAnalysisView::tools getCurrentTool() const;
     void setCurrentTool(const ImageAnalysisView::tools& value);
 
+    void createToolsFromDocument();
+
   signals:
     void viewHasChanged();
     void selectionHasChanged();
@@ -78,7 +80,10 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     /* Tool data and functions */
     ImageAnalysisView::tools currentTool = ImageAnalysisView::tools::selection;
 
-    RulerToolItem* createRulerToolItem(const LineRubberBand &band);
+    RulerToolItem* createRulerToolItem(QPointF srcPoint, QPointF destPoint);
+    PolarCircleToolItem* createInletToolItem(QPointF srcPoint, int radius);
+
+    int counterToolItemByType(TopinoGraphicsItem::itemtype type);
     void deleteToolItemByType(TopinoGraphicsItem::itemtype type);
 };
 

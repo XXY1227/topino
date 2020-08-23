@@ -148,9 +148,9 @@ void MainWindow::onSelectionHasChanged() {
     }
 
     /* More items are selected: check all selected items and count the different types  */
-    for (auto iter = view.scene()->selectedItems().begin(); iter != view.scene()->selectedItems().end(); ++iter) {
+    /*for (auto iter = view.scene()->selectedItems().begin(); iter != view.scene()->selectedItems().end(); ++iter) {
 
-    }
+    }*/
 }
 
 void MainWindow::onItemHasChanged(int itemID) {

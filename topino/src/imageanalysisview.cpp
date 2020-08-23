@@ -195,9 +195,10 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
                 LineRubberBand *band = dynamic_cast<LineRubberBand *>(rubberBand);
                 if (band != nullptr) {
                     /* Create the actual tool, select it, and return to selection tool */
-                    RulerToolItem *tool = createRulerToolItem(*band);
+                    RulerToolItem *tool = createRulerToolItem(mapToScene(band->getSrcPoint()), mapToScene(band->getDestPoint()));
 
-                    QPainterPath path; path.addRect(tool->boundingRect());
+                    QPainterPath path;
+                    path.addRect(tool->boundingRect());
                     imagescene->setSelectionArea(path);
 
                     setCurrentTool(tools::selection);
@@ -215,26 +216,21 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
     case tools::inletCircle:
         if (event->button() == Qt::LeftButton) {
             if (rubberBand) {
-                rubberBand->hide();
-                qDebug("Rubber band released at %d %d %d %d", rubberBand->geometry().x(), rubberBand->geometry().y(),
-                       rubberBand->geometry().width(), rubberBand->geometry().height());
+                /* Check again if it is a circular rubber band and create the tool if yes */
+                CircleRubberBand *band = dynamic_cast<CircleRubberBand *>(rubberBand);
+                if (band != nullptr) {
+                    /* Create the actual tool, select it, and return to selection tool */
+                    QPointF srcPoint = mapToScene(band->getSrcPoint());
+                    QPointF destPoint = mapToScene(band->getDestPoint());
+                    int radius = qSqrt(qPow(srcPoint.x() - destPoint.x(), 2.0) + qPow(srcPoint.y() - destPoint.y(), 2.0));
+                    PolarCircleToolItem *tool = createInletToolItem(srcPoint, radius);
 
-                PolarCircleToolItem *tool = new PolarCircleToolItem(0);
-                tool->setScaling(currentimage->pixmap().width() * 0.002);
-                QPointF srcPoint = mapToScene(rubberBand->getSrcPoint());
-                QPointF destPoint = mapToScene(rubberBand->getDestPoint());
-                tool->setOrigin(srcPoint);
-                tool->setInnerRadius(qSqrt(qPow(srcPoint.x() - destPoint.x(), 2.0) + qPow(srcPoint.y() - destPoint.y(), 2.0)));
-                tool->setOuterRadius(currentimage->pixmap().width() / 2);
-                tool->setSegments(3);
+                    QPainterPath path;
+                    path.addRect(tool->boundingRect());
+                    imagescene->setSelectionArea(path);
 
-                /* Connect it to the event chain */
-                connect(tool, &TopinoGraphicsItem::itemHasChanged, this, &ImageAnalysisView::onItemChanged);
-                imagescene->addItem(tool);
-                QPainterPath path;
-                path.addRect(tool->boundingRect());
-                imagescene->setSelectionArea(path);
-                setCurrentTool(tools::selection);
+                    setCurrentTool(tools::selection);
+                }
 
                 /* Delete this rubber band and free it */
                 delete rubberBand;
@@ -317,19 +313,92 @@ void ImageAnalysisView::setCurrentTool(const ImageAnalysisView::tools& value) {
     currentTool = value;
 }
 
-RulerToolItem* ImageAnalysisView::createRulerToolItem(const LineRubberBand& band) {
+void ImageAnalysisView::createToolsFromDocument() {
+    const TopinoData &data = document.getData();
+
+    /* First, create all inlets from the document */
+    QList<TopinoData::InletData> indata = data.getInlets();
+
+    for(auto iter = indata.begin(); iter != indata.end(); ++iter) {
+        PolarCircleToolItem *tool = createInletToolItem((*iter).coord, (*iter).radius);
+
+
+    }
+
+    emit viewHasChanged();
+}
+
+RulerToolItem* ImageAnalysisView::createRulerToolItem(QPointF srcPoint, QPointF destPoint) {
     /* First of all we remove all other ruler tools (only one allowed!) */
     deleteToolItemByType(TopinoGraphicsItem::itemtype::ruler);
 
     /* Create a new tool, scale it to 0.2% of the image width, and connect it to the event chain */
     RulerToolItem *tool = new RulerToolItem(0);
     tool->setScaling(currentimage->pixmap().width() * 0.002);
-    tool->setLine(QLine(mapToScene(band.getSrcPoint()).toPoint(),
-                        mapToScene(band.getDestPoint()).toPoint()));
+    tool->setLine(QLineF(srcPoint, destPoint));
     imagescene->addItem(tool);
     connect(tool, &TopinoGraphicsItem::itemHasChanged, this, &ImageAnalysisView::onItemChanged);
 
     return tool;
+}
+
+PolarCircleToolItem*ImageAnalysisView::createInletToolItem(QPointF srcPoint, int radius) {
+    /* Create a new tool, scale it to 0.2% of the image width, and connect it to the event chain */
+    PolarCircleToolItem *tool = new PolarCircleToolItem(0);
+    tool->setScaling(currentimage->pixmap().width() * 0.002);
+
+    tool->setOrigin(srcPoint);
+    tool->setInnerRadius(radius);
+    tool->setOuterRadius(currentimage->pixmap().width() / 2);
+    tool->setSegments(3);
+
+    /* Create an inlet item and add it to the document */
+    TopinoData::InletData indata;
+    indata.ID = 0;
+    indata.coord = srcPoint;
+    indata.radius = radius;
+
+    /* Create a document inlet object, receive ID, and connect to the tool */
+    TopinoData data = document.getData();
+    int ID = data.updateInlet(indata, true);
+    tool->setItemid(ID);
+
+    /* If there are already other inlets out there, then new ones will not show any segments but
+     * only the cirlce itself; only one inlet will be the "main" inlet and used for origins */
+    if (counterToolItemByType(TopinoGraphicsItem::itemtype::inlet) > 0) {
+        tool->showSegments(false);
+    } else {
+        data.setMainInletID(ID);
+    }
+
+    /* Add the new inlet data to the document */
+    document.setData(data);
+
+    /* Add the tool itself to the scene and connect it to the event chain */
+    imagescene->addItem(tool);
+    connect(tool, &TopinoGraphicsItem::itemHasChanged, this, &ImageAnalysisView::onItemChanged);
+
+    return tool;
+}
+
+int ImageAnalysisView::counterToolItemByType(TopinoGraphicsItem::itemtype type) {
+    int counter = 0;
+
+    /* Search all items in the scene and count them if they are of the respective
+     * type; important is here that we create a temporary QList and not call items()
+     * every time - otherwise the iterator will not be constant/fitting and the
+     * dynamic cast will crash. See C++ reference:
+     * https://en.cppreference.com/w/cpp/language/range-for#Temporary_range_expression */
+    QList<QGraphicsItem *> items = this->items();
+    for(auto iter = items.begin(); iter != items.end(); ++iter) {
+        TopinoGraphicsItem *item = dynamic_cast<TopinoGraphicsItem *>(*iter);
+
+        if ((item != nullptr) && (item->getItemType() == type)) {
+            counter++;
+        }
+    }
+
+    return counter;
 }
 
 void ImageAnalysisView::deleteToolItemByType(TopinoGraphicsItem::itemtype type) {
