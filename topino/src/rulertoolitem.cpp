@@ -2,7 +2,6 @@
 
 RulerToolItem::RulerToolItem(int newitemid, QGraphicsItem* parent) : TopinoGraphicsItem(newitemid, parent) {
     setFlags(QGraphicsItem::ItemIsSelectable |
-             QGraphicsItem::ItemIsMovable |
              QGraphicsItem::ItemSendsGeometryChanges);
 
     setAcceptHoverEvents(true);

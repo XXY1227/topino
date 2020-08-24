@@ -3,7 +3,6 @@
 PolarCircleToolItem::PolarCircleToolItem(int newitemid, QGraphicsItem* parent) :
     TopinoGraphicsItem(newitemid, parent) {
     setFlags(QGraphicsItem::ItemIsSelectable |
-             QGraphicsItem::ItemIsMovable |
              QGraphicsItem::ItemSendsGeometryChanges);
 
     setAcceptHoverEvents(true);
@@ -193,6 +192,7 @@ void PolarCircleToolItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     /* Release the part clicked */
     partClicked = parts::none;
 
+    qDebug("Item Data changed");
     /* Send notice that the data of this tool changed */
     emit itemDataChanged(this);
 
