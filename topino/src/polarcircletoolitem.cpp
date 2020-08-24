@@ -29,14 +29,14 @@ PolarCircleToolItem::PolarCircleToolItem(int newitemid, QGraphicsItem* parent) :
     coordlinePen.setWidth(coordlineWidth);
 
     /* Initialize the cursors used for resizing the circles */
-    sectorCursors[0] = QCursor(Qt::SizeFDiagCursor);   /* top-left */
-    sectorCursors[1] = QCursor(Qt::SizeHorCursor);     /* left */
-    sectorCursors[2] = QCursor(Qt::SizeBDiagCursor);   /* bottom-left */
-    sectorCursors[3] = QCursor(Qt::SizeVerCursor);     /* bottom */
-    sectorCursors[4] = QCursor(Qt::SizeFDiagCursor);   /* bottom-right */
-    sectorCursors[5] = QCursor(Qt::SizeHorCursor);     /* right */
-    sectorCursors[6] = QCursor(Qt::SizeBDiagCursor);   /* top-right */
-    sectorCursors[7] = QCursor(Qt::SizeVerCursor);     /* top */
+    sectorCursors[0] = QCursor(QPixmap(":/ui/cursors/bd_double_arrow.png"), 24, 24);    /* top-left */
+    sectorCursors[1] = QCursor(QPixmap(":/ui/cursors/hori_double_arrow.png"), 24, 24);  /* left */
+    sectorCursors[2] = QCursor(QPixmap(":/ui/cursors/fb_double_arrow.png"), 24, 24);    /* bottom-left */
+    sectorCursors[3] = QCursor(QPixmap(":/ui/cursors/vert_double_arrow.png"), 24, 24);  /* bottom */
+    sectorCursors[4] = QCursor(QPixmap(":/ui/cursors/bd_double_arrow.png"), 24, 24);    /* bottom-right */
+    sectorCursors[5] = QCursor(QPixmap(":/ui/cursors/hori_double_arrow.png"), 24, 24);  /* right */
+    sectorCursors[6] = QCursor(QPixmap(":/ui/cursors/fb_double_arrow.png"), 24, 24);    /* top-right */
+    sectorCursors[7] = QCursor(QPixmap(":/ui/cursors/vert_double_arrow.png"), 24, 24);  /* top */
 }
 
 PolarCircleToolItem::~PolarCircleToolItem() {
@@ -165,10 +165,14 @@ void PolarCircleToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
         origin = event->pos();
         break;
     case parts::centerBorder:
-        innerRadius = distance;
+        if ((distance > 0) && (!drawSegments || (distance < outerRadius))) {
+            innerRadius = distance;
+        }
         break;
     case parts::segmentOuterBorder:
-        outerRadius = distance;
+        if (distance > innerRadius) {
+            outerRadius = distance;
+        }
         break;
     default:
         /* If clicked just on the line part, run the default movement-code */

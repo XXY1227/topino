@@ -27,5 +27,11 @@
         <file>ui/toolicons/cursor.png</file>
         <file>ui/toolicons/ruler.png</file>
         <file>ui/toolicons/inlet.png</file>
+        <file>ui/cursors/bd_double_arrow.png</file>
+        <file>ui/cursors/fb_double_arrow.png</file>
+        <file>ui/cursors/hori_double_arrow.png</file>
+        <file>ui/cursors/vert_double_arrow.png</file>
+        <file>ui/darkstyle/darkstyle.cpp</file>
+        <file>ui/darkstyle/darkstyle.h</file>
     </qresource>
 </RCC>
