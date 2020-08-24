@@ -27,6 +27,16 @@ PolarCircleToolItem::PolarCircleToolItem(int newitemid, QGraphicsItem* parent) :
     coordlinePen = QPen(QColor(215, 135, 0));
     coordlineWidth = 2;
     coordlinePen.setWidth(coordlineWidth);
+
+    /* Initialize the cursors used for resizing the circles */
+    sectorCursors[0] = QCursor(Qt::SizeFDiagCursor);   /* top-left */
+    sectorCursors[1] = QCursor(Qt::SizeHorCursor);     /* left */
+    sectorCursors[2] = QCursor(Qt::SizeBDiagCursor);   /* bottom-left */
+    sectorCursors[3] = QCursor(Qt::SizeVerCursor);     /* bottom */
+    sectorCursors[4] = QCursor(Qt::SizeFDiagCursor);   /* bottom-right */
+    sectorCursors[5] = QCursor(Qt::SizeHorCursor);     /* right */
+    sectorCursors[6] = QCursor(Qt::SizeBDiagCursor);   /* top-right */
+    sectorCursors[7] = QCursor(Qt::SizeVerCursor);     /* top */
 }
 
 PolarCircleToolItem::~PolarCircleToolItem() {
@@ -127,13 +137,17 @@ void PolarCircleToolItem::updateScale() {
 }
 
 void PolarCircleToolItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    QPointF pos = event->pos();
+
     /* Clicked in one of the terminal points of the ruler? Then remember this
      * for future mouse events */
     if (event->buttons() & Qt::LeftButton) {
-        if (inOriginCenter(event->pos())) {
+        if (inOriginCenter(pos)) {
             partClicked = parts::center;
-        } else if (inOriginBorder(event->pos())) {
+        } else if (inOriginBorder(pos)) {
             partClicked = parts::centerBorder;
+        } else if (inSegmentOuterBorder(pos)) {
+            partClicked = parts::segmentOuterBorder;
         }
     }
 
@@ -152,6 +166,9 @@ void PolarCircleToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
         break;
     case parts::centerBorder:
         innerRadius = distance;
+        break;
+    case parts::segmentOuterBorder:
+        outerRadius = distance;
         break;
     default:
         /* If clicked just on the line part, run the default movement-code */
@@ -180,14 +197,15 @@ void PolarCircleToolItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 }
 
 void PolarCircleToolItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event) {
+    QPointF pos = event->pos();
     TopinoGraphicsItem::hoverMoveEvent(event);
 
     /* Adjust cursor when over terminal points to a grabbing hand / 4-direction-moving arrow
      * depending on platform */
-    if (inOriginCenter(event->pos())) {
+    if (inOriginCenter(pos)) {
         setCursor(QCursor(Qt::SizeAllCursor));
-    } else if (inOriginBorder(event->pos())) {
-        setCursor(QCursor(Qt::SizeHorCursor));
+    } else if (inOriginBorder(pos) || inSegmentOuterBorder(pos)) {
+        setCursor(sectorCursors[inSector(pos)]);
     } else {
         setCursor(QCursor(Qt::ArrowCursor));
     }
@@ -264,9 +282,43 @@ bool PolarCircleToolItem::inOriginCenter(const QPointF& pos) const {
 }
 
 bool PolarCircleToolItem::inOriginBorder(const QPointF& pos) const {
-    /* Origin center border is around the the innerRadius +- linewidth/2 */
+    /* Origin center border is around the the innerRadius +- linewidth */
     double distance = qSqrt(qPow(origin.x() - pos.x(), 2.0) + qPow(origin.y() - pos.y(), 2.0));
     return (distance >= (innerRadius - coordlineWidth) && (distance <= (innerRadius + coordlineWidth)));
+}
+
+bool PolarCircleToolItem::inSegmentOuterBorder(const QPointF& pos) const {
+    /* Origin center border is around the the outerRadius +- linewidth */
+    double distance = qSqrt(qPow(origin.x() - pos.x(), 2.0) + qPow(origin.y() - pos.y(), 2.0));
+    return (distance >= (outerRadius - coordlineWidth) && (distance <= (outerRadius + coordlineWidth)));
+
+}
+
+int PolarCircleToolItem::inSector(const QPointF& pos) const {
+    /* Position is relative to the origin */
+    QPointF relPos = pos - origin;
+    double length = qSqrt(qPow(relPos.x(), 2.0) + qPow(relPos.y(), 2.0));
+
+    /* Get angle relative to 12'o clock */
+    double angle = (int(relPos.x() > 0)/0.5 - 1) * qAcos(QPointF::dotProduct(relPos, QPointF(0.0, 1.0)) /
+                   (length * 1.0)) * 180.0 / M_PI + 180.0;
+
+    /* Shift angle by 22.5 */
+    angle -= 22.5;
+
+    qDebug("pure angle %.f", angle);
+
+    if (angle > 360.0) {
+        angle -= 360.0;
+    } else if (angle < 0.0) {
+        angle += 360.0;
+    }
+
+    qDebug("adapted angle %.f", angle);
+
+    /* Every 45° there is a sector (0-7), 0 is top-left, 1 is left, ... 7 is top;
+     * the modulo will make sure that only values of 0 to 7 are returned */
+    return int(angle / 45.0) % 8;
 }
 
 int PolarCircleToolItem::getDiffAngle() const {

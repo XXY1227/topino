@@ -59,13 +59,13 @@ class PolarCircleToolItem : public virtual TopinoGraphicsItem {
     void setCounterClockwise(bool value);
 
   private:
-    /* Individual parts of the rubber item to keep track of what the user is interacting with
+    /* Individual parts of the inlet item to keep track of what the user is interacting with
      * at the moment. */
     enum parts {
         none = 0,
         center = 1,
         centerBorder = 2,
-        segmentTop = 3,
+        segmentOuterBorder = 3,
         segmentRight = 4,
         segmentLeft = 5
     };
@@ -74,6 +74,12 @@ class PolarCircleToolItem : public virtual TopinoGraphicsItem {
     /* Check if the given coordinates are inside different parts of the tool */
     bool inOriginCenter(const QPointF &pos) const;
     bool inOriginBorder(const QPointF &pos) const;
+    bool inSegmentOuterBorder(const QPointF &pos) const;
+
+    /* Returns the sector (0-7) in which a position is relative to the origin and a zero plane
+     * at 12'o clock (shifted by 22.5°); sector indizes are counter clockwise */
+    int inSector(const QPointF &pos) const;
+    QCursor sectorCursors[8];
 
     /* These are the dimensions used for drawing the inner circle (= the actual inlet) and the segments
      * on top of it */
