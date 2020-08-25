@@ -66,8 +66,9 @@ class PolarCircleToolItem : public virtual TopinoGraphicsItem {
         center = 1,
         centerBorder = 2,
         segmentOuterBorder = 3,
-        segmentRight = 4,
-        segmentLeft = 5
+        grabAngleMin = 4,
+        grabAngleMax = 5,
+        grabAngleZero = 6
     };
     parts partClicked = parts::none;
 
@@ -75,11 +76,22 @@ class PolarCircleToolItem : public virtual TopinoGraphicsItem {
     bool inOriginCenter(const QPointF &pos) const;
     bool inOriginBorder(const QPointF &pos) const;
     bool inSegmentOuterBorder(const QPointF &pos) const;
+    bool inAngleGrabber(const QPointF &pos, int angle) const;
 
     /* Returns the sector (0-7) in which a position is relative to the origin and a zero plane
      * at 12'o clock (shifted by 22.5°); sector indizes are counter clockwise */
     int inSector(const QPointF &pos) const;
     QCursor sectorCursors[8];
+
+    /* Cursors for the grabbers */
+    QCursor grabberCursors[8];
+
+    /* Draws the label for the specific angle */
+    void drawAngleLabel(QPainter* painter, int angle);
+
+    /* This function converts polar coordinates to Cartesian coordinates (in the coordinate system of the inlet) */
+    QPointF polarToCartesianCoords(int angle, int radius) const;
+    QPointF cartesianToPolarCoords(const QPointF &pos) const;
 
     /* These are the dimensions used for drawing the inner circle (= the actual inlet) and the segments
      * on top of it */
@@ -102,17 +114,14 @@ class PolarCircleToolItem : public virtual TopinoGraphicsItem {
     int diffAngle;
     bool counterClockwise;
 
-    /* This function recalculates the visual-to-the-user angle to the angle used for drawing; will
-     * also take care of the sign of angle */
-    inline int adjustAngleAbs(int visualAngle) const;
-    inline int adjustAngleRel(int visualAngle) const;
-
     /* Brushes, pens, and options/dimensions used to draw the polarcircle item */
     QBrush innerCircleBrush;
     QBrush segmentBrushOdd;
     QBrush segmentBrushEven;
     QPen coordlinePen;
     int coordlineWidth;
+    QPen grabLinePen;
+    QFont fontAngleLabels;
 
     /* This function calculates the size of the boundingRect if position, etc. was changed */
     QRectF fullRect;
