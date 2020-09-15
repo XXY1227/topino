@@ -74,13 +74,17 @@ void PolarCircleToolItem::paint(QPainter* painter, const QStyleOptionGraphicsIte
                     2 * innerRadius, 2 * innerRadius, QRegion::Ellipse);
         painter->setClipRegion(QRegion(fullRect.toRect()).subtracted(reg));
 
+        /* Calculate the fixed min and max angles - those that are fixed at "diffangles" */
+        int fixMinAngle = (minAngle / diffAngle) * diffAngle;
+        int fixMaxAngle = (maxAngle / diffAngle) * diffAngle;
+
         /* Draw the outer circle using "pies" to draw the radius lines at the same time */
         painter->setPen(coordlinePen);
-        int n = (maxAngle - minAngle) / diffAngle;
+        int n = (fixMaxAngle - fixMinAngle) / diffAngle;
         painter->setBrush(segmentBrushEven);
         for (int p = 0; p < n; ++p) {
             /* This drawing function take 1/16th of an angle (given in degrees) */
-            painter->drawPie(drawRect, (zeroAngle + minAngle + diffAngle * p) * 16, 16 * diffAngle);
+            painter->drawPie(drawRect, (zeroAngle + fixMinAngle + diffAngle * p) * 16, 16 * diffAngle);
 
             /* By setting the brush for the _next_ piece, we can draw the residue piece in the right shape */
             if ((p % 2) == 0) {
@@ -90,16 +94,21 @@ void PolarCircleToolItem::paint(QPainter* painter, const QStyleOptionGraphicsIte
             }
         }
 
-        /* Draw a last one if there is any residue angle */
-        if (((maxAngle - minAngle) % diffAngle) > 0) {
-            int size = (maxAngle - minAngle) - n * diffAngle;
+        /* Draw a first and last one if there is any residue angle */
+        if (minAngle < fixMinAngle) {
+            int size = fixMinAngle - minAngle;
+            painter->drawPie(drawRect, (zeroAngle + minAngle) * 16, 16 * size);
+        }
+
+        if (maxAngle > fixMaxAngle) {
+            int size = maxAngle - fixMaxAngle;
             painter->drawPie(drawRect, (zeroAngle + maxAngle) * 16, - 16 * size);
         }
 
         /* Draw the labels for every angle line */
         painter->setPen(Qt::black);
         painter->setFont(fontAngleLabels);
-        for (int a = minAngle; a <= maxAngle; a+=diffAngle) {
+        for (int a = fixMinAngle; a <= fixMaxAngle; a+=diffAngle) {
             drawAngleLabel(painter, a);
         }
 
