@@ -9,10 +9,12 @@ PolarCircleToolItem::PolarCircleToolItem(int newitemid, QGraphicsItem* parent) :
 
     /* Set standard angles to draw */
     zeroAngle = 90;
-    minAngle = -30;
-    maxAngle = +30;
+    minAngle = -30;  /* the min angle _counterclockwise_ */
+    maxAngle = +30;  /* the max angle _counterclockwise_ */
     diffAngle = 15;
-    counterClockwise = false;
+
+    /* This parameter is only used for _displaying_ the angle to the user */
+    counterClockwise = true;
 
     drawSegments = true;
     segments = 0;
@@ -77,8 +79,8 @@ void PolarCircleToolItem::paint(QPainter* painter, const QStyleOptionGraphicsIte
         int n = (maxAngle - minAngle) / diffAngle;
         painter->setBrush(segmentBrushEven);
         for (int p = 0; p < n; ++p) {
-            /* These drawing function take 1/16th of an angle (given in degrees) */
-            painter->drawPie(drawRect, (zeroAngle - minAngle - diffAngle * p) * 16, - 16 * diffAngle);
+            /* This drawing function take 1/16th of an angle (given in degrees) */
+            painter->drawPie(drawRect, (zeroAngle + minAngle + diffAngle * p) * 16, 16 * diffAngle);
 
             /* By setting the brush for the _next_ piece, we can draw the residue piece in the right shape */
             if ((p % 2) == 0) {
@@ -91,7 +93,7 @@ void PolarCircleToolItem::paint(QPainter* painter, const QStyleOptionGraphicsIte
         /* Draw a last one if there is any residue angle */
         if (((maxAngle - minAngle) % diffAngle) > 0) {
             int size = (maxAngle - minAngle) - n * diffAngle;
-            painter->drawPie(drawRect, (zeroAngle - maxAngle) * 16, 16 * size);
+            painter->drawPie(drawRect, (zeroAngle + maxAngle) * 16, - 16 * size);
         }
 
         /* Draw the labels for every angle line */
@@ -110,7 +112,7 @@ void PolarCircleToolItem::paint(QPainter* painter, const QStyleOptionGraphicsIte
             painter->setPen(grabLinePen);
             painter->drawLine(polarToCartesianCoords(minAngle, radiusmin), polarToCartesianCoords(minAngle, radiusmax));
             painter->drawLine(polarToCartesianCoords(0, radiusmin), polarToCartesianCoords(0, radiusmax));
-            //painter->drawLine(polarToCartesianCoords(maxAngle, radiusmin), polarToCartesianCoords(maxAngle, radiusmax));
+            painter->drawLine(polarToCartesianCoords(maxAngle, radiusmin), polarToCartesianCoords(maxAngle, radiusmax));
         }
 
         /* Remove clipping again */
@@ -125,7 +127,7 @@ void PolarCircleToolItem::paint(QPainter* painter, const QStyleOptionGraphicsIte
             /* These drawing function take 1/16th of an angle (given in degrees) */
             painter->drawArc(origin.x() - innerRadius - segmentSize * c, origin.y() - innerRadius - segmentSize * c,
                                          2 * segmentSize * c + innerRadius * 2, 2 * segmentSize * c + innerRadius * 2,
-                                         16 * (zeroAngle - minAngle), - 16 * (maxAngle - minAngle));
+                                         16 * (zeroAngle + minAngle), 16 * (maxAngle - minAngle));
         }
     }
 
@@ -156,8 +158,7 @@ QPainterPath PolarCircleToolItem::shape() const {
         /* In contrast to the drawing functions, the QPainterPath.arcTo function takes
          * FULL degrees and not 1/16th of a degree */
         pathLine.moveTo(origin);
-        //pathLine.arcTo(drawRect, (counterClockwise ? zeroAngle - maxAngle : zeroAngle + minAngle), maxAngle - minAngle);
-        pathLine.arcTo(drawRect, zeroAngle - minAngle, -1 * (maxAngle - minAngle));
+        pathLine.arcTo(drawRect, zeroAngle + minAngle, (maxAngle - minAngle));
         pathLine.closeSubpath();
 
         path = path.united(pathLine);
@@ -209,7 +210,6 @@ void PolarCircleToolItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 
 void PolarCircleToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     /* Calculcate distance from origin point */
-    //double distance = qSqrt(qPow(origin.x() - event->pos().x(), 2.0) + qPow(origin.y() - event->pos().y(), 2.0));
     QPointF polar = cartesianToPolarCoords(event->pos());
     double angle = polar.x();
     double distance = polar.y();
@@ -230,8 +230,13 @@ void PolarCircleToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
         }
         break;
     case parts::grabAngleZero:
-        zeroAngle -= angle;
-        qDebug("zeroangle %d", zeroAngle);
+        zeroAngle += angle;
+        if (zeroAngle > 360) {
+            zeroAngle -= 360;
+        } else if (zeroAngle < 0) {
+            zeroAngle += 360;
+        }
+        qDebug("zeroangle %d from %.f", zeroAngle, angle);
         break;
     case parts::grabAngleMin:
         if ((angle >= -180) && (angle < maxAngle)) {
@@ -415,8 +420,13 @@ void PolarCircleToolItem::drawAngleLabel(QPainter* painter, int angle) {
     /* Center point of label to draw */
     QPointF pt = polarToCartesianCoords(angle, 0.9 * outerRadius);
 
+    //qDebug("Draw label %d at %.f %.f", angle, pt.x(), pt.y());
+
     /* Prepare label text with respective signs (the minus is actually a minus not a dash!) */
-    QString label = ((angle == 0) ? "±" : ((angle < 0) ? "–" : "+")) + QString::number(qAbs(angle));
+    QString label = ((angle == 0) ? "±" : ((angle < 0) ? "+" : "−")) + QString::number(qAbs(angle));
+    if (counterClockwise) {
+        label = ((angle == 0) ? "±" : ((angle < 0) ? "−" : "+")) + QString::number(qAbs(angle));
+    }
 
     /* Calculate font metrics */
     QFontMetrics fm(painter->font());
@@ -430,10 +440,13 @@ void PolarCircleToolItem::drawAngleLabel(QPainter* painter, int angle) {
 
 QPointF PolarCircleToolItem::polarToCartesianCoords(int angle, int radius) const {
     /* We need the angle in radians */
-    double angleRadians = qDegreesToRadians((double)angle + zeroAngle);
+    double angleRadians = qDegreesToRadians((double)(zeroAngle + angle));
 
-    /* Relative point relative to the origin; y needs to be negative since it is from up to down */
-    QPointF rel(- radius * qCos(angleRadians), - radius * qSin(angleRadians));
+    /* Point relative to the origin; y needs to be negative since it is from up to down */
+    QPointF rel(radius * qCos(angleRadians), - radius * qSin(angleRadians));
+
+    //qDebug("Polar coordinates: %d, %d", angle, radius);
+    //qDebug("Cartesian coordinates: %.f %.f", (origin + rel).x(), (origin + rel).y());
 
     /* Return absolute point */
     return origin + rel;
@@ -462,11 +475,8 @@ QPointF PolarCircleToolItem::cartesianToPolarCoords(const QPointF& pos) const {
         angle -= 180;
     }
 
-    /* Adjust for direction */
-    angle *= -1;
-
-    qDebug("Cartesian coords: %.1f %.1f", relPos.x(), -relPos.y());
-    qDebug("Polar coords: %.1f %.1f", angle, radius);
+    //qDebug("Cartesian coords: %.1f %.1f", relPos.x(), -relPos.y());
+    //qDebug("Polar coords: %.1f %.1f", angle, radius);
 
     /* Return the angle in "x" of the point and the radius in "y" of the point;
      * in future, we might just add a polar point class */
