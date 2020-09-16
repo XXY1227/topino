@@ -77,27 +77,40 @@ void PolarCircleToolItem::paint(QPainter* painter, const QStyleOptionGraphicsIte
         /* Calculate the fixed min and max angles - those that are fixed at "diffangles" */
         int fixMinAngle = (minAngle / diffAngle) * diffAngle;
         int fixMaxAngle = (maxAngle / diffAngle) * diffAngle;
+        int n = (fixMaxAngle - fixMinAngle) / diffAngle;
+
+        /* Select drawing tools */
+        painter->setPen(coordlinePen);
+        painter->setBrush(segmentBrushEven);
+        int drawn = 0;
+
+        if ((fixMinAngle / diffAngle) % 2 == 0) {
+            painter->setBrush(segmentBrushOdd);
+            drawn++;
+        }
+
+        /* Draw a first segment if there is any residue angle */
+        if (minAngle < fixMinAngle) {
+            int size = fixMinAngle - minAngle;
+
+            /* Brush is switched and then switched back for the first peace to not disturb the order */
+            painter->setBrush(drawn % 2 == 0 ? segmentBrushOdd : segmentBrushEven);
+            painter->drawPie(drawRect, (zeroAngle + minAngle) * 16, 16 * size);
+            painter->setBrush(drawn % 2 == 0 ? segmentBrushEven : segmentBrushOdd);
+        }
 
         /* Draw the outer circle using "pies" to draw the radius lines at the same time */
-        painter->setPen(coordlinePen);
-        int n = (fixMaxAngle - fixMinAngle) / diffAngle;
-        painter->setBrush(segmentBrushEven);
         for (int p = 0; p < n; ++p) {
             /* This drawing function take 1/16th of an angle (given in degrees) */
             painter->drawPie(drawRect, (zeroAngle + fixMinAngle + diffAngle * p) * 16, 16 * diffAngle);
+            drawn++;
 
             /* By setting the brush for the _next_ piece, we can draw the residue piece in the right shape */
-            if ((p % 2) == 0) {
-                painter->setBrush(segmentBrushOdd);
-            } else {
+            if ((drawn % 2) == 0) {
                 painter->setBrush(segmentBrushEven);
+            } else {
+                painter->setBrush(segmentBrushOdd);
             }
-        }
-
-        /* Draw a first and last one if there is any residue angle */
-        if (minAngle < fixMinAngle) {
-            int size = fixMinAngle - minAngle;
-            painter->drawPie(drawRect, (zeroAngle + minAngle) * 16, 16 * size);
         }
 
         if (maxAngle > fixMaxAngle) {
