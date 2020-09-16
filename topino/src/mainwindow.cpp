@@ -79,7 +79,7 @@ void MainWindow::modelHasChanged() {
     QImage image = document.getData().getImage();
     if (!image.isNull()) {
         /* Extract Pixmap from image */
-        miniImage->setPixmap(QPixmap::fromImage(image));
+        miniImage->setPixmap(QPixmap::fromImage(image));        
 
         /* Adjust rect; the pen width needs to be scaled with the whole scene, otherwise it will
          * not be visible; 1% of the whole width is ok */

@@ -8,7 +8,6 @@
 #include <QGraphicsPixmapItem>
 #include <QWheelEvent>
 
-
 #include "include/topinorubberband.h"
 #include "include/linerubberband.h"
 #include "include/circlerubberband.h"
@@ -16,6 +15,7 @@
 #include "include/topinodocument.h"
 
 #include "include/topinographicsitem.h"
+#include "include/inputimagetoolitem.h"
 #include "include/rulertoolitem.h"
 #include "include/polarcircletoolitem.h"
 
@@ -69,7 +69,7 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
 
     /* The basic scene object + the image at the bottom */
     QGraphicsScene *imagescene = nullptr;
-    QGraphicsPixmapItem *currentimage = nullptr;
+    //QGraphicsPixmapItem *currentimage = nullptr;
 
     /* Point used for translating/moving the scene by mouse */
     QPoint translateOrigin;
@@ -80,13 +80,15 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
 
     /* Tool data and functions */
     ImageAnalysisView::tools currentTool = ImageAnalysisView::tools::selection;
+    InputImageToolItem* inputImage = nullptr;
 
+    InputImageToolItem* createInputImageToolItem(const QPixmap& pixmap);
     RulerToolItem* createRulerToolItem(QPointF srcPoint, QPointF destPoint);
     PolarCircleToolItem* createInletToolItem(QPointF srcPoint, int radius, bool addToDocument = false);
 
     void synchronizeInletToolItem(const PolarCircleToolItem *item);
 
-    int counterToolItemByType(TopinoGraphicsItem::itemtype type);
+    int countToolItemByType(TopinoGraphicsItem::itemtype type);
     void deleteToolItemByType(TopinoGraphicsItem::itemtype type);
 };
 

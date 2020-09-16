@@ -6,13 +6,9 @@ ImageAnalysisView::ImageAnalysisView(QWidget *parent, TopinoDocument &doc) :
     QGraphicsView(parent), document(doc) {
     setAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
 
-    currentimage = new QGraphicsPixmapItem();
-
+    /* Create scene and input image tool */
     imagescene = new QGraphicsScene(contentsRect(), this);
-    imagescene->addItem(currentimage);
-    currentimage->setEnabled(false);
-    currentimage->setFlags(0);
-
+    inputImage = createInputImageToolItem(QPixmap());
     setScene(imagescene);
 
     /* Check if selection changed and eventually propagate */
@@ -22,20 +18,17 @@ ImageAnalysisView::ImageAnalysisView(QWidget *parent, TopinoDocument &doc) :
 ImageAnalysisView::~ImageAnalysisView() {
 }
 
-void ImageAnalysisView::modelHasChanged() {
+void ImageAnalysisView::modelHasChanged() {    
     setImage(document.getData().getImage());
 
-    setSceneRect(currentimage->boundingRect());
+    setSceneRect(inputImage->boundingRect());
 }
 
 void ImageAnalysisView::resetView() {
     /* Resets the view by clearing all items from the scenes, setting the tool to the first one, etc */
     imagescene->clear();
 
-    currentimage = new QGraphicsPixmapItem();
-    imagescene->addItem(currentimage);
-    currentimage->setEnabled(false);
-    currentimage->setFlags(0);
+    inputImage = createInputImageToolItem(QPixmap());
 
     setCurrentTool(tools::selection);
     setZoomFactor(1.0);
@@ -46,14 +39,14 @@ void ImageAnalysisView::resetView() {
 void ImageAnalysisView::setImage(const QImage& image) {
     /* If the image is empty, the zoom factor is set to 100% */
     if (image.isNull()) {
-        currentimage->setPixmap(QPixmap());
+        inputImage->setPixmap(QPixmap());
         setZoomFactor(1.0);
 
         return;
     }
 
     /* Extract Pixmap from image */
-    currentimage->setPixmap(QPixmap::fromImage(image));
+    inputImage->setPixmap(QPixmap::fromImage(image));
 
     /* Fit the image into the view, but make sure that the minimum and maximum zoom level is not violated */
     fitInView(imagescene->itemsBoundingRect(), Qt::KeepAspectRatio);
@@ -84,7 +77,7 @@ void ImageAnalysisView::resizeEvent(QResizeEvent *event) {
     if (verticalScrollBar()->isVisible())
         viewrect.setHeight(viewrect.width() - verticalScrollBar()->width());
 
-    setSceneRect(currentimage->boundingRect());
+    setSceneRect(inputImage->boundingRect());
 
     QGraphicsView::resizeEvent(event);
 
@@ -98,7 +91,7 @@ void ImageAnalysisView::mousePressEvent(QMouseEvent* event) {
     }
 
     /* Ignore the tool behaviour if the user clicked on anything other than the background (image) */
-    if (itemAt(event->pos()) != nullptr && itemAt(event->pos()) != currentimage)
+    if (itemAt(event->pos()) != nullptr && itemAt(event->pos()) != inputImage)
         return QGraphicsView::mousePressEvent(event);
 
     switch (currentTool) {
@@ -303,7 +296,7 @@ void ImageAnalysisView::setZoomFactor(const double zoomTo) {
     scale(scaleFactor, scaleFactor);
 
     /* Adjust the scene, redraw the view, and tell everyone that the view has changed */
-    setSceneRect(currentimage->boundingRect());
+    setSceneRect(inputImage->boundingRect());
 
     //update();
     emit viewHasChanged();
@@ -344,13 +337,26 @@ void ImageAnalysisView::createToolsFromDocument() {
     emit viewHasChanged();
 }
 
+InputImageToolItem* ImageAnalysisView::createInputImageToolItem(const QPixmap& pixmap) {
+    /* First of all we remove all other image tools (only one allowed!) */
+    deleteToolItemByType(TopinoGraphicsItem::itemtype::image);
+
+    /* Create a new tool, save the pointer, and connect it to the event chain */
+    InputImageToolItem *tool = new InputImageToolItem(0);
+    tool->setPixmap(pixmap);
+    imagescene->addItem(tool);
+
+    return tool;
+}
+
 RulerToolItem* ImageAnalysisView::createRulerToolItem(QPointF srcPoint, QPointF destPoint) {
     /* First of all we remove all other ruler tools (only one allowed!) */
     deleteToolItemByType(TopinoGraphicsItem::itemtype::ruler);
 
     /* Create a new tool, scale it to 0.2% of the image width, and connect it to the event chain */
     RulerToolItem *tool = new RulerToolItem(0);
-    tool->setScaling(currentimage->pixmap().width() * 0.002);
+    //tool->setScaling(currentimage->pixmap().width() * 0.002);
+    tool->setScaling(inputImage->getPixmap().width() * 0.002);
     tool->setLine(QLineF(srcPoint, destPoint));
     imagescene->addItem(tool);
     connect(tool, &TopinoGraphicsItem::itemPosChanged, this, &ImageAnalysisView::onItemPosChanged);
@@ -362,16 +368,17 @@ RulerToolItem* ImageAnalysisView::createRulerToolItem(QPointF srcPoint, QPointF 
 PolarCircleToolItem* ImageAnalysisView::createInletToolItem(QPointF srcPoint, int radius, bool addToDocument) {
     /* Create a new tool, scale it to 0.2% of the image width, and connect it to the event chain */
     PolarCircleToolItem *tool = new PolarCircleToolItem(0);
-    tool->setScaling(currentimage->pixmap().width() * 0.002);
+    //tool->setScaling(currentimage->pixmap().width() * 0.002);
+    tool->setScaling(inputImage->getPixmap().width() * 0.002);
 
     tool->setOrigin(srcPoint);
     tool->setInnerRadius(radius);
-    tool->setOuterRadius(currentimage->pixmap().width() / 2);
+    tool->setOuterRadius(inputImage->getPixmap().width() / 2);
     tool->setSegments(3);
 
     /* If there are already other inlets out there, then new ones will not show any segments but
      * only the cirlce itself; only one inlet will be the "main" inlet and used for origins */
-    int count = counterToolItemByType(TopinoGraphicsItem::itemtype::inlet);
+    int count = countToolItemByType(TopinoGraphicsItem::itemtype::inlet);
 
     if (count > 0) {
         tool->showSegments(false);
@@ -417,7 +424,7 @@ void ImageAnalysisView::synchronizeInletToolItem(const PolarCircleToolItem* item
 
     /* Update data for every inlet type */
     TopinoData::InletData indata;
-    indata.ID = item->getItemid();    
+    indata.ID = item->getItemid();
     indata.coord = item->getOrigin();
     indata.radius = item->getInnerRadius();
 
@@ -436,7 +443,7 @@ void ImageAnalysisView::synchronizeInletToolItem(const PolarCircleToolItem* item
     document.setData(data);
 }
 
-int ImageAnalysisView::counterToolItemByType(TopinoGraphicsItem::itemtype type) {
+int ImageAnalysisView::countToolItemByType(TopinoGraphicsItem::itemtype type) {
     int counter = 0;
 
     /* Search all items in the scene and count them if they are of the respective

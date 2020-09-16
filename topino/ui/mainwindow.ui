@@ -719,14 +719,12 @@
       <zorder>label_10</zorder>
       <zorder>label_8</zorder>
       <zorder>label_3</zorder>
-      <zorder>horizontalSpacer</zorder>
       <zorder>label</zorder>
       <zorder>label_11</zorder>
       <zorder>propRulerLength</zorder>
       <zorder>label_9</zorder>
       <zorder>label_7</zorder>
       <zorder>propRulerSpinWD</zorder>
-      <zorder>verticalSpacer_3</zorder>
      </widget>
     </widget>
    </widget>

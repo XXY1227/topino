@@ -45,7 +45,8 @@ SOURCES += \
     src/topinodata.cpp \
     src/rulertoolitem.cpp \
     src/topinographicsitem.cpp \
-    src/polarcircletoolitem.cpp
+    src/polarcircletoolitem.cpp \
+    src/inputimagetoolitem.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -59,7 +60,8 @@ HEADERS += \
     include/topinodata.h \
     include/rulertoolitem.h \
     include/topinographicsitem.h \
-    include/polarcircletoolitem.h
+    include/polarcircletoolitem.h \
+    include/inputimagetoolitem.h
 
 FORMS += \
     ui/mainwindow.ui

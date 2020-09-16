@@ -16,9 +16,10 @@ class TopinoGraphicsItem : public QGraphicsObject {
      * and which property page is shown in the user interface, etc. */
     enum itemtype {
         nonspecific = 0,
-        ruler = 1,
-        inlet = 2,
-        count = 3
+        image = 1,
+        ruler = 2,
+        inlet = 3,
+        count = 4
     };
 
     /* Returns the type of item */
