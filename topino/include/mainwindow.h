@@ -53,7 +53,8 @@ class MainWindow : public QMainWindow, public IObserver {
     enum objectPages {
         general = 0,
         multiple = 1,
-        ruler = 2
+        ruler = 2,
+        inlet = 3
     };
 
     Ui::MainWindow *ui;

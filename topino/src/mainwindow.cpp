@@ -125,7 +125,7 @@ void MainWindow::onViewHasChanged() {
 void MainWindow::onSelectionHasChanged() {
     int selitems = view.scene()->selectedItems().size();
 
-    /* Nothing selected -> show general page */
+    /* Nothing selected -> show general/image page */
     if (selitems == 0) {
         ui->propertiesPages->setCurrentIndex(objectPages::general);
         return;
@@ -136,21 +136,38 @@ void MainWindow::onSelectionHasChanged() {
         /* This is not really the best OO implementation, but straightforward; in future it might be replaced
          * by visitor pattern or the like */
         QGraphicsItem *widget = view.scene()->selectedItems()[0];
-        RulerToolItem *ruler = dynamic_cast<RulerToolItem*>(widget);
+        TopinoGraphicsItem *item = dynamic_cast<TopinoGraphicsItem*>(widget);
 
-        /* Ruler tool selected */
-        if (ruler != nullptr) {
-            updateObjectPage(objectPages::ruler);
-            ui->propertiesPages->setCurrentIndex(objectPages::ruler);
+        /* No graphics item selected -> show general page */
+        if (item == nullptr) {
+            ui->propertiesPages->setCurrentIndex(objectPages::general);
+            return;
         }
+
+        /* Check item type; default is again the general/image page */
+        objectPages selectPage = objectPages::general;
+        switch(item->getItemType()) {
+            case TopinoGraphicsItem::itemtype::ruler:
+                selectPage = objectPages::ruler;
+                break;
+            case TopinoGraphicsItem::itemtype::inlet:
+                selectPage = objectPages::inlet;
+                break;
+            default:
+                break;
+        }
+
+        /* Update respective page and then make sure it is shown */
+        updateObjectPage(selectPage);
+        ui->propertiesPages->setCurrentIndex(selectPage);
 
         return;
     }
 
-    /* More items are selected: check all selected items and count the different types  */
-    /*for (auto iter = view.scene()->selectedItems().begin(); iter != view.scene()->selectedItems().end(); ++iter) {
-
-    }*/
+    /* More items are selected; in this case, select the multiple page
+     * and change the data there */
+    updateObjectPage(objectPages::multiple);
+    ui->propertiesPages->setCurrentIndex(objectPages::multiple);
 }
 
 void MainWindow::onItemHasChanged(int itemID) {
@@ -180,7 +197,26 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
         break;
     case multiple:
         /* Second page: multiple objects of multiple types selected; we do not test here, just update */
-        ui->propObjectsAmount->setText(QString("%1 objects selected").arg(view.scene()->selectedItems().size()));
+        {
+            /* More items are selected: check all selected items and count the different types  */
+            QList<QGraphicsItem *> items = view.scene()->selectedItems();
+            int counter[TopinoGraphicsItem::itemtype::count] = {0};
+            for (auto iter = items.begin(); iter != items.end(); ++iter) {
+                TopinoGraphicsItem *item = dynamic_cast<TopinoGraphicsItem*>(*iter);
+
+                if (item != nullptr) {
+                    counter[item->getItemType()]++;
+                }
+            }
+
+            /* Update the counters for the individual items on the page */
+            for (int i = 0; i < TopinoGraphicsItem::itemtype::count; ++i) {
+                qDebug("Itemtype %d: count %d", i, counter[i]);
+            }
+
+            /* Total amount of items selected */
+            ui->propObjectsAmount->setText(QString(tr("%1 objects selected")).arg(view.scene()->selectedItems().size()));
+        }
         break;
     case ruler:
         /* Third page: ruler properties */
@@ -197,6 +233,11 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
                                                  QString::number(ruler->getLine().length(), 'f', 1)));
             }
         }
+        break;
+    case inlet:
+        /* Fourth page: inlet properties */
+        break;
+    default:
         break;
     }
 }

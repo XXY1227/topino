@@ -268,6 +268,13 @@ bool ImageAnalysisView::viewportEvent(QEvent* event) {
 }
 
 void ImageAnalysisView::onSelectionChange() {
+    /* If the selection contains more than one item, then unselected the image tool,
+     * which acts as a background and is not directly visible to the user */
+    if (scene()->selectedItems().count() > 0) {
+        inputImage->setSelected(false);
+    }
+
+    /* Tell everyone about the selection change */
     emit selectionHasChanged();
 }
 
