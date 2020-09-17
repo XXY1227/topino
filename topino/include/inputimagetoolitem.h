@@ -32,7 +32,10 @@ class InputImageToolItem : public TopinoGraphicsItem {
 
     void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
 
-  private:
+    QPointF getBorderSize() const;
+    void setBorderSize(const QPointF& value);
+
+    private:
     /* Individual parts of the image item to keep track of what the user is interacting with
      * at the moment. */
     enum parts {
@@ -48,6 +51,7 @@ class InputImageToolItem : public TopinoGraphicsItem {
     /* Rectangle for the whole tool including the border around the image */
     QRectF rect;
     QRectF innerRect;
+    QPointF borderSize;
 
     void calculateRect();
 

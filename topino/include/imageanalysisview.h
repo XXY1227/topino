@@ -32,6 +32,9 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
 
     void setImage(const QImage &image);
 
+    void putImagePointInView(const QPointF &pos);
+    const QRectF getImageViewPoint();
+
     void resizeEvent(QResizeEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;

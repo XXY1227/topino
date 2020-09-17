@@ -56,8 +56,8 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
     if (dynamic_cast<QGraphicsView*>(watched) && (watched == ui->miniView)) {
         /* Miniview: click mouse to change the view viewport */
         if (event->type() == QEvent::MouseButtonPress) {
-            QMouseEvent *mevent = dynamic_cast<QMouseEvent*>(event);
-            view.centerOn(ui->miniView->mapToScene(mevent->pos()));
+            QMouseEvent *mevent = dynamic_cast<QMouseEvent*>(event);            
+            view.putImagePointInView(ui->miniView->mapToScene(mevent->pos()));
         }
     }
 
@@ -100,8 +100,8 @@ void MainWindow::onViewHasChanged() {
     /* Update zoom level */
     zoomlabel.setText(QString("%1: %2%").arg(tr("Zoom")).arg(view.getZoomFactor()*100.0));
 
-    /* Set the view rectangle */
-    QRectF viewport = view.mapToScene(view.viewport()->geometry()).boundingRect();
+    /* Set the view rectangle */    
+    QRectF viewport = view.getImageViewPoint();
     if (!viewport.contains(miniImage->boundingRect())) {
         miniRect->setRect(viewport);
     } else {

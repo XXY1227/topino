@@ -77,6 +77,14 @@ void InputImageToolItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event) {
     TopinoGraphicsItem::hoverMoveEvent(event);
 }
 
+QPointF InputImageToolItem::getBorderSize() const {
+    return borderSize;
+}
+
+void InputImageToolItem::setBorderSize(const QPointF& value) {
+    borderSize = value;
+}
+
 void InputImageToolItem::calculateRect() {
     /* Make sure that the tool has some dimensions, even if there is no image; also
      * add a 10% border to each side of the image (i.e. 2 * 10% = 20%), so that other
@@ -87,8 +95,11 @@ void InputImageToolItem::calculateRect() {
         rect = QRectF(0, 0, pixmap.width() * 1.1, pixmap.height() * 1.1);
     }
 
+    /* Calculate border size */
+    borderSize = QPointF(rect.width() * 0.05, rect.height() * 0.05);
+
     /* Calculate the inner rect */
-    innerRect = QRectF(rect.width() * 0.05, rect.height() * 0.05, rect.width() * 0.9, rect.height() * 0.9);
+    innerRect = QRectF(borderSize.x(), borderSize.y(), rect.width() - borderSize.x() * 2, rect.height() - borderSize.y() * 2);
 }
 
 QPixmap InputImageToolItem::getPixmap() const {
