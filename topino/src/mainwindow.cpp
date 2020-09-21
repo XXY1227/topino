@@ -57,7 +57,7 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
         /* Miniview: click mouse to change the view viewport */
         if (event->type() == QEvent::MouseButtonPress) {
             QMouseEvent *mevent = dynamic_cast<QMouseEvent*>(event);
-            view.putImagePointInView(ui->miniView->mapToScene(mevent->pos()));
+            view.centerOn(ui->miniView->mapToScene(mevent->pos()));
         }
     }
 

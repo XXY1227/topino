@@ -7,7 +7,6 @@ InputImageToolItem::InputImageToolItem(int newitemid, QGraphicsItem* parent) :
 
     setAcceptHoverEvents(true);
 
-    background = QBrush(QColor(125, 125, 125), Qt::BDiagPattern);
     emptybox = QBrush(QColor(42, 42, 42), Qt::SolidPattern);
     borderpen = QPen(QColor(125, 125, 125));
     borderpen.setWidth(2);
@@ -28,19 +27,19 @@ void InputImageToolItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
 
     painter->setRenderHint(QPainter::Antialiasing);
 
-    /* Fill the whole tool with a /// pattern */
-    painter->fillRect(rect, background);
+    /* Fill the whole tool with a background color */
+    painter->fillRect(rect, emptybox);
 
     /* Zero image will draw a little box */
     if (pixmap.isNull()) {
         painter->setBrush(emptybox);
         painter->setPen(borderpen);
-        painter->drawRect(innerRect);
+        painter->drawRect(rect);
 
-        painter->drawText(innerRect.adjusted(20, 20, -20, -20), Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextWordWrap,
+        painter->drawText(rect.adjusted(20, 20, -20, -20), Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextWordWrap,
                           tr("No image loaded. Use File➔Import Image... to import and evaluate an image."));
     } else {
-        painter->drawPixmap(innerRect, pixmap, pixmap.rect());
+        painter->drawPixmap(rect, pixmap, pixmap.rect());
     }
 }
 
@@ -77,14 +76,6 @@ void InputImageToolItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event) {
     TopinoGraphicsItem::hoverMoveEvent(event);
 }
 
-QPointF InputImageToolItem::getBorderSize() const {
-    return borderSize;
-}
-
-void InputImageToolItem::setBorderSize(const QPointF& value) {
-    borderSize = value;
-}
-
 void InputImageToolItem::calculateRect() {
     /* Make sure that the tool has some dimensions, even if there is no image; also
      * add a 10% border to each side of the image (i.e. 2 * 10% = 20%), so that other
@@ -92,14 +83,8 @@ void InputImageToolItem::calculateRect() {
     if (pixmap.isNull()) {
         rect = QRectF(0, 0, 480, 480);
     } else {
-        rect = QRectF(0, 0, pixmap.width() * 1.1, pixmap.height() * 1.1);
+        rect = pixmap.rect();
     }
-
-    /* Calculate border size */
-    borderSize = QPointF(rect.width() * 0.05, rect.height() * 0.05);
-
-    /* Calculate the inner rect */
-    innerRect = QRectF(borderSize.x(), borderSize.y(), rect.width() - borderSize.x() * 2, rect.height() - borderSize.y() * 2);
 }
 
 QPixmap InputImageToolItem::getPixmap() const {

@@ -65,22 +65,8 @@ void ImageAnalysisView::setImage(const QImage& image) {
     emit viewHasChanged();
 }
 
-void ImageAnalysisView::putImagePointInView(const QPointF& pos) {
-    /* The point given is relative to the image, but the image tool has a border,
-     * so pos needs to be adjusted for the border. */
-    QPointF border = inputImage->getBorderSize();
-
-    /* Add border to the pos and center on this point */
-    centerOn(inputImage->mapToScene(pos + border));
-}
-
 const QRectF ImageAnalysisView::getImageViewPoint() {
-    /* The returning point needs to be adjusted for the border of the image */
-    QPointF border = inputImage->getBorderSize();
-    QRectF rect = mapToScene(viewport()->geometry()).boundingRect();
-
-    /* Both points need to be adjusted in the same way (translating to the left/top) */
-    return rect.adjusted(-border.x(), -border.y(), -border.x(), -border.y());
+    return mapToScene(viewport()->geometry()).boundingRect();
 }
 
 void ImageAnalysisView::resizeEvent(QResizeEvent *event) {
