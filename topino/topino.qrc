@@ -33,5 +33,6 @@
         <file>ui/cursors/vert_double_arrow.png</file>
         <file>ui/darkstyle/darkstyle.cpp</file>
         <file>ui/darkstyle/darkstyle.h</file>
+        <file>ui/toolicons/image.png</file>
     </qresource>
 </RCC>

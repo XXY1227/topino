@@ -182,17 +182,22 @@ void MainWindow::changeTool(ImageAnalysisView::tools tool) {
 
 void MainWindow::updateObjectPage(MainWindow::objectPages page) {
     const TopinoData &data = document.getData();
+    ui->propertiesPages->setEnabled(true);
 
     /* This function updates the information on the respective page of the object properties dock widget */
     switch (page) {
     case general:
         /* First page: general document properties, image sizes, etc. */
         if (!data.getImage().isNull()) {
+
             ui->propImageDimension->setText(QString("%1 × %2 Px²").
                                             arg(data.getImage().width()).
                                             arg(data.getImage().height()));
+            ui->propImageSize->setText(QString("%1").arg(data.getImage().byteCount() / 1000.0f));
         } else {
+            ui->propertiesPages->setEnabled(false);
             ui->propImageDimension->setText("---");
+            ui->propImageSize->setText("---");
         }
         break;
     case multiple:
