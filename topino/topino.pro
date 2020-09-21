@@ -46,7 +46,8 @@ SOURCES += \
     src/rulertoolitem.cpp \
     src/topinographicsitem.cpp \
     src/polarcircletoolitem.cpp \
-    src/inputimagetoolitem.cpp
+    src/inputimagetoolitem.cpp \
+    src/imageeditdialog.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -61,10 +62,12 @@ HEADERS += \
     include/rulertoolitem.h \
     include/topinographicsitem.h \
     include/polarcircletoolitem.h \
-    include/inputimagetoolitem.h
+    include/inputimagetoolitem.h \
+    include/imageeditdialog.h
 
 FORMS += \
-    ui/mainwindow.ui
+    ui/mainwindow.ui \
+    ui/imageeditdialog.ui
 
 RESOURCES += \
     topino.qrc

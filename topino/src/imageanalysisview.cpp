@@ -334,6 +334,27 @@ void ImageAnalysisView::zoomByFactor(const double factor) {
     setZoomFactor(getZoomFactor() * factor);
 }
 
+QRectF ImageAnalysisView::getFocusArea() const
+{
+    const TopinoData &data = document.getData();
+
+    /* Let's find the main inlet and return the bounding rect of that as focus area */
+    QList<QGraphicsItem *> items = this->items();
+    for(auto iter = items.begin(); iter != items.end(); ++iter) {
+        PolarCircleToolItem *item = dynamic_cast<PolarCircleToolItem *>(*iter);
+
+        /* We need to use the bounding rect of the shape of PolarCircleToolItem to get
+         * an accurate focus area. The boundingrect of PolarCircleToolItem itself will
+         * return a rect for the FULL circle not only the part that is visible! */
+        if ((item != nullptr) && (item->getItemid() == data.getMainInletID())) {
+            return item->shape().boundingRect();
+        }
+    }
+
+    /* If there is no main inlet yet, the whole image rect is the focus area */
+    return inputImage->boundingRect();
+}
+
 ImageAnalysisView::tools ImageAnalysisView::getCurrentTool() const {
     return currentTool;
 }

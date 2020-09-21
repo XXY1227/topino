@@ -50,6 +50,8 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     void setZoomFactor(const double zoomTo);
     void zoomByFactor(const double factor);
 
+    QRectF getFocusArea() const;
+
     enum tools {
         selection = 0,
         ruler = 1,

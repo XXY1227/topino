@@ -56,7 +56,7 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
     if (dynamic_cast<QGraphicsView*>(watched) && (watched == ui->miniView)) {
         /* Miniview: click mouse to change the view viewport */
         if (event->type() == QEvent::MouseButtonPress) {
-            QMouseEvent *mevent = dynamic_cast<QMouseEvent*>(event);            
+            QMouseEvent *mevent = dynamic_cast<QMouseEvent*>(event);
             view.putImagePointInView(ui->miniView->mapToScene(mevent->pos()));
         }
     }
@@ -79,7 +79,7 @@ void MainWindow::modelHasChanged() {
     QImage image = document.getData().getImage();
     if (!image.isNull()) {
         /* Extract Pixmap from image */
-        miniImage->setPixmap(QPixmap::fromImage(image));        
+        miniImage->setPixmap(QPixmap::fromImage(image));
 
         /* Adjust rect; the pen width needs to be scaled with the whole scene, otherwise it will
          * not be visible; 1% of the whole width is ok */
@@ -100,7 +100,7 @@ void MainWindow::onViewHasChanged() {
     /* Update zoom level */
     zoomlabel.setText(QString("%1: %2%").arg(tr("Zoom")).arg(view.getZoomFactor()*100.0));
 
-    /* Set the view rectangle */    
+    /* Set the view rectangle */
     QRectF viewport = view.getImageViewPoint();
     if (!viewport.contains(miniImage->boundingRect())) {
         miniRect->setRect(viewport);
@@ -147,14 +147,14 @@ void MainWindow::onSelectionHasChanged() {
         /* Check item type; default is again the general/image page */
         objectPages selectPage = objectPages::general;
         switch(item->getItemType()) {
-            case TopinoGraphicsItem::itemtype::ruler:
-                selectPage = objectPages::ruler;
-                break;
-            case TopinoGraphicsItem::itemtype::inlet:
-                selectPage = objectPages::inlet;
-                break;
-            default:
-                break;
+        case TopinoGraphicsItem::itemtype::ruler:
+            selectPage = objectPages::ruler;
+            break;
+        case TopinoGraphicsItem::itemtype::inlet:
+            selectPage = objectPages::inlet;
+            break;
+        default:
+            break;
         }
 
         /* Update respective page and then make sure it is shown */
@@ -202,27 +202,27 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
         break;
     case multiple:
         /* Second page: multiple objects of multiple types selected; we do not test here, just update */
-        {
-            /* More items are selected: check all selected items and count the different types  */
-            QList<QGraphicsItem *> items = view.scene()->selectedItems();
-            int counter[TopinoGraphicsItem::itemtype::count] = {0};
-            for (auto iter = items.begin(); iter != items.end(); ++iter) {
-                TopinoGraphicsItem *item = dynamic_cast<TopinoGraphicsItem*>(*iter);
+    {
+        /* More items are selected: check all selected items and count the different types  */
+        QList<QGraphicsItem *> items = view.scene()->selectedItems();
+        int counter[TopinoGraphicsItem::itemtype::count] = {0};
+        for (auto iter = items.begin(); iter != items.end(); ++iter) {
+            TopinoGraphicsItem *item = dynamic_cast<TopinoGraphicsItem*>(*iter);
 
-                if (item != nullptr) {
-                    counter[item->getItemType()]++;
-                }
+            if (item != nullptr) {
+                counter[item->getItemType()]++;
             }
-
-            /* Update the counters for the individual items on the page */
-            for (int i = 0; i < TopinoGraphicsItem::itemtype::count; ++i) {
-                qDebug("Itemtype %d: count %d", i, counter[i]);
-            }
-
-            /* Total amount of items selected */
-            ui->propObjectsAmount->setText(QString(tr("%1 objects selected")).arg(view.scene()->selectedItems().size()));
         }
-        break;
+
+        /* Update the counters for the individual items on the page */
+        for (int i = 0; i < TopinoGraphicsItem::itemtype::count; ++i) {
+            qDebug("Itemtype %d: count %d", i, counter[i]);
+        }
+
+        /* Total amount of items selected */
+        ui->propObjectsAmount->setText(QString(tr("%1 objects selected")).arg(view.scene()->selectedItems().size()));
+    }
+    break;
     case ruler:
         /* Third page: ruler properties */
         if (view.scene()->selectedItems().size() == 1) {
@@ -385,4 +385,30 @@ void MainWindow::onAboutQt() {
 void MainWindow::onAboutTopino() {
     QMessageBox::about(this, "About Topino", "Test");
 }
+
+void MainWindow::onToolEditImage() {
+    /* Open the image editing/preparing dialog to adjust saturation, levels, etc. before
+     * analysis */
+    ImageEditDialog dlg(this);
+
+    /* We either look at the whole image OR cut out the bounding rect of the main inlet,
+     * i.e. what the user wants to focus on. */
+    QImage image = document.getData().getImage();
+
+    /* The rect can technically be OUTSIDE of the image, if that is the case, adjust */
+    QRect rect = view.getFocusArea().toRect();
+    rect.setLeft(rect.left() < 0 ? 0 : rect.left());
+    rect.setTop(rect.top() < 0 ? 0 : rect.top());
+    rect.setRight(rect.right() > image.width() ? image.width()-1 : rect.right());
+    rect.setBottom(rect.bottom() > image.height() ? image.height()-1 : rect.bottom());
+
+    /* Cut out the image */
+    dlg.setImage(image.copy(rect));
+
+    /* Execute in a modal format and apply options if accepted */
+    if (dlg.exec() == QDialog::DialogCode::Accepted) {
+
+    }
+}
+
 

@@ -7,6 +7,7 @@
 #include "include/iobserver.h"
 #include "include/topinodocument.h"
 #include "include/imageanalysisview.h"
+#include "include/imageeditdialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -44,6 +45,8 @@ class MainWindow : public QMainWindow, public IObserver {
     void onToolInletCircle() {
         changeTool(ImageAnalysisView::inletCircle);
     }
+
+    void onToolEditImage();
 
     void onViewHasChanged();
     void onSelectionHasChanged();
