@@ -27,28 +27,67 @@ class ImageEditDialog : public QDialog {
     /* Set the image to show in the dialog and work with */
     void setImage(const QImage& value);
 
+    /* Set and get the values for the user */
+    int getDesaturationMode() const;
+    void setDesaturationMode(int value);
+
+    int getLevelMin() const;
+    void setLevelMin(int value);
+
+    int getLevelMax() const;
+    void setLevelMax(int value);
+
+    bool getInvert() const;
+    void setInvert(bool value);
+
   private slots:
     /* Widget events, state changes, etc. */
+    void previewModeChanged(int index);
+
+    void desaturationModeChanged(int index);
     void invertBoxChanged(int state);
-    void checkBoxChanged(int state);
+
+    void levelsChanging(int min, int max);
     void levelsChanged(int min, int max);
     void minLevelChanged(int value);
     void maxLevelChanged(int value);
 
-    private:
+  private:
+    /* All the UI data */
     Ui::ImageEditDialog *ui;
 
+    /* Preview modes */
+    enum previewModes {
+        showProcessedImage = 0,
+        showSourceImage = 1,
+        showHalfhalf = 2
+    };
+
+    /* Desaturation modes */
+    enum desaturationModes {
+        desatLightness = 0,
+        desatLuminance = 1,
+        desatAverage = 2,
+        desatMaximum = 3,
+        desatRed = 4,
+        desatGreen = 5,
+        desatBlue = 6
+    };
+
+    /* Source and preview images */
     QImage sourceImage;
-    QImage workingImage;
-    QImage leveledImage;
+    QImage processedImage;
     QGraphicsScene *scene = nullptr;
     QGraphicsPixmapItem *pixmap = nullptr;
 
-    /* This function will calculate the working image to show */
+    /* Spin boxes were changed by the program */
+    bool spinChanged = false;
+
+    /* This function will calculate the working image to show */    
     void applyEditsToImage();
 
     /* Show image in preview */
-    void showPreviewImage(const QImage& img);
+    void showPreviewImage();
 };
 
 #endif // IMAGEEDITDIALOG_H

@@ -53,7 +53,7 @@ void HistogramWidget::mouseMoveEvent(QMouseEvent* event) {
             minSelValue = barUnderMouse;
 
             /* Send notice that the data of this widget changed */
-            emit valuesChanged(minSelValue, maxSelValue);
+            emit valuesChanging(minSelValue, maxSelValue);
         }
         break;
     case parts::maxborder:
@@ -61,7 +61,7 @@ void HistogramWidget::mouseMoveEvent(QMouseEvent* event) {
             maxSelValue = barUnderMouse;
 
             /* Send notice that the data of this widget changed */
-            emit valuesChanged(minSelValue, maxSelValue);
+            emit valuesChanging(minSelValue, maxSelValue);
         }
         break;
     default:
@@ -74,6 +74,11 @@ void HistogramWidget::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void HistogramWidget::mouseReleaseEvent(QMouseEvent* event) {
+    /* If the user moved the borders, send the changed signal */
+    if (partClicked != parts::none) {
+        emit valuesChanged(minSelValue, maxSelValue);
+    }
+
     /* Release the part clicked */
     partClicked = parts::none;
 

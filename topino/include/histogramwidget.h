@@ -32,6 +32,7 @@ class HistogramWidget : public QWidget {
     void paintEvent(QPaintEvent *event) override;
 
   signals:
+    void valuesChanging(int min, int max);
     void valuesChanged(int min, int max);
 
   public slots:
