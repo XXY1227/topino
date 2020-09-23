@@ -47,7 +47,8 @@ SOURCES += \
     src/topinographicsitem.cpp \
     src/polarcircletoolitem.cpp \
     src/inputimagetoolitem.cpp \
-    src/imageeditdialog.cpp
+    src/imageeditdialog.cpp \
+    src/histogramwidget.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -63,7 +64,9 @@ HEADERS += \
     include/topinographicsitem.h \
     include/polarcircletoolitem.h \
     include/inputimagetoolitem.h \
-    include/imageeditdialog.h
+    include/imageeditdialog.h \
+    include/topinotool.h \
+    include/histogramwidget.h
 
 FORMS += \
     ui/mainwindow.ui \
