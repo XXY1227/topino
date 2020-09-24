@@ -48,7 +48,8 @@ SOURCES += \
     src/polarcircletoolitem.cpp \
     src/inputimagetoolitem.cpp \
     src/imageeditdialog.cpp \
-    src/histogramwidget.cpp
+    src/histogramwidget.cpp \
+    src/topinotool.cpp
 
 HEADERS += \
     include/mainwindow.h \

@@ -143,11 +143,11 @@ void ImageEditDialog::setLevelMin(int value) {
     ui->levelMin->setValue(value);
 }
 
-int ImageEditDialog::getDesaturationMode() const {
-    return ui->desaturateModes->currentIndex();
+TopinoTools::desaturationModes ImageEditDialog::getDesaturationMode() const {
+    return (TopinoTools::desaturationModes)ui->desaturateModes->currentIndex();
 }
 
-void ImageEditDialog::setDesaturationMode(int value) {
+void ImageEditDialog::setDesaturationMode(TopinoTools::desaturationModes value) {
     ui->desaturateModes->setCurrentIndex(value);
 }
 
@@ -176,37 +176,37 @@ void ImageEditDialog::applyEditsToImage() {
 
         switch(desatmode) {
         /* Luminance method */
-        case desaturationModes::desatLuminance:
+        case TopinoTools::desaturationModes::desatLuminance:
             value = TopinoTools::qLuminance(pixels[p]);
             break;
 
         /* Average method */
-        case desaturationModes::desatAverage:
+        case TopinoTools::desaturationModes::desatAverage:
             value = TopinoTools::qAverage(pixels[p]);
             break;
 
         /* Maximum method */
-        case desaturationModes::desatMaximum:
+        case TopinoTools::desaturationModes::desatMaximum:
             value = TopinoTools::qMaximum(pixels[p]);
             break;
 
         /* Red channel */
-        case desaturationModes::desatRed:
+        case TopinoTools::desaturationModes::desatRed:
             value = qRed(pixels[p]);
             break;
 
         /* Green channel */
-        case desaturationModes::desatGreen:
+        case TopinoTools::desaturationModes::desatGreen:
             value = qGreen(pixels[p]);
             break;
 
         /* Blue channel */
-        case desaturationModes::desatBlue:
+        case TopinoTools::desaturationModes::desatBlue:
             value = qBlue(pixels[p]);
             break;
 
         /* Lightness method (default) */
-        case desaturationModes::desatLightness:
+        case TopinoTools::desaturationModes::desatLightness:
         default:
             value = TopinoTools::qLightness(pixels[p]);
             break;

@@ -1,9 +1,25 @@
 #ifndef TOPINOTOOL_H
 #define TOPINOTOOL_H
 
+#include <QString>
 #include <QRgb>
 
 namespace TopinoTools {
+
+/* Desaturation modes */
+enum desaturationModes {
+    desatLightness = 0,
+    desatLuminance = 1,
+    desatAverage = 2,
+    desatMaximum = 3,
+    desatRed = 4,
+    desatGreen = 5,
+    desatBlue = 6,
+    desatCOUNT = 7
+};
+
+/* Names for the desaturation modes */
+QString getDesaturationModeName(desaturationModes mode);
 
 /* The following two functions calculate the lightness value, typically
  * used for desaturation of images. Lightness = 0.5 × (max(R,G,B) + min(R,G,B)) */
@@ -46,6 +62,10 @@ inline Q_DECL_CONSTEXPR int qMaximum(int r, int g, int b) {
 inline Q_DECL_CONSTEXPR int qMaximum(QRgb rgb) {
     return qMaximum(qRed(rgb), qGreen(rgb), qBlue(rgb));
 }
+
+/* This function receives the unit prefixes and matching double values for a
+ * given value. */
+QString getUnitPrefix(qreal &value);
 
 }
 

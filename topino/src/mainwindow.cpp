@@ -181,24 +181,13 @@ void MainWindow::changeTool(ImageAnalysisView::tools tool) {
 }
 
 void MainWindow::updateObjectPage(MainWindow::objectPages page) {
-    const TopinoData &data = document.getData();
     ui->propertiesPages->setEnabled(true);
 
     /* This function updates the information on the respective page of the object properties dock widget */
     switch (page) {
     case general:
         /* First page: general document properties, image sizes, etc. */
-        if (!data.getImage().isNull()) {
-
-            ui->propImageDimension->setText(QString("%1 × %2 Px²").
-                                            arg(data.getImage().width()).
-                                            arg(data.getImage().height()));
-            ui->propImageSize->setText(QString("%1").arg(data.getImage().byteCount() / 1000.0f));
-        } else {
-            ui->propertiesPages->setEnabled(false);
-            ui->propImageDimension->setText("---");
-            ui->propImageSize->setText("---");
-        }
+        updateImagePage();
         break;
     case multiple:
         /* Second page: multiple objects of multiple types selected; we do not test here, just update */
@@ -247,6 +236,35 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
     }
 }
 
+void MainWindow::updateImagePage() {
+    /* Get data */
+    const TopinoData &data = document.getData();
+
+    /* Check if there is an image in the data */
+    if (!data.getImage().isNull()) {
+        /* Pixel size */
+        ui->propImageDimension->setText(QString("%1 × %2 Px²").arg(data.getImage().width()).arg(data.getImage().height()));
+
+        /* Calculate the memory size. It's two times the bytesize of one image since there is
+         * a processed image as well. */
+        qreal byteSize = (qreal)data.getImage().byteCount() * 2.0;
+        QString prefix = TopinoTools::getUnitPrefix(byteSize);
+        ui->propImageSize->setText(QString::number(byteSize, 'f', 1) + " " + prefix + "Bytes");
+
+        /* Processing parameters */
+        ui->propImageDesatMode->setText(TopinoTools::getDesaturationModeName(data.getDesatMode()));
+        ui->propImageInversion->setText(data.getInversion() ? tr("applied") : tr("not applied"));
+        ui->propImageLevels->setText(QString::number(data.getLevelMin()) + " – " + QString::number(data.getLevelMax()));
+    } else {
+        ui->propertiesPages->setEnabled(false);
+        ui->propImageDimension->setText("---");
+        ui->propImageSize->setText("---");
+        ui->propImageDesatMode->setText("---");
+        ui->propImageInversion->setText("---");
+        ui->propImageLevels->setText("---");
+    }
+}
+
 void MainWindow::onNew() {
     /* If the document has changed the user needs to be asked if to proceed */
     if (document.hasChanged()) {
@@ -273,6 +291,13 @@ void MainWindow::onNew() {
 }
 
 void MainWindow::onOpen() {
+    /* Let the user select a filename and try to open this file as TopinoXML file */
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open file to analyze"), "",
+                       tr("Topino files (*.topxml);;All files (*.*)"));
+
+    if (filename.length() == 0)
+        return;
+
     /* If the document has changed the user needs to be asked if to proceed */
     if (document.hasChanged()) {
         QMessageBox::StandardButton ret;
@@ -287,13 +312,6 @@ void MainWindow::onOpen() {
             return;
         }
     }
-
-    /* Let the user select a filename and try to open this file as TopinoXML file */
-    QString filename = QFileDialog::getOpenFileName(this, tr("Open file to analyze"), "",
-                       tr("Topino files (*.topxml);;All files (*.*)"));
-
-    if (filename.length() == 0)
-        return;
 
     TopinoDocument newdoc;
     TopinoDocument::FileError err = newdoc.loadFromXML(filename);
@@ -387,13 +405,16 @@ void MainWindow::onAboutTopino() {
 }
 
 void MainWindow::onToolEditImage() {
+    /* Copy data */
+    TopinoData data = document.getData();
+
     /* Open the image editing/preparing dialog to adjust saturation, levels, etc. before
      * analysis */
     ImageEditDialog dlg(this);
 
     /* We either look at the whole image OR cut out the bounding rect of the main inlet,
      * i.e. what the user wants to focus on. */
-    QImage image = document.getData().getImage();
+    QImage image = data.getImage();
 
     /* The rect can technically be OUTSIDE of the image, if that is the case, adjust */
     QRect rect = view.getFocusArea().toRect();
@@ -405,10 +426,52 @@ void MainWindow::onToolEditImage() {
     /* Cut out the image */
     dlg.setImage(image.copy(rect));
 
+    /* Set starting parameters */
+    dlg.setInvert(data.getInversion());
+    dlg.setDesaturationMode(data.getDesatMode());
+    dlg.setLevelMin(data.getLevelMin());
+    dlg.setLevelMax(data.getLevelMax());
+
     /* Execute in a modal format and apply options if accepted */
     if (dlg.exec() == QDialog::DialogCode::Accepted) {
+        qDebug("Image edit: invert = %s", dlg.getInvert() ? "true" : "false");
+        qDebug("Image edit: desaturation mode %d", dlg.getDesaturationMode());
+        qDebug("Image edit: min %d max %d", dlg.getLevelMin(), dlg.getLevelMax());
 
+        /* Process the image */
+        data.setInversion(dlg.getInvert());
+        data.setDesatMode(dlg.getDesaturationMode());
+        data.setLevelMin(dlg.getLevelMin());
+        data.setLevelMax(dlg.getLevelMax());
+        data.processImage();
+
+        /* Write back the data; set the view to show the processed image */
+        view.showSourceImage(false);
+        document.setData(data);
+
+        /* Update the image page */
+        updateImagePage();
     }
+}
+
+void MainWindow::onToolSwitchImage() {
+    /* Swap processed and source image */
+    view.showSourceImage(!view.isSourceImageShown());
+}
+
+void MainWindow::onToolResetImage() {
+    /* Copy data */
+    TopinoData data = document.getData();
+
+    /* Reset processed image back to source image */
+    data.resetProcessing();
+
+    /* Write back the data; set the view to show the source image */
+    view.showSourceImage(true);
+    document.setData(data);
+
+    /* Update the image page */
+    updateImagePage();
 }
 
 

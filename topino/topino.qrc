@@ -34,5 +34,6 @@
         <file>ui/darkstyle/darkstyle.cpp</file>
         <file>ui/darkstyle/darkstyle.h</file>
         <file>ui/toolicons/image.png</file>
+        <file>ui/toolicons/image_edit.png</file>
     </qresource>
 </RCC>

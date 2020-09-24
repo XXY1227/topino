@@ -6,6 +6,8 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
+#include "include/topinotool.h"
+
 class TopinoData {
   public:
     TopinoData();
@@ -65,9 +67,36 @@ class TopinoData {
     ParsingError loadInletObject(QXmlStreamReader& xml);
     void saveInletObject(QXmlStreamWriter& xml, const InletData &data);
 
-    private:
-    /* Original and unmodified image */
-    QImage image;
+    bool getInversion() const;
+    void setInversion(bool value);
+
+    TopinoTools::desaturationModes getDesatMode() const;
+    void setDesatMode(const TopinoTools::desaturationModes& value);
+
+    int getLevelMin() const;
+    void setLevelMin(int value);
+
+    int getLevelMax() const;
+    void setLevelMax(int value);
+
+    QImage getProcessedImage() const;
+    void setProcessedImage(const QImage& value);
+
+    /* Process the source image and apply inversion, desaturation, and color levels. */
+    void processImage();
+
+    /* Resets the processing of the image and sets all values to default */
+    void resetProcessing();
+
+  private:
+    /* Image and image editing data */
+    QImage sourceImage;
+    QImage processedImage;
+
+    bool inversion;
+    TopinoTools::desaturationModes desatMode;
+    int levelMin;
+    int levelMax;
 
     /* Polar coordinate system: origin coordinates on image, neutral plane angle (given in degrees),
      * and if direction of increasing angles is counterClockwise (true/false) */

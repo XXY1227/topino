@@ -99,8 +99,8 @@
     <bool>false</bool>
    </attribute>
    <addaction name="action_selection_tool"/>
-   <addaction name="action_ruler_tool"/>
    <addaction name="action_inlet_tool"/>
+   <addaction name="action_ruler_tool"/>
   </widget>
   <widget class="QToolBar" name="zoomBar">
    <property name="windowTitle">
@@ -355,87 +355,13 @@
          </property>
         </widget>
        </item>
-       <item row="6" column="3">
-        <widget class="QSlider" name="sliderSaturation">
-         <property name="minimum">
-          <number>-100</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="singleStep">
-          <number>10</number>
-         </property>
-         <property name="pageStep">
-          <number>20</number>
-         </property>
-         <property name="sliderPosition">
-          <number>0</number>
-         </property>
-         <property name="tracking">
-          <bool>true</bool>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="invertedAppearance">
-          <bool>false</bool>
-         </property>
-         <property name="invertedControls">
-          <bool>false</bool>
-         </property>
-         <property name="tickPosition">
-          <enum>QSlider::TicksBothSides</enum>
-         </property>
-         <property name="tickInterval">
-          <number>0</number>
-         </property>
-        </widget>
-       </item>
        <item row="6" column="0" colspan="3">
         <widget class="QLabel" name="label_26">
          <property name="text">
-          <string>Saturation:</string>
+          <string>Levels:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="3">
-        <widget class="QSlider" name="sliderContrast">
-         <property name="minimum">
-          <number>-100</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="singleStep">
-          <number>10</number>
-         </property>
-         <property name="pageStep">
-          <number>20</number>
-         </property>
-         <property name="sliderPosition">
-          <number>0</number>
-         </property>
-         <property name="tracking">
-          <bool>true</bool>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="invertedAppearance">
-          <bool>false</bool>
-         </property>
-         <property name="invertedControls">
-          <bool>false</bool>
-         </property>
-         <property name="tickPosition">
-          <enum>QSlider::TicksBothSides</enum>
-         </property>
-         <property name="tickInterval">
-          <number>0</number>
          </property>
         </widget>
        </item>
@@ -449,7 +375,7 @@
        <item row="5" column="0" colspan="3">
         <widget class="QLabel" name="label_25">
          <property name="text">
-          <string>Contrast:</string>
+          <string>Inversion:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -475,7 +401,7 @@
        <item row="2" column="0" colspan="3">
         <widget class="QLabel" name="label_22">
          <property name="text">
-          <string>Disk size:</string>
+          <string>Memory size:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -498,7 +424,7 @@
        <item row="4" column="0" colspan="3">
         <widget class="QLabel" name="label_24">
          <property name="text">
-          <string>Brightness:</string>
+          <string>Desaturation mode:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -512,43 +438,6 @@
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="3">
-        <widget class="QSlider" name="sliderBrightness">
-         <property name="minimum">
-          <number>-100</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="singleStep">
-          <number>10</number>
-         </property>
-         <property name="pageStep">
-          <number>20</number>
-         </property>
-         <property name="sliderPosition">
-          <number>0</number>
-         </property>
-         <property name="tracking">
-          <bool>true</bool>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="invertedAppearance">
-          <bool>false</bool>
-         </property>
-         <property name="invertedControls">
-          <bool>false</bool>
-         </property>
-         <property name="tickPosition">
-          <enum>QSlider::TicksBothSides</enum>
-         </property>
-         <property name="tickInterval">
-          <number>0</number>
          </property>
         </widget>
        </item>
@@ -569,6 +458,35 @@
         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0">
          <item>
           <widget class="QToolButton" name="toolEditImage">
+           <property name="toolTip">
+            <string>Preprocess image</string>
+           </property>
+           <property name="statusTip">
+            <string>Select options for preprocessing the image to make it ready for angulargram creation</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../topino.qrc">
+             <normaloff>:/ui/toolicons/image_edit.png</normaloff>:/ui/toolicons/image_edit.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="toolSwitchImage">
+           <property name="toolTip">
+            <string>Swap source and processed image</string>
+           </property>
+           <property name="statusTip">
+            <string>Swap source and processed image</string>
+           </property>
            <property name="text">
             <string>...</string>
            </property>
@@ -585,24 +503,10 @@
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="toolButton_6">
-           <property name="text">
-            <string>...</string>
+          <widget class="QToolButton" name="toolResetImage">
+           <property name="toolTip">
+            <string>Resets the processed image</string>
            </property>
-           <property name="icon">
-            <iconset resource="../topino.qrc">
-             <normaloff>:/ui/toolicons/image.png</normaloff>:/ui/toolicons/image.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>64</width>
-             <height>32</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="toolButton_8">
            <property name="text">
             <string>...</string>
            </property>
@@ -632,6 +536,36 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item row="4" column="3">
+        <widget class="QLabel" name="propImageDesatMode">
+         <property name="text">
+          <string>%s</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="3">
+        <widget class="QLabel" name="propImageInversion">
+         <property name="text">
+          <string>%s</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="3">
+        <widget class="QLabel" name="propImageLevels">
+         <property name="text">
+          <string>%d – %d</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -1339,6 +1273,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>toolSwitchImage</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolSwitchImage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>802</x>
+     <y>500</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolResetImage</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolResetImage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>873</x>
+     <y>500</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onQuit()</slot>
@@ -1355,5 +1321,7 @@
   <slot>onToolRuler()</slot>
   <slot>onToolInletCircle()</slot>
   <slot>onToolEditImage()</slot>
+  <slot>onToolSwitchImage()</slot>
+  <slot>onToolResetImage()</slot>
  </slots>
 </ui>

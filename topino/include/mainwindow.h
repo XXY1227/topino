@@ -47,6 +47,8 @@ class MainWindow : public QMainWindow, public IObserver {
     }
 
     void onToolEditImage();
+    void onToolSwitchImage();
+    void onToolResetImage();
 
     void onViewHasChanged();
     void onSelectionHasChanged();
@@ -77,6 +79,7 @@ class MainWindow : public QMainWindow, public IObserver {
     void changeTool(ImageAnalysisView::tools tool);
 
     void updateObjectPage(objectPages page);
+    void updateImagePage();
 };
 
 #endif // MAINWINDOW_H

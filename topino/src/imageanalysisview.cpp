@@ -19,7 +19,11 @@ ImageAnalysisView::~ImageAnalysisView() {
 }
 
 void ImageAnalysisView::modelHasChanged() {
-    setImage(document.getData().getImage());
+    if (sourceImageShown) {
+        setImage(document.getData().getImage());
+    } else {
+        setImage(document.getData().getProcessedImage());
+    }
 
     setSceneRect(inputImage->boundingRect());
 }
@@ -320,8 +324,7 @@ void ImageAnalysisView::zoomByFactor(const double factor) {
     setZoomFactor(getZoomFactor() * factor);
 }
 
-QRectF ImageAnalysisView::getFocusArea() const
-{
+QRectF ImageAnalysisView::getFocusArea() const {
     const TopinoData &data = document.getData();
 
     /* Let's find the main inlet and return the bounding rect of that as focus area */
@@ -367,6 +370,24 @@ void ImageAnalysisView::createToolsFromDocument() {
     }
 
     emit viewHasChanged();
+}
+
+bool ImageAnalysisView::isSourceImageShown() const {
+    return sourceImageShown;
+}
+
+void ImageAnalysisView::showSourceImage(bool value) {
+    /* Switch the image */
+    sourceImageShown = value;
+
+    if (sourceImageShown) {
+        setImage(document.getData().getImage());
+    } else {
+        setImage(document.getData().getProcessedImage());
+    }
+
+    /* Update */
+    update();
 }
 
 InputImageToolItem* ImageAnalysisView::createInputImageToolItem(const QPixmap& pixmap) {

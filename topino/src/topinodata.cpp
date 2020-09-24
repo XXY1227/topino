@@ -3,6 +3,9 @@
 TopinoData::TopinoData() {
     nextInletID = 1;
 
+    /* Set default values for processing */
+    resetProcessing();
+
     mainInletID = 0;
     neutralAngle = -90;
     minAngle = -30;
@@ -15,11 +18,11 @@ TopinoData::~TopinoData() {
 }
 
 QImage TopinoData::getImage() const {
-    return image;
+    return sourceImage;
 }
 
 void TopinoData::setImage(const QImage& value) {
-    image = value;
+    sourceImage = value;
 }
 
 QPointF TopinoData::getCoordOrigin() const {
@@ -88,10 +91,10 @@ int TopinoData::updateInlet(const TopinoData::InletData& data, bool create) {
             qDebug("Data: updating inlet %d", data.ID);
             qDebug("      new coordinates: %.0f x %.0f", data.coord.x(), data.coord.y());
             qDebug("      before the update: %.0f x %.0f", inlets[iter - inlets.begin()].coord.x(),
-                    inlets[iter - inlets.begin()].coord.y());
+                   inlets[iter - inlets.begin()].coord.y());
             inlets[iter - inlets.begin()] = data;
             qDebug("      after the update: %.0f x %.0f", inlets[iter - inlets.begin()].coord.x(),
-                    inlets[iter - inlets.begin()].coord.y());
+                   inlets[iter - inlets.begin()].coord.y());
             return data.ID;
         }
     }
@@ -150,9 +153,9 @@ TopinoData::ParsingError TopinoData::loadImageObject(QXmlStreamReader& xml) {
             QByteArray bytes;
             bytes.append(text);
             bytes = QByteArray::fromBase64(bytes);
-            image = QImage::fromData(bytes, "PNG");
+            sourceImage = QImage::fromData(bytes, "PNG");
 
-            if (image.isNull())
+            if (sourceImage.isNull())
                 return ParsingError::CouldNotLoadImage;
         } else {
             xml.skipCurrentElement();
@@ -174,7 +177,7 @@ void TopinoData::saveImageObject(QXmlStreamWriter& xml) {
      * text editors outside of Topino */
     QByteArray bytes;
     QBuffer buffer(&bytes);
-    image.save(&buffer, "PNG");
+    sourceImage.save(&buffer, "PNG");
     xml.writeTextElement("data", bytes.toBase64());
 
     xml.writeEndElement();
@@ -309,6 +312,127 @@ void TopinoData::saveInletObject(QXmlStreamWriter& xml, const InletData &data) {
     xml.writeTextElement("radius", QString::number(data.radius));
 
     xml.writeEndElement();
+}
+
+bool TopinoData::getInversion() const {
+    return inversion;
+}
+
+void TopinoData::setInversion(bool value) {
+    inversion = value;
+}
+
+TopinoTools::desaturationModes TopinoData::getDesatMode() const {
+    return desatMode;
+}
+
+void TopinoData::setDesatMode(const TopinoTools::desaturationModes& value) {
+    desatMode = value;
+}
+
+int TopinoData::getLevelMin() const {
+    return levelMin;
+}
+
+void TopinoData::setLevelMin(int value) {
+    levelMin = value;
+}
+
+int TopinoData::getLevelMax() const {
+    return levelMax;
+}
+
+void TopinoData::setLevelMax(int value) {
+    levelMax = value;
+}
+
+QImage TopinoData::getProcessedImage() const {
+    return processedImage;
+}
+
+void TopinoData::setProcessedImage(const QImage& value) {
+    processedImage = value;
+}
+
+void TopinoData::processImage() {
+    /* Start with the source image */
+    processedImage = sourceImage;
+
+    /* Invert if needed */
+    if (inversion) {
+        processedImage.invertPixels();
+    }
+
+    /* Iterate over all pixels and apply desaturation method. Count the
+     * values for the histogram in the same run. */
+    int pixelCount = processedImage.width() * processedImage.height();
+    QRgb *pixels = reinterpret_cast<QRgb *>(processedImage.bits());
+
+    /* Process all pixels individually */
+    qreal scale = 255.0 / (qreal)(levelMax - levelMin);
+    for (int p = 0; p < pixelCount; ++p) {
+        /* The value calculated depends on the method selected */
+        int value = 0;
+
+        switch(desatMode) {
+        /* Luminance method */
+        case TopinoTools::desaturationModes::desatLuminance:
+            value = TopinoTools::qLuminance(pixels[p]);
+            break;
+
+        /* Average method */
+        case TopinoTools::desaturationModes::desatAverage:
+            value = TopinoTools::qAverage(pixels[p]);
+            break;
+
+        /* Maximum method */
+        case TopinoTools::desaturationModes::desatMaximum:
+            value = TopinoTools::qMaximum(pixels[p]);
+            break;
+
+        /* Red channel */
+        case TopinoTools::desaturationModes::desatRed:
+            value = qRed(pixels[p]);
+            break;
+
+        /* Green channel */
+        case TopinoTools::desaturationModes::desatGreen:
+            value = qGreen(pixels[p]);
+            break;
+
+        /* Blue channel */
+        case TopinoTools::desaturationModes::desatBlue:
+            value = qBlue(pixels[p]);
+            break;
+
+        /* Lightness method (default) */
+        case TopinoTools::desaturationModes::desatLightness:
+        default:
+            value = TopinoTools::qLightness(pixels[p]);
+            break;
+        }
+
+        /* Subtract the bottom value; since all the channels are the same
+         * it does not really matter which channel we use here. */
+        value = qMax(0, value - levelMin);
+
+        /* Multiply with the scale */
+        value = qMin(255, (int)(value * scale));
+
+        /* Apply new desaturated value */
+        pixels[p] = qRgb(value, value, value);
+    }
+}
+
+void TopinoData::resetProcessing() {
+    /* Default values for processing the image */
+    inversion = false;
+    desatMode = TopinoTools::desaturationModes::desatLightness;
+    levelMin = 0;
+    levelMax = 255;
+
+    /* Reset image as well */
+    processedImage = sourceImage;
 }
 
 

@@ -28,8 +28,8 @@ class ImageEditDialog : public QDialog {
     void setImage(const QImage& value);
 
     /* Set and get the values for the user */
-    int getDesaturationMode() const;
-    void setDesaturationMode(int value);
+    TopinoTools::desaturationModes getDesaturationMode() const;
+    void setDesaturationMode(TopinoTools::desaturationModes value);
 
     int getLevelMin() const;
     void setLevelMin(int value);
@@ -61,17 +61,6 @@ class ImageEditDialog : public QDialog {
         showProcessedImage = 0,
         showSourceImage = 1,
         showHalfhalf = 2
-    };
-
-    /* Desaturation modes */
-    enum desaturationModes {
-        desatLightness = 0,
-        desatLuminance = 1,
-        desatAverage = 2,
-        desatMaximum = 3,
-        desatRed = 4,
-        desatGreen = 5,
-        desatBlue = 6
     };
 
     /* Source and preview images */

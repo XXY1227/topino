@@ -62,6 +62,9 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
 
     void createToolsFromDocument();
 
+    bool isSourceImageShown() const;
+    void showSourceImage(bool value);
+
   signals:
     void viewHasChanged();
     void selectionHasChanged();
@@ -73,7 +76,7 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
 
     /* The basic scene object + the image at the bottom */
     QGraphicsScene *imagescene = nullptr;
-    //QGraphicsPixmapItem *currentimage = nullptr;
+    bool sourceImageShown = true;
 
     /* Point used for translating/moving the scene by mouse */
     QPoint translateOrigin;
