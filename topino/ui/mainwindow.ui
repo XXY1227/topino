@@ -287,7 +287,7 @@
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>227</width>
+       <width>251</width>
        <height>300</height>
       </rect>
      </property>
@@ -307,7 +307,7 @@
       <number>1</number>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="general">
       <layout class="QGridLayout" name="gridLayout_4">
@@ -357,6 +357,12 @@
        </item>
        <item row="6" column="0" colspan="3">
         <widget class="QLabel" name="label_26">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string>Levels:</string>
          </property>
@@ -374,6 +380,12 @@
        </item>
        <item row="5" column="0" colspan="3">
         <widget class="QLabel" name="label_25">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string>Inversion:</string>
          </property>
@@ -400,6 +412,12 @@
        </item>
        <item row="2" column="0" colspan="3">
         <widget class="QLabel" name="label_22">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string>Memory size:</string>
          </property>
@@ -423,6 +441,12 @@
        </item>
        <item row="4" column="0" colspan="3">
         <widget class="QLabel" name="label_24">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string>Desaturation mode:</string>
          </property>
@@ -433,6 +457,12 @@
        </item>
        <item row="1" column="0" colspan="3">
         <widget class="QLabel" name="label_21">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string>Dimension:</string>
          </property>
@@ -492,7 +522,7 @@
            </property>
            <property name="icon">
             <iconset resource="../topino.qrc">
-             <normaloff>:/ui/toolicons/image.png</normaloff>:/ui/toolicons/image.png</iconset>
+             <normaloff>:/ui/toolicons/image_switch.png</normaloff>:/ui/toolicons/image_switch.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -507,12 +537,15 @@
            <property name="toolTip">
             <string>Resets the processed image</string>
            </property>
+           <property name="statusTip">
+            <string>Resets the processed image back to the source image and all processing parameters to default</string>
+           </property>
            <property name="text">
             <string>...</string>
            </property>
            <property name="icon">
             <iconset resource="../topino.qrc">
-             <normaloff>:/ui/toolicons/image.png</normaloff>:/ui/toolicons/image.png</iconset>
+             <normaloff>:/ui/toolicons/image_reset.png</normaloff>:/ui/toolicons/image_reset.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -672,7 +705,23 @@
      </widget>
      <widget class="QWidget" name="ruler">
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="3" column="2">
+       <item row="1" column="0" colspan="3">
+        <widget class="QLabel" name="label_3">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Point 1:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="3">
         <widget class="QLabel" name="label_8">
          <property name="text">
           <string>Length:</string>
@@ -682,46 +731,7 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="2">
-        <widget class="QLabel" name="label_11">
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Length:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
-        <widget class="QLabel" name="propRulerP1">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>5</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>200, 300</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1" colspan="3">
-        <widget class="QLabel" name="label_7">
-         <property name="text">
-          <string>Ruler dimension</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
+       <item row="2" column="0" colspan="3">
         <widget class="QLabel" name="label_9">
          <property name="text">
           <string>Point 2:</string>
@@ -731,53 +741,29 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="3">
-        <widget class="QDoubleSpinBox" name="propRulerSpinWD">
-         <property name="font">
-          <font>
-           <weight>50</weight>
-           <bold>false</bold>
-          </font>
+       <item row="2" column="3">
+        <widget class="QLabel" name="propRulerP2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>5</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="wrapping">
-          <bool>false</bool>
-         </property>
-         <property name="frame">
-          <bool>true</bool>
+         <property name="text">
+          <string>321, 450</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
          </property>
-         <property name="buttonSymbols">
-          <enum>QAbstractSpinBox::UpDownArrows</enum>
-         </property>
-         <property name="correctionMode">
-          <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
-         </property>
-         <property name="showGroupSeparator" stdset="0">
-          <bool>false</bool>
-         </property>
-         <property name="suffix">
-          <string> mm</string>
-         </property>
-         <property name="minimum">
-          <double>1.000000000000000</double>
-         </property>
-         <property name="maximum">
-          <double>10000.000000000000000</double>
-         </property>
-         <property name="singleStep">
-          <double>0.500000000000000</double>
-         </property>
-         <property name="value">
-          <double>28.899999999999999</double>
-         </property>
         </widget>
        </item>
-       <item row="4" column="1" colspan="3">
-        <widget class="QLabel" name="label_10">
+       <item row="3" column="3">
+        <widget class="QLabel" name="propRulerLength">
          <property name="text">
-          <string>World dimensions</string>
+          <string>192.72 pixel</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -809,8 +795,81 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="3">
-        <widget class="QLabel" name="propRulerP2">
+       <item row="5" column="0" colspan="4">
+        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0,0">
+         <item>
+          <widget class="QToolButton" name="toolEditImage_2">
+           <property name="toolTip">
+            <string>Preprocess image</string>
+           </property>
+           <property name="statusTip">
+            <string>Select options for preprocessing the image to make it ready for angulargram creation</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../topino.qrc">
+             <normaloff>:/ui/toolicons/ruler.png</normaloff>:/ui/toolicons/ruler.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="toolSwitchImage_2">
+           <property name="toolTip">
+            <string>Swap source and processed image</string>
+           </property>
+           <property name="statusTip">
+            <string>Swap source and processed image</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../topino.qrc">
+             <normaloff>:/ui/toolicons/ruler.png</normaloff>:/ui/toolicons/ruler.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="toolResetImage_2">
+           <property name="toolTip">
+            <string>Resets the processed image</string>
+           </property>
+           <property name="statusTip">
+            <string>Resets the processed image back to the source image and all processing parameters to default</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../topino.qrc">
+             <normaloff>:/ui/toolicons/ruler.png</normaloff>:/ui/toolicons/ruler.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="3">
+        <widget class="QLabel" name="propRulerP1">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>5</horstretch>
@@ -818,57 +877,21 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>321, 450</string>
+          <string>200, 300</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
-       <item row="3" column="3">
-        <widget class="QLabel" name="propRulerLength">
+       <item row="0" column="1" colspan="3">
+        <widget class="QLabel" name="label_7">
          <property name="text">
-          <string>192.72 pixel</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <string>Ruler dimension</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="3">
-        <widget class="QLabel" name="propRulerFactor">
-         <property name="text">
-          <string>150 µm px&lt;sup&gt;–1&lt;/sup&gt;</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Point 1:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>5</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="7" column="3">
+       <item row="6" column="0" colspan="4">
         <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -876,24 +899,35 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>40</height>
+           <height>110</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="4" column="0" colspan="4">
+        <spacer name="verticalSpacer_7">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
           </size>
          </property>
         </spacer>
        </item>
       </layout>
       <zorder>propRulerP2</zorder>
-      <zorder>propRulerFactor</zorder>
       <zorder>propRulerP1</zorder>
-      <zorder>label_10</zorder>
       <zorder>label_8</zorder>
       <zorder>label_3</zorder>
       <zorder>label</zorder>
-      <zorder>label_11</zorder>
       <zorder>propRulerLength</zorder>
       <zorder>label_9</zorder>
       <zorder>label_7</zorder>
-      <zorder>propRulerSpinWD</zorder>
+      <zorder>layoutWidget</zorder>
+      <zorder>verticalSpacer_7</zorder>
      </widget>
     </widget>
    </widget>

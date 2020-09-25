@@ -121,7 +121,11 @@ class PolarCircleToolItem : public virtual TopinoGraphicsItem {
     QPen coordlinePen;
     int coordlineWidth;
     QPen grabLinePen;
+
+    /* Font tools */
     QFont fontAngleLabels;
+    QPen fontOutline;
+    QBrush fontFilling;
 
     /* This function calculates the size of the boundingRect if position, etc. was changed */
     QRectF fullRect;

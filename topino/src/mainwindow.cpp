@@ -173,7 +173,7 @@ void MainWindow::onSelectionHasChanged() {
 void MainWindow::onItemHasChanged(int itemID) {
     qDebug("Main windows: item %d has changed", itemID);
 
-    //onSelectionHasChanged();
+    onSelectionHasChanged();
 }
 
 void MainWindow::changeTool(ImageAnalysisView::tools tool) {

@@ -54,6 +54,17 @@ class RulerToolItem : public TopinoGraphicsItem {
 
     /* Checks if the given position is _inside_ on of the terminal points or not */
     bool inTerminalPoint(const QPointF &termPoint, const QPointF &pos) const;
+
+    /* Swaps the first with the second point of the line */
+    void swapTerminalPoints();
+
+    /* Checks which point is left/top and which is right/bottom and sets them to
+     * point1 and point2 of the line, respectively. */
+    void checkTerminalPointsOrder();
+
+    /* Checks if the given is outside the boundary of the scene. */
+    QPointF checkTerminalPointPosition(const QPointF &pos);
+
 };
 
 #endif // RULERTOOLITEM_H

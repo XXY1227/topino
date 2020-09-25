@@ -35,5 +35,7 @@
         <file>ui/darkstyle/darkstyle.h</file>
         <file>ui/toolicons/image.png</file>
         <file>ui/toolicons/image_edit.png</file>
+        <file>ui/toolicons/image_switch.png</file>
+        <file>ui/toolicons/image_reset.png</file>
     </qresource>
 </RCC>

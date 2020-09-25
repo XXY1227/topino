@@ -23,6 +23,7 @@ QImage TopinoData::getImage() const {
 
 void TopinoData::setImage(const QImage& value) {
     sourceImage = value;
+    processedImage = value;
 }
 
 QPointF TopinoData::getCoordOrigin() const {
@@ -154,6 +155,7 @@ TopinoData::ParsingError TopinoData::loadImageObject(QXmlStreamReader& xml) {
             bytes.append(text);
             bytes = QByteArray::fromBase64(bytes);
             sourceImage = QImage::fromData(bytes, "PNG");
+            processedImage = sourceImage;
 
             if (sourceImage.isNull())
                 return ParsingError::CouldNotLoadImage;

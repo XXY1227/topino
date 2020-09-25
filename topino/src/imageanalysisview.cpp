@@ -25,7 +25,7 @@ void ImageAnalysisView::modelHasChanged() {
         setImage(document.getData().getProcessedImage());
     }
 
-    setSceneRect(inputImage->boundingRect());
+    //setSceneRect(inputImage->boundingRect().adjusted(-20, -20, +20, +20));
 }
 
 void ImageAnalysisView::resetView() {
@@ -49,23 +49,32 @@ void ImageAnalysisView::setImage(const QImage& image) {
         return;
     }
 
+    /* Save the dimensions of the old image for comparison later */
+    int oldWidth = inputImage->getPixmap().width();
+    int oldHeight = inputImage->getPixmap().height();
+
     /* Extract Pixmap from image */
     inputImage->setPixmap(QPixmap::fromImage(image));
 
-    /* Fit the image into the view, but make sure that the minimum and maximum zoom level is not violated */
-    fitInView(imagescene->itemsBoundingRect(), Qt::KeepAspectRatio);
+    /* Should the image dimensions have changed, then update scene rect, zoom, etc. */
+    if ((inputImage->getPixmap().width() != oldWidth) || (inputImage->getPixmap().height() != oldHeight)) {
+        /* Fit the image into the view, but make sure that the minimum and maximum zoom level is not violated */
+        setSceneRect(inputImage->boundingRect());
+        fitInView(imagescene->itemsBoundingRect(), Qt::KeepAspectRatio);
 
-    /* Zoom factor should be between 3.125% and 6400%. In contrast to the setZoomFactor function we can use
-     * more precise numbers here. */
-    double zoomFactor = getZoomFactor();
+        /* Zoom factor should be between 3.125% and 6400%. In contrast to the setZoomFactor function we can use
+         * more precise numbers here. */
+        double zoomFactor = getZoomFactor();
 
-    if (zoomFactor < 0.03) {
-        setZoomFactor(0.03125);
-    } else if (zoomFactor > 64.0) {
-        setZoomFactor(64.0);
+        if (zoomFactor < 0.03) {
+            setZoomFactor(0.03125);
+        } else if (zoomFactor > 64.0) {
+            setZoomFactor(64.0);
+        }
     }
 
     /* Redraw view and tell everyone */
+    viewport()->update();
     emit viewHasChanged();
 }
 
@@ -177,16 +186,14 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
     case tools::selection:
         if (event->button() == Qt::LeftButton) {
             if (rubberBand) {
-                rubberBand->hide();
-                qDebug("Rubber band released at %d %d %d %d", rubberBand->geometry().x(), rubberBand->geometry().y(),
-                       rubberBand->geometry().width(), rubberBand->geometry().height());
+                /* Delete this rubber band and free it */
+                delete rubberBand;
+                rubberBand = nullptr;
+
+                emit viewHasChanged();
+
+                return;
             }
-
-            /* Delete this rubber band and free it */
-            delete rubberBand;
-            rubberBand = nullptr;
-
-            emit viewHasChanged();
         }
         break;
     case tools::ruler:
@@ -208,6 +215,8 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
 
                 /* View has definitely changed */
                 emit viewHasChanged();
+
+                return;
             }
         }
         break;
@@ -231,12 +240,14 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
                 rubberBand = nullptr;
 
                 emit viewHasChanged();
+
+                return;
             }
         }
         break;
     }
 
-    return QGraphicsView::mouseReleaseEvent(event);
+    QGraphicsView::mouseReleaseEvent(event);
 }
 
 void ImageAnalysisView::wheelEvent(QWheelEvent *event) {
@@ -292,6 +303,8 @@ void ImageAnalysisView::onItemDataChanged(const TopinoGraphicsItem* item) {
     default:
         break;
     }
+
+    emit itemHasChanged(item->getItemid());
 }
 
 double ImageAnalysisView::getZoomFactor() const {
@@ -385,9 +398,6 @@ void ImageAnalysisView::showSourceImage(bool value) {
     } else {
         setImage(document.getData().getProcessedImage());
     }
-
-    /* Update */
-    update();
 }
 
 InputImageToolItem* ImageAnalysisView::createInputImageToolItem(const QPixmap& pixmap) {

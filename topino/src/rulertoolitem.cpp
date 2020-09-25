@@ -117,13 +117,15 @@ void RulerToolItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 
 
 void RulerToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
+    QPointF pos = event->pos(); // checkTerminalPointPosition(event->pos());
+
     /* Depending on which part clicked, the position of the points is updated */
     switch (partClicked) {
     case parts::point1:
-        line.setP1(event->pos());
+        line.setP1(pos);
         break;
     case parts::point2:
-        line.setP2(event->pos());
+        line.setP2(pos);
         break;
     default:
         /* If clicked just on the line part, run the default movement-code */
@@ -140,6 +142,9 @@ void RulerToolItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     /* Release the part clicked */
     partClicked = parts::none;
 
+    /* Check the order of the terminal points and swap if necessary */
+    checkTerminalPointsOrder();
+
     /* Send notice that the data of this tool changed */
     emit itemDataChanged(this);
 
@@ -147,8 +152,7 @@ void RulerToolItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     TopinoGraphicsItem::mouseReleaseEvent(event);
 }
 
-void RulerToolItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
-{
+void RulerToolItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event) {
     TopinoGraphicsItem::hoverMoveEvent(event);
 
     /* Adjust cursor when over terminal points to a grabbing hand / 4-direction-moving arrow
@@ -163,5 +167,48 @@ void RulerToolItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event)
 bool RulerToolItem::inTerminalPoint(const QPointF& termPoint, const QPointF& pos) const {
     return QRectF(termPoint.x() - offset, termPoint.y() - offset, 2 * offset, 2 * offset).contains(pos);
 }
+
+void RulerToolItem::swapTerminalPoints() {
+    QPointF tempP1 = line.p1();
+    QPointF tempP2 = line.p2();
+    line.setPoints(tempP2, tempP1);
+}
+
+void RulerToolItem::checkTerminalPointsOrder() {
+    /* Check if point2 is now left and/or top of point1. If yes,
+     * swap the points. */
+    if ((line.p2().x() < line.p1().x()) || (line.p2().y() < line.p1().y())) {
+        swapTerminalPoints();
+    }
+}
+
+QPointF RulerToolItem::checkTerminalPointPosition(const QPointF &pos) {
+    /* Scene rect */
+    QRectF rect = scene()->sceneRect();
+    QPointF newpos = pos;
+
+    /* Too far to the left */
+    if (newpos.x() < (rect.left() + offset)) {
+        newpos.setX(rect.left() + offset);
+    }
+
+    /* Too far to the top */
+    if (newpos.y() < (rect.top() + offset)) {
+        newpos.setY(rect.top() + offset);
+    }
+
+    /* Too far to the right */
+    if (newpos.x() > (rect.right() - offset)) {
+        newpos.setY(rect.bottom() - offset);
+    }
+
+    /* Too far to the top */
+    if (newpos.y() > (rect.bottom() - offset)) {
+        newpos.setY(rect.bottom() - offset);
+    }
+
+    return newpos;
+}
+
 
 

@@ -11,7 +11,8 @@ InputImageToolItem::InputImageToolItem(int newitemid, QGraphicsItem* parent) :
     borderpen = QPen(QColor(125, 125, 125));
     borderpen.setWidth(2);
     borderpen.setStyle(Qt::DashLine);
-    borderpen.setDashPattern({20, 10});
+    borderpen.setDashPattern({5, 5});
+    borderpen.setDashOffset(2.5);
 }
 
 InputImageToolItem::~InputImageToolItem() {

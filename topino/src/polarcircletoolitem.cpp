@@ -30,8 +30,11 @@ PolarCircleToolItem::PolarCircleToolItem(int newitemid, QGraphicsItem* parent) :
     coordlinePen.setWidth(coordlineWidth);
     grabLinePen = QPen(QColor(50, 20, 0));
     grabLinePen.setWidth(coordlineWidth * 3);
-    grabLinePen.setStyle(Qt::DashLine);
+    grabLinePen.setStyle(Qt::DashLine);    
     fontAngleLabels = QFont("Helvetica", 16, QFont::Bold);
+    fontOutline = QPen(Qt::black);
+    fontOutline.setWidth(coordlineWidth / 2);
+    fontFilling = QBrush(Qt::white);
 
     /* Initialize the cursors used for resizing the circles */
     sectorCursors[0] = QCursor(QPixmap(":/ui/cursors/bd_double_arrow.png"), 24, 24);    /* top-left */
@@ -201,6 +204,7 @@ void PolarCircleToolItem::updateScale() {
     coordlineWidth = coordlineWidth * scaling;
     coordlinePen.setWidth(coordlineWidth);
     grabLinePen.setWidth(coordlineWidth * 3);
+    fontOutline.setWidth(coordlineWidth / 2);
 
     fontAngleLabels.setPointSizeF(fontAngleLabels.pointSizeF() * scaling);
 }
@@ -253,12 +257,16 @@ void PolarCircleToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
         }
         break;
     case parts::grabAngleZero:
-        zeroAngle += angle;
+        if (event->modifiers() == Qt::ShiftModifier) {
+            zeroAngle += angle;
+        } else {
+            zeroAngle += anglefixed;
+        }
         if (zeroAngle > 360) {
             zeroAngle -= 360;
         } else if (zeroAngle < 0) {
             zeroAngle += 360;
-        }
+        }        
         break;
     case parts::grabAngleMin:
         if ((anglefixed >= -180) && (anglefixed < 0)) {
@@ -457,11 +465,13 @@ void PolarCircleToolItem::drawAngleLabel(QPainter* painter, int angle) {
     /* Calculate font metrics */
     QFontMetrics fm(painter->font());
     int half_width = fm.width(label) / 2;
-    int half_height = fm.height() / 2;
 
     /* Draw the text */
-    painter->drawText(QRect(pt.x() - half_width, pt.y() - half_height, half_width * 2, half_height * 2),
-                      Qt::AlignVCenter | Qt::AlignHCenter, label);
+    QPainterPath fontPath;
+    fontPath.addText(pt.x() - half_width, pt.y(), fontAngleLabels, label);
+    painter->setPen(fontOutline);
+    painter->setBrush(fontFilling);
+    painter->drawPath(fontPath);
 }
 
 QPointF PolarCircleToolItem::polarToCartesianCoords(int angle, int radius) const {
