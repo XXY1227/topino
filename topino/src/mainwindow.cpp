@@ -401,7 +401,31 @@ void MainWindow::onAboutQt() {
 }
 
 void MainWindow::onAboutTopino() {
-    QMessageBox::about(this, "About Topino", "Test");
+    /* About text of Topino */
+    const QString aboutTopinoText = tr(
+                "<p><b>Topino 1.0</b></p>"
+                "<p><b>Copyright (C) 2020 by Sven Kochmann</b></p>"
+                "<p>Topino is an analysis tool for continuous flow electrophoresis (CFE). It provides an easy "
+                "to use graphical user-interface (GUI) for assessing CFE images by angulagrams [1].</p>"
+                "<p>Topino was developed by <b>Sven Kochmann</b> in the research group of <b>Prof. Sergey N. "
+                "Krylov</b>. It is using the Qt framework and, thus, is available for all major desktop operating "
+                "systems (Linux/Unix, MacOS, Windows). It is open-source software licensed under BSD-3-Clause "
+                "License; it's source code can be found on <a href=\"https://github.com/Schallaven/topino/\">"
+                "Github</a>.</p>"
+                "<p>The development of Topino was supported by a grant from Natural Sciences and Engineering "
+                "Research Council of Canada to Sergey N. Krylov (grant number STPG-P 521331-2018). Please see "
+                "<a href=\"https://www.yorku.ca/skrylov/\">Krylov group page</a> for more information on CFE "
+                "research.</p>"
+                "<p>References:</p>"
+                "<style>ol {-qt-list-number-prefix: '['; -qt-list-number-suffix: ']'; -qt-list-indent: 1;}</style>"
+                "<ol>"
+                "<li>Kochmann <i>et al.</i>, <i>Anal. Chem.</i> <b>2018</b>, 90, 9504–9509. "
+                "<a href=\"https://doi.org/10.1021/acs.analchem.8b02186\">Link</a>.</li>"
+                "</ol>"
+                );
+
+    /* Present to user */
+    QMessageBox::about(this, tr("About Topino"), aboutTopinoText);
 }
 
 void MainWindow::onToolEditImage() {
