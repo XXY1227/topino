@@ -49,7 +49,9 @@ SOURCES += \
     src/inputimagetoolitem.cpp \
     src/imageeditdialog.cpp \
     src/histogramwidget.cpp \
-    src/topinotool.cpp
+    src/topinotool.cpp \
+    src/topinoabstractview.cpp \
+    src/angulagramview.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -67,7 +69,9 @@ HEADERS += \
     include/inputimagetoolitem.h \
     include/imageeditdialog.h \
     include/topinotool.h \
-    include/histogramwidget.h
+    include/histogramwidget.h \
+    include/topinoabstractview.h \
+    include/angulagramview.h
 
 FORMS += \
     ui/mainwindow.ui \

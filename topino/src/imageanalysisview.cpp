@@ -3,7 +3,7 @@
 #include <math.h>
 
 ImageAnalysisView::ImageAnalysisView(QWidget *parent, TopinoDocument &doc) :
-    QGraphicsView(parent), document(doc) {
+    TopinoAbstractView(parent, doc) {
     setAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
 
     /* Create scene and input image tool */
@@ -24,8 +24,6 @@ void ImageAnalysisView::modelHasChanged() {
     } else {
         setImage(document.getData().getProcessedImage());
     }
-
-    //setSceneRect(inputImage->boundingRect().adjusted(-20, -20, +20, +20));
 }
 
 void ImageAnalysisView::resetView() {
@@ -96,7 +94,7 @@ void ImageAnalysisView::resizeEvent(QResizeEvent *event) {
 
     setSceneRect(inputImage->boundingRect());
 
-    QGraphicsView::resizeEvent(event);
+    TopinoAbstractView::resizeEvent(event);
 
     emit viewHasChanged();
 }
@@ -115,12 +113,12 @@ void ImageAnalysisView::mousePressEvent(QMouseEvent* event) {
     /* Selection event for selection, ruler, and inlet tools: press and hold left mouse button to
      * start selection/rubber band process */
     case tools::selection:
-    case tools::ruler:
+    case tools::rulerLine:
     case tools::inletCircle:
         if (event->button() == Qt::LeftButton) {
             if (rubberBand == nullptr) {
                 switch (currentTool) {
-                case tools::ruler:
+                case tools::rulerLine:
                     rubberBand = new LineRubberBand(this);
                     break;
                 case tools::inletCircle:
@@ -137,9 +135,11 @@ void ImageAnalysisView::mousePressEvent(QMouseEvent* event) {
             rubberBand->show();
         }
         break;
+    default:
+        break;
     }
 
-    QGraphicsView::mousePressEvent(event);
+    TopinoAbstractView::mousePressEvent(event);
 }
 
 void ImageAnalysisView::mouseMoveEvent(QMouseEvent* event) {
@@ -167,16 +167,18 @@ void ImageAnalysisView::mouseMoveEvent(QMouseEvent* event) {
             }
         }
         break;
-    case tools::ruler:
+    case tools::rulerLine:
     case tools::inletCircle:
         if (event->buttons() == Qt::LeftButton) {
             if (rubberBand)
                 rubberBand->setDestPoint(event->pos());
         }
         break;
+    default:
+        break;
     }
 
-    QGraphicsView::mouseMoveEvent(event);
+    TopinoAbstractView::mouseMoveEvent(event);
 }
 
 void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
@@ -196,7 +198,7 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
             }
         }
         break;
-    case tools::ruler:
+    case tools::rulerLine:
         if (event->button() == Qt::LeftButton) {
             if (rubberBand) {
                 /* Create the actual tool, select it, and return to selection tool */
@@ -245,9 +247,11 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
             }
         }
         break;
+    default:
+        break;
     }
 
-    QGraphicsView::mouseReleaseEvent(event);
+    TopinoAbstractView::mouseReleaseEvent(event);
 }
 
 void ImageAnalysisView::wheelEvent(QWheelEvent *event) {
@@ -265,7 +269,7 @@ void ImageAnalysisView::wheelEvent(QWheelEvent *event) {
 bool ImageAnalysisView::viewportEvent(QEvent* event) {
     emit viewHasChanged();
 
-    return QGraphicsView::viewportEvent(event);
+    return TopinoAbstractView::viewportEvent(event);
 }
 
 void ImageAnalysisView::onSelectionChange() {
@@ -307,36 +311,6 @@ void ImageAnalysisView::onItemDataChanged(const TopinoGraphicsItem* item) {
     emit itemHasChanged(item->getItemid());
 }
 
-double ImageAnalysisView::getZoomFactor() const {
-    /* Use determinant of the transformation matrix as the zoom factor (determinant = scaling of the _area_) */
-    return transform().det();
-}
-
-void ImageAnalysisView::setZoomFactor(const double zoomTo) {
-    /* Zoom factor should be between 3.125% and 6400%. Due to double innaccuracies the check is actually less
-     * than 6500% (65.0) and greater than 3% (0.03). */
-    if ((zoomTo < 0.03) || (zoomTo > 65.0))
-        return;
-
-    /* New zoom factor over current zoom factor is the factor we need to scale the view; since we are using
-     * the area as the reference, the actual scale factor is the square root of the ratio! */
-    double scaleFactor = sqrt(zoomTo / getZoomFactor());
-    scale(scaleFactor, scaleFactor);
-
-    /* Adjust the scene, redraw the view, and tell everyone that the view has changed */
-    setSceneRect(inputImage->boundingRect());
-
-    //update();
-    emit viewHasChanged();
-}
-
-void ImageAnalysisView::zoomByFactor(const double factor) {
-    /* Technically the scale function allows simply to forward the factor; however, it scales by sides while
-     * factor is the scaling of the area; so, we just forward the factor to setZoomFactor, which also checks
-     * for the right range. */
-    setZoomFactor(getZoomFactor() * factor);
-}
-
 QRectF ImageAnalysisView::getFocusArea() const {
     const TopinoData &data = document.getData();
 
@@ -357,12 +331,11 @@ QRectF ImageAnalysisView::getFocusArea() const {
     return inputImage->boundingRect();
 }
 
-ImageAnalysisView::tools ImageAnalysisView::getCurrentTool() const {
-    return currentTool;
-}
+bool ImageAnalysisView::isToolSupported(const TopinoAbstractView::tools& value) const {
+    Q_UNUSED(value);
 
-void ImageAnalysisView::setCurrentTool(const ImageAnalysisView::tools& value) {
-    currentTool = value;
+    /* Support all tools at the moment */
+    return true;
 }
 
 void ImageAnalysisView::createToolsFromDocument() {

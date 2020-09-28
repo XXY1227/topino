@@ -101,7 +101,6 @@
    <addaction name="action_selection_tool"/>
    <addaction name="action_inlet_tool"/>
    <addaction name="action_ruler_tool"/>
-   <addaction name="action_angulagram"/>
   </widget>
   <widget class="QToolBar" name="zoomBar">
    <property name="windowTitle">
@@ -113,6 +112,9 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="action_inputimage"/>
+   <addaction name="action_angulagram"/>
+   <addaction name="separator"/>
    <addaction name="action_zoom_in"/>
    <addaction name="action_zoom_out"/>
    <addaction name="action_zoom_fit_in_window"/>
@@ -147,7 +149,7 @@
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
    <property name="windowTitle">
-    <string>View tools</string>
+    <string>Overview</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
@@ -979,6 +981,18 @@
     <string>Show and edit the angulagram</string>
    </property>
   </action>
+  <action name="action_inputimage">
+   <property name="icon">
+    <iconset resource="../topino.qrc">
+     <normaloff>:/ui/toolicons/image.png</normaloff>:/ui/toolicons/image.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Image</string>
+   </property>
+   <property name="toolTip">
+    <string>Show and edit input image</string>
+   </property>
+  </action>
   <actiongroup name="action_group_tools">
    <action name="action_selection_tool">
     <property name="checkable">
@@ -1282,6 +1296,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>action_inputimage</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolInputImage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onQuit()</slot>
@@ -1301,5 +1331,6 @@
   <slot>onToolSwitchImage()</slot>
   <slot>onToolResetImage()</slot>
   <slot>onToolAngulagram()</slot>
+  <slot>onToolInputImage()</slot>
  </slots>
 </ui>

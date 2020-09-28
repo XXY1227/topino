@@ -5,14 +5,13 @@
 #include <QLabel>
 #include <QStackedWidget>
 
-#include <QChartView>
-#include <QChart>
-#include <QLineSeries>
-
 #include "include/iobserver.h"
 #include "include/topinodocument.h"
+
 #include "include/imageanalysisview.h"
 #include "include/imageeditdialog.h"
+
+#include "include/angulagramview.h"
 
 namespace Ui {
 class MainWindow;
@@ -42,15 +41,16 @@ class MainWindow : public QMainWindow, public IObserver {
     void onAboutTopino();
 
     void onToolSelection() {
-        changeTool(ImageAnalysisView::selection);
+        changeTool(TopinoAbstractView::selection);
     }
     void onToolRuler() {
-        changeTool(ImageAnalysisView::ruler);
+        changeTool(TopinoAbstractView::rulerLine);
     }
     void onToolInletCircle() {
-        changeTool(ImageAnalysisView::inletCircle);
+        changeTool(TopinoAbstractView::inletCircle);
     }
 
+    void onToolInputImage();
     void onToolAngulagram();
 
     void onToolEditImage();
@@ -83,7 +83,7 @@ class MainWindow : public QMainWindow, public IObserver {
     TopinoDocument document;
     QStackedWidget viewManager;
     ImageAnalysisView imageView;
-    QtCharts::QChartView chartView;
+    AngulagramView angulagramView;
 
     /* Stuff for the mini/micro views on the top right corner */
     QGraphicsScene *miniScene = nullptr;
@@ -92,7 +92,10 @@ class MainWindow : public QMainWindow, public IObserver {
 
     QGraphicsScene *angulascene = nullptr;
 
-    void changeTool(ImageAnalysisView::tools tool);
+    void changeTool(TopinoAbstractView::tools tool);
+    void changeToView(const viewPages value);
+    TopinoAbstractView *getCurrentView();
+    viewPages getCurrentViewIndex() const;
 
     void updateObjectPage(objectPages page);
     void updateImagePage();

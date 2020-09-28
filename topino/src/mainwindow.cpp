@@ -4,7 +4,8 @@
 #include <QMessageBox>
 #include <QFileDialog>
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), imageView(this, document) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow),
+    imageView(this, document), angulagramView(this, document) {
     /* Basic layout/UI setup */
     ui->setupUi(this);
 
@@ -12,9 +13,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
      * the views themselves */
     setCentralWidget(&viewManager);
     viewManager.addWidget(&imageView);
-    viewManager.addWidget(&chartView);
-    chartView.setRenderHint(QPainter::Antialiasing);
-    chartView.setRubberBand(QtCharts::QChartView::RectangleRubberBand);
+    viewManager.addWidget(&angulagramView);
     viewManager.setCurrentIndex(viewPages::image);
 
     /* All tools are exclusive to select */
@@ -60,7 +59,7 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
     /* Events for the miniview */
     if (dynamic_cast<QGraphicsView*>(watched) && (watched == ui->miniView)) {
         /* Miniview: click mouse to change the view viewport */
-        if (event->type() == QEvent::MouseButtonPress) {
+        if ((event->type() == QEvent::MouseButtonPress) && (getCurrentViewIndex() == viewPages::image)) {
             QMouseEvent *mevent = dynamic_cast<QMouseEvent*>(event);
             imageView.centerOn(ui->miniView->mapToScene(mevent->pos()));
         }
@@ -105,7 +104,7 @@ void MainWindow::onViewHasChanged() {
     /* Update zoom level */
     zoomlabel.setText(QString("%1: %2%").arg(tr("Zoom")).arg(imageView.getZoomFactor()*100.0));
 
-    /* Set the view rectangle */
+    /* Set the view rectangle of the image view */
     QRectF viewport = imageView.getImageViewPoint();
     if (!viewport.contains(miniImage->boundingRect())) {
         miniRect->setRect(viewport);
@@ -114,20 +113,26 @@ void MainWindow::onViewHasChanged() {
     }
 
     /* Set the current tool based on the view */
-    switch(imageView.getCurrentTool()) {
-    case ImageAnalysisView::tools::selection:
+    switch(getCurrentView()->getCurrentTool()) {
+    case TopinoAbstractView::tools::selection:
         ui->action_selection_tool->setChecked(true);
         break;
-    case ImageAnalysisView::tools::ruler:
+    case TopinoAbstractView::tools::rulerLine:
         ui->action_ruler_tool->setChecked(true);
         break;
-    case ImageAnalysisView::tools::inletCircle:
+    case TopinoAbstractView::tools::inletCircle:
         ui->action_inlet_tool->setChecked(true);
+        break;
+    default:
         break;
     }
 }
 
 void MainWindow::onSelectionHasChanged() {
+    /* This is only for the image view */
+    if (getCurrentViewIndex() != viewPages::image)
+        return;
+
     int selitems = imageView.scene()->selectedItems().size();
 
     /* Nothing selected -> show general/image page */
@@ -181,8 +186,72 @@ void MainWindow::onItemHasChanged(int itemID) {
     onSelectionHasChanged();
 }
 
-void MainWindow::changeTool(ImageAnalysisView::tools tool) {
-    imageView.setCurrentTool(tool);
+void MainWindow::changeTool(TopinoAbstractView::tools tool) {
+    getCurrentView()->setCurrentTool(tool);
+}
+
+void MainWindow::changeToView(const viewPages value) {
+    /* Check if value is out of boundaries */
+    if (value >= viewPages::countView)
+        return;
+
+    /* Set the page in the view manager */
+    viewManager.setCurrentIndex(value);
+
+    /* Check the availability of tools for the respective view */
+    QAction *tools[TopinoAbstractView::tools::toolCount] = {
+        ui->action_selection_tool,
+        ui->action_ruler_tool,
+        ui->action_inlet_tool
+    };
+    for (int i = 0; i < TopinoAbstractView::tools::toolCount; ++i) {
+        tools[i]->setEnabled(getCurrentView()->isToolSupported(static_cast<TopinoAbstractView::tools>(i)));
+    }
+
+    /* Select the selection tool as standard */
+    getCurrentView()->setCurrentTool(TopinoAbstractView::tools::selection);
+
+    /* Page related stuff, e.g. show specific property pages,
+     * (re)calculate the angulagram, etc. */
+    switch(value) {
+    /* Angulagram page */
+    case viewPages::angulagram:
+        break;
+    /* Default is the image page */
+    case viewPages::image:
+    default:
+        onSelectionHasChanged();
+        break;
+    }
+
+    /* View has changed */
+    onViewHasChanged();
+}
+
+TopinoAbstractView* MainWindow::getCurrentView() {
+    /* Get current page from view manager widget */
+    viewPages value = getCurrentViewIndex();
+
+    /* Check if value is out of boundaries */
+    if (value >= viewPages::countView)
+        return nullptr;
+
+    /* Return the respective object */
+    switch(value) {
+    /* Image analysis page */
+    case viewPages::image:
+        return &imageView;
+    /* Angulagram page */
+    case viewPages::angulagram:
+        return &angulagramView;
+    /* Default is null pointer */
+    default:
+        return nullptr;
+    }
+}
+
+MainWindow::viewPages MainWindow::getCurrentViewIndex() const {
+    return static_cast<viewPages>(viewManager.currentIndex());
 }
 
 void MainWindow::updateObjectPage(MainWindow::objectPages page) {
@@ -288,10 +357,12 @@ void MainWindow::onNew() {
 
     /* Create an empty document, override the old one, reset the view, notify everyone */
     imageView.resetView();
+    changeToView(viewPages::image);
 
     document = TopinoDocument();
     document.addObserver(this);
     document.addObserver(&imageView);
+    document.addObserver(&angulagramView);
     document.notifyAllObserver();
 }
 
@@ -332,9 +403,12 @@ void MainWindow::onOpen() {
     /* Only override the open document if loading of the new document was successful; don't forget to reset
      * the view! */
     imageView.resetView();
+    changeToView(viewPages::image);
+
     document = newdoc;
     document.addObserver(this);
     document.addObserver(&imageView);
+    document.addObserver(&angulagramView);
     document.notifyAllObserver();
 
     /* Create objects from the document and set the document to saved state */
@@ -384,12 +458,15 @@ void MainWindow::onImportImage() {
         return;
     }
 
-    /* Modify data */
+    /* Modify data */    
     TopinoData data;
     document.getData(data);
-    data.setImage(img);
+    data.setImage(img);    
     document.setData(data);
     document.notifyAllObserver();
+
+    /* Change to default view */
+    changeToView(viewPages::image);
 }
 
 void MainWindow::onExportImage() {
@@ -433,28 +510,14 @@ void MainWindow::onAboutTopino() {
     QMessageBox::about(this, tr("About Topino"), aboutTopinoText);
 }
 
+void MainWindow::onToolInputImage() {
+    qDebug("Input image");
+    changeToView(viewPages::image);
+}
+
 void MainWindow::onToolAngulagram() {
     qDebug("Angulagram");
-    viewManager.setCurrentIndex(viewPages::angulagram);
-
-    QtCharts::QLineSeries *series = new QtCharts::QLineSeries();
-    series->append(0, 6);
-    series->append(2, 4);
-    series->append(3, 8);
-    series->append(7, 4);
-    series->append(10, 5);
-    *series << QPointF(11, 1) << QPointF(13, 3) << QPointF(17, 6) << QPointF(18, 3) << QPointF(20, 2);
-
-    /* Create the chart and set some options for axes, etc. */
-    QtCharts::QChart *chart = new QtCharts::QChart();
-    chart->legend()->hide();
-    chart->addSeries(series);
-    chart->createDefaultAxes();
-    chart->axisX()->setTitleText("Angle (°)");
-    chart->axisY()->setTitleText("Intensity (a.u.)");
-    chart->setTheme(QtCharts::QChart::ChartThemeDark);
-
-    chartView.setChart(chart);
+    changeToView(viewPages::angulagram);
 }
 
 void MainWindow::onToolEditImage() {

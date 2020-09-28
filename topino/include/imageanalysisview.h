@@ -8,6 +8,8 @@
 #include <QGraphicsPixmapItem>
 #include <QWheelEvent>
 
+#include "include/topinoabstractview.h"
+
 #include "include/topinorubberband.h"
 #include "include/linerubberband.h"
 #include "include/circlerubberband.h"
@@ -19,7 +21,7 @@
 #include "include/rulertoolitem.h"
 #include "include/polarcircletoolitem.h"
 
-class ImageAnalysisView : public QGraphicsView, public IObserver {
+class ImageAnalysisView : public TopinoAbstractView {
     Q_OBJECT
 
   public:
@@ -45,20 +47,9 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     void onItemPosChanged(const TopinoGraphicsItem* item);
     void onItemDataChanged(const TopinoGraphicsItem* item);
 
-    double getZoomFactor() const;
-    void setZoomFactor(const double zoomTo);
-    void zoomByFactor(const double factor);
-
     QRectF getFocusArea() const;
 
-    enum tools {
-        selection = 0,
-        ruler = 1,
-        inletCircle = 2
-    };
-
-    ImageAnalysisView::tools getCurrentTool() const;
-    void setCurrentTool(const ImageAnalysisView::tools& value);
+    bool isToolSupported(const TopinoAbstractView::tools& value) const;
 
     void createToolsFromDocument();
 
@@ -71,9 +62,6 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     void itemHasChanged(int itemID);
 
   private:
-    /* Reference to the document to get/set data */
-    TopinoDocument &document;
-
     /* The basic scene object + the image at the bottom */
     QGraphicsScene *imagescene = nullptr;
     bool sourceImageShown = true;
@@ -86,7 +74,6 @@ class ImageAnalysisView : public QGraphicsView, public IObserver {
     TopinoRubberBand *rubberBand = nullptr;
 
     /* Tool data and functions */
-    ImageAnalysisView::tools currentTool = ImageAnalysisView::tools::selection;
     InputImageToolItem* inputImage = nullptr;
 
     InputImageToolItem* createInputImageToolItem(const QPixmap& pixmap);
