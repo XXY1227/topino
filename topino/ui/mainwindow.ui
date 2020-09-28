@@ -27,22 +27,22 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="action_New"/>
-    <addaction name="action_Open"/>
-    <addaction name="action_Save"/>
-    <addaction name="action_Saveas"/>
+    <addaction name="action_new"/>
+    <addaction name="action_open"/>
+    <addaction name="action_save"/>
+    <addaction name="action_saveas"/>
     <addaction name="separator"/>
-    <addaction name="action_Import_image"/>
-    <addaction name="action_Export_image"/>
+    <addaction name="action_import_image"/>
+    <addaction name="action_export_image"/>
     <addaction name="separator"/>
-    <addaction name="action_Quit"/>
+    <addaction name="action_quit"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
      <string>&amp;Help</string>
     </property>
-    <addaction name="action_AboutQt"/>
-    <addaction name="action_AboutTopino"/>
+    <addaction name="action_about_Qt"/>
+    <addaction name="action_about_Topino"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
@@ -73,10 +73,10 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_New"/>
-   <addaction name="action_Open"/>
-   <addaction name="action_Save"/>
-   <addaction name="action_Quit"/>
+   <addaction name="action_new"/>
+   <addaction name="action_open"/>
+   <addaction name="action_save"/>
+   <addaction name="action_quit"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="toolbox">
@@ -101,6 +101,7 @@
    <addaction name="action_selection_tool"/>
    <addaction name="action_inlet_tool"/>
    <addaction name="action_ruler_tool"/>
+   <addaction name="action_angulagram"/>
   </widget>
   <widget class="QToolBar" name="zoomBar">
    <property name="windowTitle">
@@ -119,7 +120,7 @@
   </widget>
   <widget class="QDockWidget" name="dockViewTools">
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -127,13 +128,13 @@
    <property name="minimumSize">
     <size>
      <width>255</width>
-     <height>195</height>
+     <height>200</height>
     </size>
    </property>
    <property name="maximumSize">
     <size>
      <width>255</width>
-     <height>195</height>
+     <height>200</height>
     </size>
    </property>
    <property name="floating">
@@ -152,107 +153,23 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
     <property name="autoFillBackground">
      <bool>false</bool>
     </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <property name="leftMargin">
-      <number>5</number>
-     </property>
-     <property name="topMargin">
-      <number>5</number>
-     </property>
-     <property name="rightMargin">
-      <number>5</number>
-     </property>
-     <property name="bottomMargin">
-      <number>5</number>
-     </property>
-     <property name="spacing">
-      <number>5</number>
-     </property>
-     <item row="1" column="1">
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <property name="spacing">
-        <number>0</number>
-       </property>
-       <item>
-        <widget class="QToolButton" name="toolButton">
-         <property name="text">
-          <string>...</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="toolButton_2">
-         <property name="text">
-          <string>...</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="toolButton_3">
-         <property name="text">
-          <string>...</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item row="3" column="1">
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="0" column="1">
-      <widget class="QGraphicsView" name="microView">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>1</horstretch>
-         <verstretch>1</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>80</width>
-         <height>80</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>80</width>
-         <height>80</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0" rowspan="4">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
       <widget class="QGraphicsView" name="miniView">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>3</horstretch>
+         <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>160</width>
-         <height>160</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>160</width>
-         <height>160</height>
-        </size>
        </property>
        <property name="contextMenuPolicy">
         <enum>Qt::DefaultContextMenu</enum>
@@ -926,13 +843,11 @@
       <zorder>propRulerLength</zorder>
       <zorder>label_9</zorder>
       <zorder>label_7</zorder>
-      <zorder>layoutWidget</zorder>
-      <zorder>verticalSpacer_7</zorder>
      </widget>
     </widget>
    </widget>
   </widget>
-  <action name="action_New">
+  <action name="action_new">
    <property name="icon">
     <iconset theme="document-new">
      <normaloff>.</normaloff>.</iconset>
@@ -944,7 +859,7 @@
     <string>Ctrl+N</string>
    </property>
   </action>
-  <action name="action_Open">
+  <action name="action_open">
    <property name="icon">
     <iconset theme="document-open">
      <normaloff>.</normaloff>.</iconset>
@@ -956,7 +871,7 @@
     <string>Ctrl+O</string>
    </property>
   </action>
-  <action name="action_Save">
+  <action name="action_save">
    <property name="icon">
     <iconset theme="document-save">
      <normaloff>.</normaloff>.</iconset>
@@ -968,7 +883,7 @@
     <string>Ctrl+S</string>
    </property>
   </action>
-  <action name="action_Saveas">
+  <action name="action_saveas">
    <property name="text">
     <string>Save &amp;as...</string>
    </property>
@@ -976,7 +891,7 @@
     <string>Ctrl+Alt+S</string>
    </property>
   </action>
-  <action name="action_Quit">
+  <action name="action_quit">
    <property name="icon">
     <iconset theme="application-exit">
      <normaloff>.</normaloff>.</iconset>
@@ -988,7 +903,7 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="action_AboutQt">
+  <action name="action_about_Qt">
    <property name="icon">
     <iconset theme="help-info">
      <normaloff>.</normaloff>.</iconset>
@@ -997,7 +912,7 @@
     <string>About Qt...</string>
    </property>
   </action>
-  <action name="action_AboutTopino">
+  <action name="action_about_Topino">
    <property name="icon">
     <iconset theme="help-info">
      <normaloff>.</normaloff>.</iconset>
@@ -1006,12 +921,12 @@
     <string>About Topino...</string>
    </property>
   </action>
-  <action name="action_Import_image">
+  <action name="action_import_image">
    <property name="text">
     <string>&amp;Import image...</string>
    </property>
   </action>
-  <action name="action_Export_image">
+  <action name="action_export_image">
    <property name="text">
     <string>&amp;Export image...</string>
    </property>
@@ -1050,6 +965,18 @@
    </property>
    <property name="text">
     <string>O&amp;riginal size</string>
+   </property>
+  </action>
+  <action name="action_angulagram">
+   <property name="icon">
+    <iconset resource="../topino.qrc">
+     <normaloff>:/ui/toolicons/angulagram.png</normaloff>:/ui/toolicons/angulagram.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Angulagram</string>
+   </property>
+   <property name="toolTip">
+    <string>Show and edit the angulagram</string>
    </property>
   </action>
   <actiongroup name="action_group_tools">
@@ -1100,7 +1027,7 @@
  </resources>
  <connections>
   <connection>
-   <sender>action_Quit</sender>
+   <sender>action_quit</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>onQuit()</slot>
@@ -1116,7 +1043,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_AboutQt</sender>
+   <sender>action_about_Qt</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>onAboutQt()</slot>
@@ -1132,7 +1059,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_AboutTopino</sender>
+   <sender>action_about_Topino</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>onAboutTopino()</slot>
@@ -1148,7 +1075,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_Open</sender>
+   <sender>action_open</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>onOpen()</slot>
@@ -1164,7 +1091,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_New</sender>
+   <sender>action_new</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>onNew()</slot>
@@ -1180,7 +1107,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_Save</sender>
+   <sender>action_save</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>onSave()</slot>
@@ -1196,7 +1123,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_Saveas</sender>
+   <sender>action_saveas</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>onSaveAs()</slot>
@@ -1212,7 +1139,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_Import_image</sender>
+   <sender>action_import_image</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>onImportImage()</slot>
@@ -1228,7 +1155,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_Export_image</sender>
+   <sender>action_export_image</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>onExportImage()</slot>
@@ -1339,6 +1266,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>action_angulagram</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolAngulagram()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onQuit()</slot>
@@ -1357,5 +1300,6 @@
   <slot>onToolEditImage()</slot>
   <slot>onToolSwitchImage()</slot>
   <slot>onToolResetImage()</slot>
+  <slot>onToolAngulagram()</slot>
  </slots>
 </ui>

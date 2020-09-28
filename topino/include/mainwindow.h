@@ -3,6 +3,11 @@
 
 #include <QMainWindow>
 #include <QLabel>
+#include <QStackedWidget>
+
+#include <QChartView>
+#include <QChart>
+#include <QLineSeries>
 
 #include "include/iobserver.h"
 #include "include/topinodocument.h"
@@ -46,6 +51,8 @@ class MainWindow : public QMainWindow, public IObserver {
         changeTool(ImageAnalysisView::inletCircle);
     }
 
+    void onToolAngulagram();
+
     void onToolEditImage();
     void onToolSwitchImage();
     void onToolResetImage();
@@ -59,7 +66,14 @@ class MainWindow : public QMainWindow, public IObserver {
         general = 0,
         multiple = 1,
         ruler = 2,
-        inlet = 3
+        inlet = 3,
+        countPropPages = 4
+    };
+
+    enum viewPages {
+        image = 0,
+        angulagram = 1,
+        countView = 2
     };
 
     Ui::MainWindow *ui;
@@ -67,7 +81,9 @@ class MainWindow : public QMainWindow, public IObserver {
     QLabel zoomlabel;
 
     TopinoDocument document;
-    ImageAnalysisView view;
+    QStackedWidget viewManager;
+    ImageAnalysisView imageView;
+    QtCharts::QChartView chartView;
 
     /* Stuff for the mini/micro views on the top right corner */
     QGraphicsScene *miniScene = nullptr;

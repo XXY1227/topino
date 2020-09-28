@@ -37,5 +37,6 @@
         <file>ui/toolicons/image_edit.png</file>
         <file>ui/toolicons/image_switch.png</file>
         <file>ui/toolicons/image_reset.png</file>
+        <file>ui/toolicons/angulagram.png</file>
     </qresource>
 </RCC>

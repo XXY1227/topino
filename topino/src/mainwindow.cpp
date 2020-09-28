@@ -4,10 +4,18 @@
 #include <QMessageBox>
 #include <QFileDialog>
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), view(this, document) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), imageView(this, document) {
     /* Basic layout/UI setup */
     ui->setupUi(this);
-    setCentralWidget(&view);
+
+    /* Set up our "view manager" (a simple stacked widget that allows to switch between all views) and
+     * the views themselves */
+    setCentralWidget(&viewManager);
+    viewManager.addWidget(&imageView);
+    viewManager.addWidget(&chartView);
+    chartView.setRenderHint(QPainter::Antialiasing);
+    chartView.setRubberBand(QtCharts::QChartView::RectangleRubberBand);
+    viewManager.setCurrentIndex(viewPages::image);
 
     /* All tools are exclusive to select */
     ui->action_group_tools->setExclusive(true);
@@ -31,20 +39,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->miniView->setScene(miniScene);
     ui->miniView->installEventFilter(this);
 
-    /* Prepare the angulagram micro view */
-    angulascene = new QGraphicsScene(ui->microView->contentsRect(), ui->microView);
-
     /* The document is a reference to the model; here, all observers (mainwindow and view) are added, so that
      * they get notified if the model changes */
     document.addObserver(this);
-    document.addObserver(&view);
+    document.addObserver(&imageView);
     document.notifyAllObserver();
 
     /* If the view has been updated (e.g. zoomed in or the like) we need to know this, too. Here we implemeted
      * a signal-slot pair for this case */
-    connect(&view, &ImageAnalysisView::viewHasChanged, this, &MainWindow::onViewHasChanged);
-    connect(&view, &ImageAnalysisView::selectionHasChanged, this, &MainWindow::onSelectionHasChanged);
-    connect(&view, &ImageAnalysisView::itemHasChanged, this, &MainWindow::onItemHasChanged);
+    connect(&imageView, &ImageAnalysisView::viewHasChanged, this, &MainWindow::onViewHasChanged);
+    connect(&imageView, &ImageAnalysisView::selectionHasChanged, this, &MainWindow::onSelectionHasChanged);
+    connect(&imageView, &ImageAnalysisView::itemHasChanged, this, &MainWindow::onItemHasChanged);
 }
 
 MainWindow::~MainWindow() {
@@ -57,7 +62,7 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
         /* Miniview: click mouse to change the view viewport */
         if (event->type() == QEvent::MouseButtonPress) {
             QMouseEvent *mevent = dynamic_cast<QMouseEvent*>(event);
-            view.centerOn(ui->miniView->mapToScene(mevent->pos()));
+            imageView.centerOn(ui->miniView->mapToScene(mevent->pos()));
         }
     }
 
@@ -98,10 +103,10 @@ void MainWindow::modelHasChanged() {
 
 void MainWindow::onViewHasChanged() {
     /* Update zoom level */
-    zoomlabel.setText(QString("%1: %2%").arg(tr("Zoom")).arg(view.getZoomFactor()*100.0));
+    zoomlabel.setText(QString("%1: %2%").arg(tr("Zoom")).arg(imageView.getZoomFactor()*100.0));
 
     /* Set the view rectangle */
-    QRectF viewport = view.getImageViewPoint();
+    QRectF viewport = imageView.getImageViewPoint();
     if (!viewport.contains(miniImage->boundingRect())) {
         miniRect->setRect(viewport);
     } else {
@@ -109,7 +114,7 @@ void MainWindow::onViewHasChanged() {
     }
 
     /* Set the current tool based on the view */
-    switch(view.getCurrentTool()) {
+    switch(imageView.getCurrentTool()) {
     case ImageAnalysisView::tools::selection:
         ui->action_selection_tool->setChecked(true);
         break;
@@ -123,7 +128,7 @@ void MainWindow::onViewHasChanged() {
 }
 
 void MainWindow::onSelectionHasChanged() {
-    int selitems = view.scene()->selectedItems().size();
+    int selitems = imageView.scene()->selectedItems().size();
 
     /* Nothing selected -> show general/image page */
     if (selitems == 0) {
@@ -135,7 +140,7 @@ void MainWindow::onSelectionHasChanged() {
     if (selitems == 1) {
         /* This is not really the best OO implementation, but straightforward; in future it might be replaced
          * by visitor pattern or the like */
-        QGraphicsItem *widget = view.scene()->selectedItems()[0];
+        QGraphicsItem *widget = imageView.scene()->selectedItems()[0];
         TopinoGraphicsItem *item = dynamic_cast<TopinoGraphicsItem*>(widget);
 
         /* No graphics item selected -> show general page */
@@ -177,7 +182,7 @@ void MainWindow::onItemHasChanged(int itemID) {
 }
 
 void MainWindow::changeTool(ImageAnalysisView::tools tool) {
-    view.setCurrentTool(tool);
+    imageView.setCurrentTool(tool);
 }
 
 void MainWindow::updateObjectPage(MainWindow::objectPages page) {
@@ -193,7 +198,7 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
         /* Second page: multiple objects of multiple types selected; we do not test here, just update */
     {
         /* More items are selected: check all selected items and count the different types  */
-        QList<QGraphicsItem *> items = view.scene()->selectedItems();
+        QList<QGraphicsItem *> items = imageView.scene()->selectedItems();
         int counter[TopinoGraphicsItem::itemtype::count] = {0};
         for (auto iter = items.begin(); iter != items.end(); ++iter) {
             TopinoGraphicsItem *item = dynamic_cast<TopinoGraphicsItem*>(*iter);
@@ -209,13 +214,13 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
         }
 
         /* Total amount of items selected */
-        ui->propObjectsAmount->setText(QString(tr("%1 objects selected")).arg(view.scene()->selectedItems().size()));
+        ui->propObjectsAmount->setText(QString(tr("%1 objects selected")).arg(imageView.scene()->selectedItems().size()));
     }
     break;
     case ruler:
         /* Third page: ruler properties */
-        if (view.scene()->selectedItems().size() == 1) {
-            QGraphicsItem *widget = view.scene()->selectedItems()[0];
+        if (imageView.scene()->selectedItems().size() == 1) {
+            QGraphicsItem *widget = imageView.scene()->selectedItems()[0];
             RulerToolItem *ruler = dynamic_cast<RulerToolItem*>(widget);
 
             if (ruler != nullptr) {
@@ -282,11 +287,11 @@ void MainWindow::onNew() {
     }
 
     /* Create an empty document, override the old one, reset the view, notify everyone */
-    view.resetView();
+    imageView.resetView();
 
     document = TopinoDocument();
     document.addObserver(this);
-    document.addObserver(&view);
+    document.addObserver(&imageView);
     document.notifyAllObserver();
 }
 
@@ -326,14 +331,14 @@ void MainWindow::onOpen() {
 
     /* Only override the open document if loading of the new document was successful; don't forget to reset
      * the view! */
-    view.resetView();
+    imageView.resetView();
     document = newdoc;
     document.addObserver(this);
-    document.addObserver(&view);
+    document.addObserver(&imageView);
     document.notifyAllObserver();
 
     /* Create objects from the document and set the document to saved state */
-    view.createToolsFromDocument();
+    imageView.createToolsFromDocument();
     document.saveChanges();
 }
 
@@ -403,29 +408,53 @@ void MainWindow::onAboutQt() {
 void MainWindow::onAboutTopino() {
     /* About text of Topino */
     const QString aboutTopinoText = tr(
-                "<p><b>Topino 1.0</b></p>"
-                "<p><b>Copyright (C) 2020 by Sven Kochmann</b></p>"
-                "<p>Topino is an analysis tool for continuous flow electrophoresis (CFE). It provides an easy "
-                "to use graphical user-interface (GUI) for assessing CFE images by angulagrams [1].</p>"
-                "<p>Topino was developed by <b>Sven Kochmann</b> in the research group of <b>Prof. Sergey N. "
-                "Krylov</b>. It is using the Qt framework and, thus, is available for all major desktop operating "
-                "systems (Linux/Unix, MacOS, Windows). It is open-source software licensed under BSD-3-Clause "
-                "License; it's source code can be found on <a href=\"https://github.com/Schallaven/topino/\">"
-                "Github</a>.</p>"
-                "<p>The development of Topino was supported by a grant from Natural Sciences and Engineering "
-                "Research Council of Canada to Sergey N. Krylov (grant number STPG-P 521331-2018). Please see "
-                "<a href=\"https://www.yorku.ca/skrylov/\">Krylov group page</a> for more information on CFE "
-                "research.</p>"
-                "<p>References:</p>"
-                "<style>ol {-qt-list-number-prefix: '['; -qt-list-number-suffix: ']'; -qt-list-indent: 1;}</style>"
-                "<ol>"
-                "<li>Kochmann <i>et al.</i>, <i>Anal. Chem.</i> <b>2018</b>, 90, 9504–9509. "
-                "<a href=\"https://doi.org/10.1021/acs.analchem.8b02186\">Link</a>.</li>"
-                "</ol>"
-                );
+                                        "<p><b>Topino 1.0</b></p>"
+                                        "<p><b>Copyright (C) 2020 by Sven Kochmann</b></p>"
+                                        "<p>Topino is an analysis tool for continuous flow electrophoresis (CFE). It provides an easy "
+                                        "to use graphical user-interface (GUI) for assessing CFE images by angulagrams [1].</p>"
+                                        "<p>Topino was developed by <b>Sven Kochmann</b> in the research group of <b>Prof. Sergey N. "
+                                        "Krylov</b>. It is using the Qt framework and, thus, is available for all major desktop operating "
+                                        "systems (Linux/Unix, MacOS, Windows). It is open-source software licensed under BSD-3-Clause "
+                                        "License; it's source code can be found on <a href=\"https://github.com/Schallaven/topino/\">"
+                                        "Github</a>.</p>"
+                                        "<p>The development of Topino was supported by a grant from Natural Sciences and Engineering "
+                                        "Research Council of Canada to Sergey N. Krylov (grant number STPG-P 521331-2018). Please see "
+                                        "<a href=\"https://www.yorku.ca/skrylov/\">Krylov group page</a> for more information on CFE "
+                                        "research.</p>"
+                                        "<p>References:</p>"
+                                        "<style>ol {-qt-list-number-prefix: '['; -qt-list-number-suffix: ']'; -qt-list-indent: 1;}</style>"
+                                        "<ol>"
+                                        "<li>Kochmann <i>et al.</i>, <i>Anal. Chem.</i> <b>2018</b>, 90, 9504–9509. "
+                                        "<a href=\"https://doi.org/10.1021/acs.analchem.8b02186\">Link</a>.</li>"
+                                        "</ol>"
+                                    );
 
     /* Present to user */
     QMessageBox::about(this, tr("About Topino"), aboutTopinoText);
+}
+
+void MainWindow::onToolAngulagram() {
+    qDebug("Angulagram");
+    viewManager.setCurrentIndex(viewPages::angulagram);
+
+    QtCharts::QLineSeries *series = new QtCharts::QLineSeries();
+    series->append(0, 6);
+    series->append(2, 4);
+    series->append(3, 8);
+    series->append(7, 4);
+    series->append(10, 5);
+    *series << QPointF(11, 1) << QPointF(13, 3) << QPointF(17, 6) << QPointF(18, 3) << QPointF(20, 2);
+
+    /* Create the chart and set some options for axes, etc. */
+    QtCharts::QChart *chart = new QtCharts::QChart();
+    chart->legend()->hide();
+    chart->addSeries(series);
+    chart->createDefaultAxes();
+    chart->axisX()->setTitleText("Angle (°)");
+    chart->axisY()->setTitleText("Intensity (a.u.)");
+    chart->setTheme(QtCharts::QChart::ChartThemeDark);
+
+    chartView.setChart(chart);
 }
 
 void MainWindow::onToolEditImage() {
@@ -441,7 +470,7 @@ void MainWindow::onToolEditImage() {
     QImage image = data.getImage();
 
     /* The rect can technically be OUTSIDE of the image, if that is the case, adjust */
-    QRect rect = view.getFocusArea().toRect();
+    QRect rect = imageView.getFocusArea().toRect();
     rect.setLeft(rect.left() < 0 ? 0 : rect.left());
     rect.setTop(rect.top() < 0 ? 0 : rect.top());
     rect.setRight(rect.right() > image.width() ? image.width()-1 : rect.right());
@@ -470,7 +499,7 @@ void MainWindow::onToolEditImage() {
         data.processImage();
 
         /* Write back the data; set the view to show the processed image */
-        view.showSourceImage(false);
+        imageView.showSourceImage(false);
         document.setData(data);
 
         /* Update the image page */
@@ -480,7 +509,7 @@ void MainWindow::onToolEditImage() {
 
 void MainWindow::onToolSwitchImage() {
     /* Swap processed and source image */
-    view.showSourceImage(!view.isSourceImageShown());
+    imageView.showSourceImage(!imageView.isSourceImageShown());
 }
 
 void MainWindow::onToolResetImage() {
@@ -491,7 +520,7 @@ void MainWindow::onToolResetImage() {
     data.resetProcessing();
 
     /* Write back the data; set the view to show the source image */
-    view.showSourceImage(true);
+    imageView.showSourceImage(true);
     document.setData(data);
 
     /* Update the image page */
