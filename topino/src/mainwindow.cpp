@@ -25,8 +25,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->zoomBar->addWidget(&zoomlabel);
 
     /* Prepare all things for the object properties */
-    ui->propertiesPages->setCurrentIndex(objectPages::general);
-    updateObjectPage(objectPages::general);
+    ui->propertiesPages->setCurrentIndex(objectPages::imageProps);
+    updateObjectPage(objectPages::imageProps);
 
     /* Prepare the thumbnail miniview */
     miniImage = new QGraphicsPixmapItem();
@@ -76,7 +76,7 @@ void MainWindow::modelHasChanged() {
     setWindowTitle(newtitle);
 
     /* Update the general page of the object properties dock widget */
-    updateObjectPage(objectPages::general);
+    updateObjectPage(objectPages::imageProps);
 
     /* Set image for the mini and micro view */
     miniImage->setPixmap(QPixmap());
@@ -137,7 +137,7 @@ void MainWindow::onSelectionHasChanged() {
 
     /* Nothing selected -> show general/image page */
     if (selitems == 0) {
-        ui->propertiesPages->setCurrentIndex(objectPages::general);
+        ui->propertiesPages->setCurrentIndex(objectPages::imageProps);
         return;
     }
 
@@ -150,18 +150,18 @@ void MainWindow::onSelectionHasChanged() {
 
         /* No graphics item selected -> show general page */
         if (item == nullptr) {
-            ui->propertiesPages->setCurrentIndex(objectPages::general);
+            ui->propertiesPages->setCurrentIndex(objectPages::imageProps);
             return;
         }
 
         /* Check item type; default is again the general/image page */
-        objectPages selectPage = objectPages::general;
+        objectPages selectPage = objectPages::imageProps;
         switch(item->getItemType()) {
         case TopinoGraphicsItem::itemtype::ruler:
-            selectPage = objectPages::ruler;
+            selectPage = objectPages::rulerProps;
             break;
         case TopinoGraphicsItem::itemtype::inlet:
-            selectPage = objectPages::inlet;
+            selectPage = objectPages::inletProps;
             break;
         default:
             break;
@@ -176,8 +176,8 @@ void MainWindow::onSelectionHasChanged() {
 
     /* More items are selected; in this case, select the multiple page
      * and change the data there */
-    updateObjectPage(objectPages::multiple);
-    ui->propertiesPages->setCurrentIndex(objectPages::multiple);
+    updateObjectPage(objectPages::multipleProps);
+    ui->propertiesPages->setCurrentIndex(objectPages::multipleProps);
 }
 
 void MainWindow::onItemHasChanged(int itemID) {
@@ -259,11 +259,11 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
 
     /* This function updates the information on the respective page of the object properties dock widget */
     switch (page) {
-    case general:
+    case imageProps:
         /* First page: general document properties, image sizes, etc. */
         updateImagePage();
         break;
-    case multiple:
+    case multipleProps:
         /* Second page: multiple objects of multiple types selected; we do not test here, just update */
     {
         /* More items are selected: check all selected items and count the different types  */
@@ -286,7 +286,7 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
         ui->propObjectsAmount->setText(QString(tr("%1 objects selected")).arg(imageView.scene()->selectedItems().size()));
     }
     break;
-    case ruler:
+    case rulerProps:
         /* Third page: ruler properties */
         if (imageView.scene()->selectedItems().size() == 1) {
             QGraphicsItem *widget = imageView.scene()->selectedItems()[0];
@@ -302,8 +302,32 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
             }
         }
         break;
-    case inlet:
+    case inletProps:
         /* Fourth page: inlet properties */
+        if (imageView.scene()->selectedItems().size() == 1) {
+            QGraphicsItem *widget = imageView.scene()->selectedItems()[0];
+            PolarCircleToolItem *inlet = dynamic_cast<PolarCircleToolItem*>(widget);
+
+            if (inlet != nullptr) {
+                /* Position and inner radius */
+                QPoint pos = inlet->mapToScene(inlet->getOrigin().toPoint()).toPoint();
+                ui->propInletPos->setText(QString("%1, %2").arg(pos.x()).arg(pos.y()));
+                ui->propInletInnerRadius->setText(QString("%1 pixel").arg(inlet->getInnerRadius()));
+
+                /* Check for main inlet data */
+                if (document.getData().getMainInletID() == inlet->getItemid()) {
+                    ui->propInletRefAngle->setText(QString("%1°").arg(inlet->getZeroAngle()));
+                    ui->propInletOuterRadius->setText(QString("%1 pixel").arg(inlet->getOuterRadius()));
+                    ui->propInletAngleRange->setText(QString("%1° – %2°").arg(inlet->getMinAngle()).arg(inlet->getMaxAngle()));
+                    ui->propInletSector->setText(QString("%1 / %2°").arg(inlet->getSegments()).arg(inlet->getDiffAngle()));
+                } else {
+                    ui->propInletRefAngle->setText("-");
+                    ui->propInletOuterRadius->setText("-");
+                    ui->propInletAngleRange->setText("-");
+                    ui->propInletSector->setText("-");
+                }
+            }
+        }
         break;
     default:
         break;
@@ -458,10 +482,10 @@ void MainWindow::onImportImage() {
         return;
     }
 
-    /* Modify data */    
+    /* Modify data */
     TopinoData data;
     document.getData(data);
-    data.setImage(img);    
+    data.setImage(img);
     document.setData(data);
     document.notifyAllObserver();
 
@@ -589,5 +613,6 @@ void MainWindow::onToolResetImage() {
     /* Update the image page */
     updateImagePage();
 }
+
 
 

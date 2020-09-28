@@ -63,11 +63,12 @@ class MainWindow : public QMainWindow, public IObserver {
 
   private:
     enum objectPages {
-        general = 0,
-        multiple = 1,
-        ruler = 2,
-        inlet = 3,
-        countPropPages = 4
+        imageProps = 0,
+        multipleProps = 1,
+        rulerProps = 2,
+        inletProps = 3,
+        angulagramProps = 4,
+        countPropPages = 5
     };
 
     enum viewPages {
