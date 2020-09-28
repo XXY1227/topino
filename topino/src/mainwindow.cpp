@@ -216,6 +216,8 @@ void MainWindow::changeToView(const viewPages value) {
     switch(value) {
     /* Angulagram page */
     case viewPages::angulagram:
+        updateObjectPage(objectPages::angulagramProps);
+        ui->propertiesPages->setCurrentIndex(objectPages::angulagramProps);
         break;
     /* Default is the image page */
     case viewPages::image:
@@ -328,6 +330,9 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
                 }
             }
         }
+        break;
+    case angulagramProps:
+        /* Fifth page: angulagram properties */
         break;
     default:
         break;
