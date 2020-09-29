@@ -22,13 +22,24 @@ AngulagramView::AngulagramView(QWidget* parent, TopinoDocument& doc) : TopinoAbs
     series->append(10, 5);
     *series << QPointF(11, 1) << QPointF(13, 3) << QPointF(17, 6) << QPointF(18, 3) << QPointF(20, 2);
 
+    /* Create a new chart and set the theme; important: the theme has to be set BEFORE everything else,
+     * otherwise it will overwrite font sizes, etc. */
     chart = new QtCharts::QChart();
+    chart->setTheme(QtCharts::QChart::ChartThemeDark);
     chart->legend()->hide();
     chart->addSeries(series);
     chart->createDefaultAxes();
     chart->axisX()->setTitleText("Angle (°)");
     chart->axisY()->setTitleText("Intensity (a.u.)");
-    chart->setTheme(QtCharts::QChart::ChartThemeDark);
+
+    QFont font;
+    font.setPixelSize(36);
+    chart->axisX()->setTitleFont(font);
+    chart->axisY()->setTitleFont(font);
+
+    font.setPixelSize(22);
+    chart->axisX()->setLabelsFont(font);
+    chart->axisY()->setLabelsFont(font);
 
     chartScene->addItem(chart);
 }
@@ -37,6 +48,37 @@ AngulagramView::~AngulagramView() {
 }
 
 void AngulagramView::modelHasChanged() {
+    /* Remove the old series and get the new one from the data */
+    chart->removeAllSeries();
+
+    QtCharts::QLineSeries *series = new QtCharts::QLineSeries(chart);
+    QVector<QPointF> dataPoints = document.getData().getAngulagramPoints();
+    for (auto iter = dataPoints.begin(); iter != dataPoints.end(); ++iter) {
+        qDebug("Add point %.1f %.1f", iter->x(), iter->y());
+        series->append(iter->x(), iter->y());
+    }
+
+    chart->addSeries(series);
+
+    /* Reset the axes ranges; it is important to create new axes here for the new data by
+     * calling createDefaultAxes() - otherwise the data will be shown at the wrong positions. */
+    chart->createDefaultAxes();
+    chart->axisX()->setRange(document.getData().getCoordMinAngle(), document.getData().getCoordMaxAngle());
+    /* TODO: support relative intensities */
+    //double max = *std::max_element(dataPoints.constBegin(), dataPoints.constEnd());
+    //chart->axisY()->setRange(0.0, 1.0);
+
+    chart->axisX()->setTitleText("Angle (°)");
+    chart->axisY()->setTitleText("Intensity (a.u.)");
+
+    QFont font;
+    font.setPixelSize(36);
+    chart->axisX()->setTitleFont(font);
+    chart->axisY()->setTitleFont(font);
+
+    font.setPixelSize(22);
+    chart->axisX()->setLabelsFont(font);
+    chart->axisY()->setLabelsFont(font);
 }
 
 bool AngulagramView::isToolSupported(const TopinoAbstractView::tools& value) const {

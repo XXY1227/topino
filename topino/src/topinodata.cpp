@@ -9,8 +9,16 @@ TopinoData::TopinoData() {
     mainInletID = 0;
     neutralAngle = -90;
     minAngle = -30;
-    maxAngle = +30;
+    maxAngle = +30;    
+    outerRadius = 120;
     counterClockwise = false;
+
+    angulagramPoints.append(QPointF(-10.0, 0.0));
+    angulagramPoints.append(QPointF(-5.0, 5.0));
+    angulagramPoints.append(QPointF(0.0, 7.3));
+    angulagramPoints.append(QPointF(5.0, 3.0));
+    angulagramPoints.append(QPointF(10.0, 1.0));
+    angulagramPoints.append(QPointF(15.0, 0.0));
 }
 
 TopinoData::~TopinoData() {
@@ -201,6 +209,8 @@ TopinoData::ParsingError TopinoData::loadCoordinateObject(QXmlStreamReader& xml)
             minAngle = content.toInt();
         } else if (xml.name() == "maxAngle") {
             maxAngle = content.toInt();
+        } else if (xml.name() == "outerRadius") {
+            outerRadius = content.toInt();
         } else if (xml.name() == "counterClockwise") {
             counterClockwise = (content.compare("true") == 0);
         } else {
@@ -219,6 +229,7 @@ void TopinoData::saveCoordinateObject(QXmlStreamWriter& xml) {
     xml.writeTextElement("neutralAngle", QString::number(neutralAngle));
     xml.writeTextElement("minAngle", QString::number(minAngle));
     xml.writeTextElement("maxAngle", QString::number(maxAngle));
+    xml.writeTextElement("outerRadius", QString::number(outerRadius));
     xml.writeTextElement("counterClockwise", counterClockwise ? "true" : "false");
 
     xml.writeEndElement();
@@ -435,6 +446,102 @@ void TopinoData::resetProcessing() {
 
     /* Reset image as well */
     processedImage = sourceImage;
+}
+
+void TopinoData::calculatePolarImage() {
+    qDebug("Calculate polar image");
+
+    /* Need the data of the main inlet (radii, etc) */
+    TopinoData::InletData mainInletData = getInletData(mainInletID);
+
+    /* Create a new image that has the angles as heights (0.1° steps, so multiply
+     * by 10) and the radii as widths. Is will be RGB32 color - we want to be able
+     * to display the image to the user if needed. Fill everything with zeros (black). */
+    int angleSteps = (maxAngle - minAngle) * 10;
+    polarImage = QImage(outerRadius, angleSteps, QImage::Format_RGB32);
+    polarImage.fill(Qt::black);
+
+    /* Calculate the signal for each radian and angle and set the respective pixel on the
+     * image to a RGB color (each channel intensity = signal). Using the direct access to
+     * bit data of the image ensures high performance. */
+    QRgb *polarPixels = reinterpret_cast<QRgb *>(polarImage.bits());
+    QRgb *processedPixels = reinterpret_cast<QRgb *>(processedImage.bits());
+    for (int r = 0; r < outerRadius; ++r) {
+        for (int a = 0; a < angleSteps; ++a ) {
+            /* Ignore the inner radius of the inlet (garbage data) */
+            if (r < mainInletData.radius)
+                continue;
+
+            /* Current "real" angle */
+            qreal angle = neutralAngle + minAngle + a * 0.1;
+
+            /* Calculate x and y of these polar coordinates; translate the point by the
+             * origin. Keep in mind that the y coordinates start at the top to bottom,
+             * but the mathematical point is from bottom to top (therefore, the minus)! */
+            int x = mainInletData.coord.x() + int(qRound(r * qCos(qDegreesToRadians(angle))));
+            int y = mainInletData.coord.y() - int(qRound(r * qSin(qDegreesToRadians(angle))));
+
+            /* Get the intensity. Since the processed image should have the same signal
+             * in all channels, it is ok just to use the green here. Also, we should make
+             * sure that the x and y coordinates are inside the image before reading out! */
+            int intensity = 0;
+
+            if ((x > 0) && (x < processedImage.width()) && (y > 0) && (y < processedImage.height())) {
+                intensity = qGreen(processedPixels[y * processedImage.width() + x]);
+            }
+
+            /* Write to the polar pixels. Here, x = r and y = a */
+            polarPixels[a * polarImage.width() + r] = qRgb(intensity, intensity, intensity);
+        }
+    }
+
+    /* Testing for now */
+    polarImage.save("/home/sven/Projekte/Anwendungen/polarimage.png");
+}
+
+void TopinoData::calculateAngulagramPoints() {
+    qDebug("Calculate angulagram points");
+
+    /* Clear old points */
+    angulagramPoints.clear();
+
+    /* Make sure the image has been created */
+    if (polarImage.isNull())
+        return;
+
+    /* Process all the data of the image and integrate over the x-axis (radius) */
+    QRgb *polarPixels = reinterpret_cast<QRgb *>(polarImage.bits());
+    int width = polarImage.width();
+    int height = polarImage.height();
+
+    for (int y = 0; y < height; ++y) {
+        /* Integrate over x-axis (radius). Again, the intensities of each channel
+         * should be the same, so we just take the green channel here. */
+        int intensity = 0;
+
+        for (int x = 0; x < width; ++x) {
+            intensity += qGreen(polarPixels[y * width + x]);
+        }
+
+        /* Finally, add the data point to the angulagram data. The angle is
+         * minAngle + y * 0.1° - this is how we created the image in the
+         * previous step (see calculatePolarImage() above). */
+        angulagramPoints.append(QPointF(minAngle + y * 0.1, intensity));
+    }
+}
+
+QVector<QPointF> TopinoData::getAngulagramPoints() const {
+    return angulagramPoints;
+}
+
+int TopinoData::getCoordOuterRadius() const
+{
+    return outerRadius;
+}
+
+void TopinoData::setCoordOuterRadius(int value)
+{
+    outerRadius = value;
 }
 
 

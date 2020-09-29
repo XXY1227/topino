@@ -1,6 +1,8 @@
 #ifndef TOPINODATA_H
 #define TOPINODATA_H
 
+#include <QtMath>
+#include <QVector>
 #include <QBuffer>
 #include <QImage>
 #include <QXmlStreamReader>
@@ -88,10 +90,22 @@ class TopinoData {
     /* Resets the processing of the image and sets all values to default */
     void resetProcessing();
 
-  private:
+    /* Calculates the polar image from the inlet points */
+    void calculatePolarImage();
+
+    /* Calculates the points of the angulagram from the polar image */
+    void calculateAngulagramPoints();
+
+    QVector<QPointF> getAngulagramPoints() const;
+
+    int getCoordOuterRadius() const;
+    void setCoordOuterRadius(int value);
+
+    private:
     /* Image and image editing data */
     QImage sourceImage;
     QImage processedImage;
+    QImage polarImage;
 
     bool inversion;
     TopinoTools::desaturationModes desatMode;
@@ -104,11 +118,15 @@ class TopinoData {
     int neutralAngle;
     int minAngle;
     int maxAngle;
+    int outerRadius;
     bool counterClockwise;
 
     /* List of inlets */
     QList<InletData> inlets;
     int nextInletID;
+
+    /* Calculated points for the angulagram */
+    QVector<QPointF> angulagramPoints;
 };
 
 #endif // TOPINODATA_H

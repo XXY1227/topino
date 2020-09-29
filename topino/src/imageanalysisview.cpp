@@ -349,6 +349,11 @@ void ImageAnalysisView::createToolsFromDocument() {
         tool->setItemid((*iter).ID);
 
         if (data.getMainInletID() == (*iter).ID) {
+            tool->setMinAngle(data.getCoordMinAngle());
+            tool->setMaxAngle(data.getCoordMaxAngle());
+            tool->setOuterRadius(data.getCoordOuterRadius());
+            tool->setZeroAngle(data.getCoordNeutralAngle());
+            tool->setCounterClockwise(data.getCoordCounterClockwise());
             tool->showSegments(true);
         } else {
             tool->showSegments(false);
@@ -471,6 +476,7 @@ void ImageAnalysisView::synchronizeInletToolItem(const PolarCircleToolItem* item
         data.setCoordNeutralAngle(item->getZeroAngle());
         data.setCoordMinAngle(item->getMinAngle());
         data.setCoordMaxAngle(item->getMaxAngle());
+        data.setCoordOuterRadius(item->getOuterRadius());
         data.setCoordCounterClockwise(item->getCounterClockwise());
     }
 
