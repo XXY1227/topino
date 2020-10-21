@@ -34,6 +34,8 @@ class ImageAnalysisView : public TopinoAbstractView {
 
     void setImage(const QImage &image);
 
+    void setImageBasedSceneRect();
+
     const QRectF getImageViewPoint();
 
     void resizeEvent(QResizeEvent *event) override;

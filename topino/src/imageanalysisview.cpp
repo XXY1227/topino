@@ -57,7 +57,7 @@ void ImageAnalysisView::setImage(const QImage& image) {
     /* Should the image dimensions have changed, then update scene rect, zoom, etc. */
     if ((inputImage->getPixmap().width() != oldWidth) || (inputImage->getPixmap().height() != oldHeight)) {
         /* Fit the image into the view, but make sure that the minimum and maximum zoom level is not violated */
-        setSceneRect(inputImage->boundingRect());
+        setImageBasedSceneRect();
         fitInView(imagescene->itemsBoundingRect(), Qt::KeepAspectRatio);
 
         /* Zoom factor should be between 3.125% and 6400%. In contrast to the setZoomFactor function we can use
@@ -76,6 +76,25 @@ void ImageAnalysisView::setImage(const QImage& image) {
     emit viewHasChanged();
 }
 
+void ImageAnalysisView::setImageBasedSceneRect() {
+    /* Get the boundary rect of the image; this is the focus point after all */
+    QRectF rect = inputImage->boundingRect();
+
+    /* Border added to the image is a minimum of 20 pixels, or 5% of the width
+     * or height of the image - whatever is larger */
+    qreal border = qMax(qMax(0.05 * rect.width(), 0.05 * rect.height()), 20.0);
+
+    /* Negative coordinate, because we want the top-left of the image to be (0,0);
+     * also, border needs to be added 2 times to width and height (left/right and
+     * top/bottom)! */
+    rect.setTopLeft(QPointF(-border, -border));
+    rect.setWidth(rect.width() + border);
+    rect.setHeight(rect.height() + border);
+
+    /* Set the modified scene rect */
+    setSceneRect(rect);
+}
+
 const QRectF ImageAnalysisView::getImageViewPoint() {
     return mapToScene(viewport()->geometry()).boundingRect();
 }
@@ -92,7 +111,7 @@ void ImageAnalysisView::resizeEvent(QResizeEvent *event) {
     if (verticalScrollBar()->isVisible())
         viewrect.setHeight(viewrect.width() - verticalScrollBar()->width());
 
-    setSceneRect(inputImage->boundingRect());
+    setImageBasedSceneRect();
 
     TopinoAbstractView::resizeEvent(event);
 
