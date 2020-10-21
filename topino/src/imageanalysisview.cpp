@@ -85,8 +85,7 @@ void ImageAnalysisView::setImageBasedSceneRect() {
     qreal border = qMax(qMax(0.05 * rect.width(), 0.05 * rect.height()), 20.0);
 
     /* Negative coordinate, because we want the top-left of the image to be (0,0);
-     * also, border needs to be added 2 times to width and height (left/right and
-     * top/bottom)! */
+     * also, border needs to be added only one time to width and height! */
     rect.setTopLeft(QPointF(-border, -border));
     rect.setWidth(rect.width() + border);
     rect.setHeight(rect.height() + border);
