@@ -542,7 +542,10 @@ int PolarCircleToolItem::getZeroAngle() const {
 }
 
 void PolarCircleToolItem::setZeroAngle(int value) {
-    zeroAngle = value;
+    /* Only allow values between -359 and +359 */
+    if (value > -359 && value < 359) {
+        zeroAngle = value;
+    }
 }
 
 void PolarCircleToolItem::calculateBoundingRect() {

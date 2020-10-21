@@ -249,6 +249,29 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
                 int radius = qSqrt(qPow(srcPoint.x() - destPoint.x(), 2.0) + qPow(srcPoint.y() - destPoint.y(), 2.0));
                 PolarCircleToolItem *tool = createInletToolItem(srcPoint, radius, true);
 
+                /* Make sure that the initial direction of the tool is towards the middle of the picture; for
+                 * this, we separate the picture into four triangles (left, bottom, right, top) and select the
+                 * respective angle (fixed 90°-wise) */
+                QPointF center = inputImage->boundingRect().center();
+                int width = inputImage->boundingRect().width();
+                int height = inputImage->boundingRect().height();
+                QPolygonF triangles[4] = {
+                    QPolygonF({QPointF(0.0, 0.0), center, QPointF(0.0, height), QPointF(0.0, 0.0)}),
+                    QPolygonF({QPointF(0.0, height), center, QPointF(width, height), QPointF(0.0, height)}),
+                    QPolygonF({QPointF(width, height), center, QPointF(width, 0.0), QPointF(width, height)}),
+                    QPolygonF({QPointF(0.0, 0.0), QPointF(width, 0.0), center, QPointF(0.0, 0.0)})
+                };
+
+                int angle = 90;
+                for (int a = 0; a < 4; ++a) {
+                    if (triangles[a].containsPoint(srcPoint, Qt::OddEvenFill)) {
+                        angle = a * 90;
+                        break;
+                    }
+                }
+                tool->setZeroAngle(angle);
+
+                /* Select the new tool by boundary */
                 QPainterPath path;
                 path.addRect(tool->boundingRect());
                 imagescene->setSelectionArea(path);
