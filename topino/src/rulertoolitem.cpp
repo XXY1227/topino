@@ -1,18 +1,20 @@
 #include "include/rulertoolitem.h"
 
 RulerToolItem::RulerToolItem(int newitemid, QGraphicsItem* parent) : TopinoGraphicsItem(newitemid, parent) {
+    /* Ruler item is selectable and will send geometry changes as well as hover events. */
     setFlags(QGraphicsItem::ItemIsSelectable |
              QGraphicsItem::ItemSendsGeometryChanges);
 
     setAcceptHoverEvents(true);
 
-    /* Set standard visual appearance of this rubberband */
-    terminalBrush = QBrush(QColor(0, 135, 215, 128));
-    linePen = QPen(QColor(0, 135, 215));
+    /* Set standard visual appearance of this rubberband; blue from the Tableau10 colors
+     * for the terminal points and the line. Small narrow line and large terminal end
+     * points. */
+    terminalBrush = QBrush(TopinoTools::colorsTableau10[0]);
+    linePen = QPen(TopinoTools::colorsTableau10[0]);
     lineWidth = 2;
     linePen.setWidth(lineWidth);
-
-    offset = 5;
+    offset = 6;
 }
 
 RulerToolItem::~RulerToolItem() {
