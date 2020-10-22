@@ -8,6 +8,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 
+#include "include/topinotool.h"
 #include "include/topinographicsitem.h"
 
 class RulerToolItem : public TopinoGraphicsItem {
@@ -62,8 +63,8 @@ class RulerToolItem : public TopinoGraphicsItem {
      * point1 and point2 of the line, respectively. */
     void checkTerminalPointsOrder();
 
-    /* Checks if the given is outside the boundary of the scene. */
-    QPointF checkTerminalPointPosition(const QPointF &pos);
+    /* Checks if the given point is inside the boundary of the scene. */
+    bool isTerminalPointInsideScene(const QPointF &pos);
 
 };
 

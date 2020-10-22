@@ -1,10 +1,35 @@
 #ifndef TOPINOTOOL_H
 #define TOPINOTOOL_H
 
+#include <QColor>
 #include <QString>
 #include <QRgb>
 
 namespace TopinoTools {
+
+/* Tableau10 colors by Chris Gerrard; more information at:
+ * http://tableaufriction.blogspot.com/2012/11/finally-you-can-use-tableau-data-colors.html */
+const QColor colorsTableau10[10] = {
+    QColor( 31, 119, 180),
+    QColor(214,  39,  40),
+    QColor( 44, 160,  44),
+    QColor(148, 103, 189),
+    QColor(255, 127,  14),
+    QColor(140,  86,  75),
+    QColor(227, 119, 194),
+    QColor(127, 127, 127),
+    QColor(188, 189,  34),
+    QColor( 23, 190, 207)
+};
+
+/* Selection color pairs - a dark variant (for the border) and a light variant (for the
+ * content). Sorted for RGB channels, i.e. the first color pair is red. */
+const QColor colorsSelectionRGB[3][2] = {
+    { QColor(235,  70,  55), QColor(250, 230, 230) },
+    { QColor( 30, 160,  95), QColor(230, 250, 240) },
+    { QColor( 25, 115, 230), QColor(230, 240, 250) }
+};
+
 
 /* Desaturation modes */
 enum desaturationModes {

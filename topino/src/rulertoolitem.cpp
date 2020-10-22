@@ -19,11 +19,7 @@ RulerToolItem::~RulerToolItem() {
 }
 
 QRectF RulerToolItem::boundingRect() const {
-    QPoint p1 = getLine().toLine().p1();
-    QPoint p2 = getLine().toLine().p2();
-
-    return QRectF(qMin(p1.x(), p2.x()) - offset, qMin(p1.y(), p2.y()) - offset,
-                  qAbs(p1.x() - p2.x()) + 2 * offset, qAbs(p1.y() - p2.y()) + 2 * offset);
+    return shape().boundingRect();
 }
 
 void RulerToolItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) {
@@ -117,15 +113,24 @@ void RulerToolItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 
 
 void RulerToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
-    QPointF pos = event->pos(); // checkTerminalPointPosition(event->pos());
+    QPointF pos = event->pos();
 
-    /* Depending on which part clicked, the position of the points is updated */
+    /* Depending on which part clicked, the position of the points is updated; let's
+     * not forget to call prepareGeometryChange() here - otherwise, the scene does
+     * not update properly and the ruler item becomes unmovable at some point (also,
+     * it will draw artifacts, etc.)! */
     switch (partClicked) {
     case parts::point1:
-        line.setP1(pos);
+        if (isTerminalPointInsideScene(pos)) {
+            line.setP1(pos);
+            prepareGeometryChange();
+        }
         break;
     case parts::point2:
-        line.setP2(pos);
+        if (isTerminalPointInsideScene(pos)) {
+            line.setP2(pos);
+            prepareGeometryChange();
+        }
         break;
     default:
         /* If clicked just on the line part, run the default movement-code */
@@ -182,33 +187,13 @@ void RulerToolItem::checkTerminalPointsOrder() {
     }
 }
 
-QPointF RulerToolItem::checkTerminalPointPosition(const QPointF &pos) {
-    /* Scene rect */
-    QRectF rect = scene()->sceneRect();
-    QPointF newpos = pos;
+bool RulerToolItem::isTerminalPointInsideScene(const QPointF& pos) {
+    /* Creating a rectangle around the terminal point; then, we only have to check
+     * if the top-left point and the bottom-right point are inside the scene
+     * rect (since both rectangles are aligned). */
+    QRectF terminalRect = QRectF(pos - QPointF(offset, offset), pos + QPointF(offset, offset));
+    QRectF sceneRect = scene()->sceneRect();
 
-    /* Too far to the left */
-    if (newpos.x() < (rect.left() + offset)) {
-        newpos.setX(rect.left() + offset);
-    }
-
-    /* Too far to the top */
-    if (newpos.y() < (rect.top() + offset)) {
-        newpos.setY(rect.top() + offset);
-    }
-
-    /* Too far to the right */
-    if (newpos.x() > (rect.right() - offset)) {
-        newpos.setY(rect.bottom() - offset);
-    }
-
-    /* Too far to the top */
-    if (newpos.y() > (rect.bottom() - offset)) {
-        newpos.setY(rect.bottom() - offset);
-    }
-
-    return newpos;
+    return (sceneRect.contains(terminalRect.topLeft()) && sceneRect.contains(terminalRect.bottomRight()));
 }
-
-
 

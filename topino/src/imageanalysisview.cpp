@@ -92,6 +92,10 @@ void ImageAnalysisView::setImageBasedSceneRect() {
 
     /* Set the modified scene rect */
     setSceneRect(rect);
+
+    /* For some reason the scenerect of the scene itself does not get updated;
+     * let's do it manually, so that items can rely on this */
+    imagescene->setSceneRect(rect);
 }
 
 const QRectF ImageAnalysisView::getImageViewPoint() {
