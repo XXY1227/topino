@@ -102,6 +102,17 @@ int RulerToolItem::getAngleToAbscissa() const {
     return qAtan((line.p1().y() - line.p2().y()) / (line.p1().x() - line.p2().x()));
 }
 
+QRectF RulerToolItem::getRectOfTerminalPoint(int p = 0) const {
+    /* Return the rectangle of the terminal point specified by p */
+    QPointF pos = line.p1();
+    if (p != 0) {
+        pos = line.p2();
+    }
+
+    /* Return the rectangle adjusted for the offset around the position */
+    return QRectF(pos - QPointF(offset, offset), pos + QPointF(offset, offset));
+}
+
 TopinoGraphicsItem::itemtype RulerToolItem::getItemType() const {
     return itemtype::ruler;
 }
