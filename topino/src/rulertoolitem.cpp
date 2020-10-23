@@ -53,7 +53,8 @@ void RulerToolItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opt
 }
 
 QPainterPath RulerToolItem::shape() const {
-    /* Create the shape out of the invidual elements, first the two circles at the end */
+    /* Create the shape out of the invidual elements, first the two circles at the end
+     * for the terminal points */
     QPainterPath path;
     QPoint p1 = line.toLine().p1();
     QPoint p2 = line.toLine().p2();
@@ -84,6 +85,21 @@ QLineF RulerToolItem::getLine() const {
 
 void RulerToolItem::setLine(const QLineF& value) {
     line = value;
+}
+
+int RulerToolItem::getAngleToAbscissa() const {
+    /* There can only be an angle if the points are not equal */
+    if (line.p1() == line.p2())
+        return 0;
+
+    /* Border case: both x values of the points are equal; in
+     * this case, just return 90 degrees */
+    if (line.p1().x() == line.p2().x())
+        return 90;
+
+    /* Otherwise, the (short) angle between the line and the
+     * abscissa is the tangens of the slope = diff(y)/diff(x) */
+    return qAtan((line.p1().y() - line.p2().y()) / (line.p1().x() - line.p2().x()));
 }
 
 TopinoGraphicsItem::itemtype RulerToolItem::getItemType() const {

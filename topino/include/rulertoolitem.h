@@ -23,6 +23,8 @@ class RulerToolItem : public TopinoGraphicsItem {
     QLineF getLine() const;
     void setLine(const QLineF& value);
 
+    int getAngleToAbscissa() const;
+
     itemtype getItemType() const override;
     void updateScale() override;
 
