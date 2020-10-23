@@ -54,6 +54,8 @@ class ImageAnalysisView : public TopinoAbstractView {
     bool isToolSupported(const TopinoAbstractView::tools& value) const;
 
     void createToolsFromDocument();
+    TopinoGraphicsItem* getToolbyTypeAndId(TopinoGraphicsItem::itemtype type, int id);
+    PolarCircleToolItem* getMainInletTool();
 
     bool isSourceImageShown() const;
     void showSourceImage(bool value);

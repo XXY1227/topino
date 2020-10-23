@@ -218,7 +218,7 @@ void MainWindow::changeToView(const viewPages value) {
     /* Angulagram page */
     case viewPages::angulagram:
         updateObjectPage(objectPages::angulagramProps);
-        ui->propertiesPages->setCurrentIndex(objectPages::angulagramProps);        
+        ui->propertiesPages->setCurrentIndex(objectPages::angulagramProps);
         data.calculatePolarImage();
         data.calculateAngulagramPoints();
         document.setData(data);
@@ -303,6 +303,7 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
                 QPoint p2 = ruler->mapToScene(ruler->getLine().p2().toPoint()).toPoint();
                 ui->propRulerP1->setText(QString("%1, %2").arg(p1.x()).arg(p1.y()));
                 ui->propRulerP2->setText(QString("%1, %2").arg(p2.x()).arg(p2.y()));
+                ui->propRulerAngle->setText(QString("%1°").arg(ruler->getAngleToAbscissa()));
                 ui->propRulerLength->setText(QString("%1 pixel").arg(
                                                  QString::number(ruler->getLine().length(), 'f', 1)));
             }
@@ -336,7 +337,7 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
         }
         break;
     case angulagramProps:
-        /* Fifth page: angulagram properties */        
+        /* Fifth page: angulagram properties */
         break;
     default:
         break;
@@ -621,6 +622,205 @@ void MainWindow::onToolResetImage() {
 
     /* Update the image page */
     updateImagePage();
+}
+
+void MainWindow::onToolSnapRulerToCorner() {
+    qDebug("Snap to corner");
+}
+
+void MainWindow::onToolSnapRulerToInlet() {
+    /* Check if there is a single ruler selected */
+    if (imageView.scene()->selectedItems().size() != 1)
+        return;
+
+    RulerToolItem *ruler = dynamic_cast<RulerToolItem*>(imageView.scene()->selectedItems()[0]);
+
+    if (ruler == nullptr)
+        return;
+
+    /* Let's check if there is a main inlet defined yet,
+     * otherwise we will just leave here */
+    if (document.getData().getMainInletID() == 0)
+        return;
+
+    /* Receive inlet and ruler position */
+    QPointF inletPos = document.getData().getCoordOrigin();
+    QLineF rulerLine = ruler->getLine();
+
+    /* Calculate the distance of both points of the ruler item
+     * to the main inlet. */
+    qreal dist1 = qSqrt(qPow(inletPos.x() - rulerLine.p1().x(), 2.0) + qPow(inletPos.y() - rulerLine.p1().y(), 2.0));
+    qreal dist2 = qSqrt(qPow(inletPos.x() - rulerLine.p2().x(), 2.0) + qPow(inletPos.y() - rulerLine.p2().y(), 2.0));
+
+    /* Decide which distance is smaller and snap respective point to the inlet */
+    if (dist1 < dist2) {
+        rulerLine.setP1(inletPos);
+    } else {
+        rulerLine.setP2(inletPos);
+    }
+    ruler->setLine(rulerLine);
+
+    /* Update the ruler page and the view(port) */
+    updateObjectPage(rulerProps);
+    getCurrentView()->viewport()->update();
+}
+
+void MainWindow::onToolExtendInletToRuler() {
+    /* Check if there is a single ruler selected */
+    if (imageView.scene()->selectedItems().size() != 1)
+        return;
+
+    /* Let's check if there is a main inlet defined yet,
+     * otherwise we will just leave here */
+    if (document.getData().getMainInletID() == 0)
+        return;
+
+    /* Get ruler and main inlet pointers */
+    RulerToolItem *ruler = dynamic_cast<RulerToolItem*>(imageView.scene()->selectedItems()[0]);
+    PolarCircleToolItem *inlet = imageView.getMainInletTool();
+
+    if ((ruler == nullptr) || (inlet == nullptr))
+        return;
+
+    /* Receive inlet and ruler position */
+    QPointF inletPos = document.getData().getCoordOrigin();
+    QLineF rulerLine = ruler->getLine();
+
+    /* Special case: ruler line is not a line but a single point - in this case, the distance
+     * from the ruler to the inlet position is simply the distance between one of the points
+     * and the inlet position. */
+    int dist = 0;
+    if (rulerLine.p1() == rulerLine.p2()) {
+        dist = qSqrt(qPow(inletPos.x() - rulerLine.p1().x(), 2.0) + qPow(inletPos.y() - rulerLine.p1().y(), 2.0));
+
+    /* Special case: ruler is a vertical line (both points have same x values); in this case,
+     * the distance to the inlet position is simply the difference between the x values. */
+    } else if (rulerLine.p1().x() == rulerLine.p2().x()) {
+        dist = qAbs(inletPos.x() - rulerLine.p1().x());
+
+    /* Special case: ruler is a horizontal line (both points have same y values); in this case,
+     * the distance to the inlet position is simply the difference between the y values. */
+    } else if (rulerLine.p1().y() == rulerLine.p2().y()) {
+        dist = qAbs(inletPos.y() - rulerLine.p1().y());
+
+    /* Otherwise, simply calculcate the slope and intercept of the ruler line, find the normal line to it, and
+     * calculate the distance from the intercept to the inlet position. */
+    } else {
+        qreal rulerSlope = (rulerLine.p1().y() - rulerLine.p2().y()) / (rulerLine.p1().x() - rulerLine.p2().x());
+        qreal rulerIntercept = rulerLine.p1().y() - rulerSlope * rulerLine.p1().x();
+
+        qreal iX = (inletPos.x() + rulerSlope * (inletPos.y() - rulerIntercept)) / (qPow(rulerSlope, 2.0) + 1);
+        qreal iY = rulerSlope * iX + rulerIntercept;
+
+        dist = qSqrt(qPow(inletPos.x() - iX, 2.0) + qPow(inletPos.y() - iY, 2.0));
+    }
+
+    /* Update the inlet item and tell the view that it changed; it will synchronize
+     * the data then automatically with the document */
+    inlet->setOuterRadius(dist);
+    imageView.onItemDataChanged(inlet);
+
+    /* Update the ruler page and the view(port) */
+    updateObjectPage(rulerProps);
+    getCurrentView()->viewport()->update();
+}
+
+void MainWindow::onToolRulerAsRefAngle() {
+    /* Check if there is a single ruler selected */
+    if (imageView.scene()->selectedItems().size() != 1)
+        return;
+
+    /* Let's check if there is a main inlet defined yet,
+     * otherwise we will just leave here */
+    if (document.getData().getMainInletID() == 0)
+        return;
+
+    /* Get ruler and main inlet pointers */
+    RulerToolItem *ruler = dynamic_cast<RulerToolItem*>(imageView.scene()->selectedItems()[0]);
+    PolarCircleToolItem *inlet = imageView.getMainInletTool();
+
+    if ((ruler == nullptr) || (inlet == nullptr))
+        return;
+
+    /* Receive inlet reference angle and the angle of the ruler */
+    int refAngle = inlet->getZeroAngle();
+    int rulerAngle = ruler->getAngleToAbscissa();
+
+    /* If the reference angle and the ruler angle are more than 90° away from
+     * each other, then add 180° to the ruler angle to not inverse the inlet;
+     * if the angles are 270° from each other, this means that one is <90° and
+     * the other one >270° - so they are actually closer than 90° to each other */
+    int diffAngle = qAbs(refAngle - rulerAngle);
+    if ((diffAngle > 90) && (diffAngle < 270)) {
+        rulerAngle += 180;
+    }
+
+    /* Update the inlet item and tell the view that it changed; it will synchronize
+     * the data then automatically with the document */
+    inlet->setZeroAngle(rulerAngle);
+    imageView.onItemDataChanged(inlet);
+
+    /* Update the ruler page and the view(port) */
+    updateObjectPage(rulerProps);
+    getCurrentView()->viewport()->update();
+}
+
+void MainWindow::onToolRulerAsMinBoundary() {
+    qDebug("Use as left boundary");
+    onToolRulerAsMinMaxBoundary(false);
+}
+
+void MainWindow::onToolRulerAsMaxBoundary() {
+    qDebug("Use as right boundary");
+    onToolRulerAsMinMaxBoundary(true);
+}
+
+void MainWindow::onToolRulerAsMinMaxBoundary(bool max) {
+    /* Check if there is a single ruler selected */
+    if (imageView.scene()->selectedItems().size() != 1)
+        return;
+
+    /* Let's check if there is a main inlet defined yet,
+     * otherwise we will just leave here */
+    if (document.getData().getMainInletID() == 0)
+        return;
+
+    /* Get ruler and main inlet pointers */
+    RulerToolItem *ruler = dynamic_cast<RulerToolItem*>(imageView.scene()->selectedItems()[0]);
+    PolarCircleToolItem *inlet = imageView.getMainInletTool();
+
+    if ((ruler == nullptr) || (inlet == nullptr))
+        return;
+
+    /* Get all inlet angles and the angle of the ruler */
+    int refAngle = inlet->getZeroAngle();
+    int minAngle = inlet->getMinAngle() + refAngle;
+    int maxAngle = inlet->getMaxAngle() + refAngle;
+    int rulerAngle = ruler->getAngleToAbscissa();
+
+    qDebug("Angles (ref, min, max, ruler): %d %d %d %d", refAngle, minAngle, maxAngle, rulerAngle);
+
+    /* If the reference angle and the ruler angle are more than 90° away from
+     * each other, then add 180° to the ruler angle to not inverse the inlet;
+     * if the angles are 270° from each other, this means that one is <90° and
+     * the other one >270° - so they are actually closer than 90° to each other */
+    int diffAngle = qAbs(minAngle - rulerAngle);
+    if ((diffAngle > 90) && (diffAngle < 270)) {
+        rulerAngle -= 180;
+    }
+
+    /* Update the inlet item and tell the view that it changed; it will synchronize
+     * the data then automatically with the document */
+    if (max) {
+        inlet->setMaxAngle(rulerAngle - refAngle);
+    } else {
+        inlet->setMinAngle(rulerAngle - refAngle);
+    }
+    imageView.onItemDataChanged(inlet);
+
+    /* Update the ruler page and the view(port) */
+    updateObjectPage(rulerProps);
+    getCurrentView()->viewport()->update();
 }
 
 

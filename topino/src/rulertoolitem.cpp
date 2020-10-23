@@ -97,9 +97,16 @@ int RulerToolItem::getAngleToAbscissa() const {
     if (line.p1().x() == line.p2().x())
         return 90;
 
-    /* Otherwise, the (short) angle between the line and the
-     * abscissa is the tangens of the slope = diff(y)/diff(x) */
-    return qAtan((line.p1().y() - line.p2().y()) / (line.p1().x() - line.p2().x()));
+    /* Otherwise, the angle between the ruler line and the
+     * abscissa is the tangens of the slope = diff(y)/diff(x).
+     * However, the y-values are from top to bottom (instead of
+     * the usual bottom to top) so we need to negate them here. */
+    qreal angle = qRadiansToDegrees(qAtan((- line.p1().y() + line.p2().y()) / (line.p1().x() - line.p2().x())));
+    if (angle < 0) {
+        angle += 180;
+    }
+
+    return qRound(angle);
 }
 
 QRectF RulerToolItem::getRectOfTerminalPoint(int p = 0) const {

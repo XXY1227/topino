@@ -30,7 +30,7 @@ PolarCircleToolItem::PolarCircleToolItem(int newitemid, QGraphicsItem* parent) :
     coordlinePen.setWidth(coordlineWidth);
     grabLinePen = QPen(QColor(50, 20, 0));
     grabLinePen.setWidth(coordlineWidth * 3);
-    grabLinePen.setStyle(Qt::DashLine);    
+    grabLinePen.setStyle(Qt::DashLine);
     fontAngleLabels = QFont("Helvetica", 16, QFont::Bold);
     fontOutline = QPen(Qt::black);
     fontOutline.setWidth(coordlineWidth / 2);
@@ -151,8 +151,8 @@ void PolarCircleToolItem::paint(QPainter* painter, const QStyleOptionGraphicsIte
         for (int c = 1; c < segments; ++c ) {
             /* These drawing function take 1/16th of an angle (given in degrees) */
             painter->drawArc(origin.x() - innerRadius - segmentSize * c, origin.y() - innerRadius - segmentSize * c,
-                                         2 * segmentSize * c + innerRadius * 2, 2 * segmentSize * c + innerRadius * 2,
-                                         16 * (zeroAngle + minAngle), 16 * (maxAngle - minAngle));
+                             2 * segmentSize * c + innerRadius * 2, 2 * segmentSize * c + innerRadius * 2,
+                             16 * (zeroAngle + minAngle), 16 * (maxAngle - minAngle));
         }
     }
 
@@ -266,7 +266,7 @@ void PolarCircleToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
             zeroAngle -= 360;
         } else if (zeroAngle < 0) {
             zeroAngle += 360;
-        }        
+        }
         break;
     case parts::grabAngleMin:
         if ((anglefixed >= -180) && (anglefixed < 0)) {
@@ -370,9 +370,12 @@ int PolarCircleToolItem::getOuterRadius() const {
 }
 
 void PolarCircleToolItem::setOuterRadius(int value) {
-    outerRadius = value;
-    calculateBoundingRect();
-    calculateSegmentSize();
+    /* Outer radius should be larger than the inner radius */
+    if (value > innerRadius) {
+        outerRadius = value;
+        calculateBoundingRect();
+        calculateSegmentSize();
+    }
 }
 
 void PolarCircleToolItem::calculateSegmentSize() {
@@ -526,7 +529,11 @@ int PolarCircleToolItem::getMaxAngle() const {
 }
 
 void PolarCircleToolItem::setMaxAngle(int value) {
-    maxAngle = value;
+    /* The new maximum angle should be larger than zero and
+     * larger than the minimum angle */
+    if ((value > 0) && (value > minAngle)) {
+        maxAngle = value;
+    }
 }
 
 int PolarCircleToolItem::getMinAngle() const {
@@ -534,7 +541,11 @@ int PolarCircleToolItem::getMinAngle() const {
 }
 
 void PolarCircleToolItem::setMinAngle(int value) {
-    minAngle = value;
+    /* The new minimum angle should be smaller than zero and
+     * smaller than the maximum angle */
+    if ((value < 0) && (value < maxAngle)) {
+        minAngle = value;
+    }
 }
 
 int PolarCircleToolItem::getZeroAngle() const {

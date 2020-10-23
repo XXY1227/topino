@@ -206,7 +206,7 @@
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>248</width>
+       <width>253</width>
        <height>331</height>
       </rect>
      </property>
@@ -226,7 +226,7 @@
       <number>1</number>
      </property>
      <property name="currentIndex">
-      <number>4</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="general">
       <layout class="QGridLayout" name="gridLayout_4">
@@ -623,69 +623,7 @@
       </layout>
      </widget>
      <widget class="QWidget" name="ruler">
-      <layout class="QGridLayout" name="gridLayout_3">
-       <item row="1" column="0" colspan="3">
-        <widget class="QLabel" name="label_3">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>1</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Point 1:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0" colspan="3">
-        <widget class="QLabel" name="label_8">
-         <property name="text">
-          <string>Length:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="3">
-        <widget class="QLabel" name="label_9">
-         <property name="text">
-          <string>Point 2:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="3">
-        <widget class="QLabel" name="propRulerP2">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>5</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>321, 450</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="3">
-        <widget class="QLabel" name="propRulerLength">
-         <property name="text">
-          <string>192.72 pixel</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
+      <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,1,0,0">
        <item row="0" column="0">
         <widget class="QLabel" name="label">
          <property name="minimumSize">
@@ -714,22 +652,38 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="0" colspan="4">
-        <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0,0">
-         <item>
-          <widget class="QToolButton" name="toolEditImage_2">
+       <item row="2" column="3">
+        <widget class="QLabel" name="propRulerP2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>5</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>321, 450</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0" colspan="4">
+        <layout class="QGridLayout" name="gridLayout_6">
+         <item row="0" column="0">
+          <widget class="QToolButton" name="toolSnapRulerToCorner">
            <property name="toolTip">
-            <string>Preprocess image</string>
+            <string>Snap to corner</string>
            </property>
            <property name="statusTip">
-            <string>Select options for preprocessing the image to make it ready for angulargram creation</string>
+            <string>Snap the ruler point(s) to nearby corners on the image</string>
            </property>
            <property name="text">
             <string>...</string>
            </property>
            <property name="icon">
             <iconset resource="../topino.qrc">
-             <normaloff>:/ui/toolicons/ruler.png</normaloff>:/ui/toolicons/ruler.png</iconset>
+             <normaloff>:/ui/toolicons/ruler_snapto_image.png</normaloff>:/ui/toolicons/ruler_snapto_image.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -739,20 +693,20 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QToolButton" name="toolSwitchImage_2">
+         <item row="0" column="1">
+          <widget class="QToolButton" name="toolSnapRulerToInlet">
            <property name="toolTip">
-            <string>Swap source and processed image</string>
+            <string>Snap to inlet</string>
            </property>
            <property name="statusTip">
-            <string>Swap source and processed image</string>
+            <string>Snaps a nerby endpoint to the main inlet</string>
            </property>
            <property name="text">
             <string>...</string>
            </property>
            <property name="icon">
             <iconset resource="../topino.qrc">
-             <normaloff>:/ui/toolicons/ruler.png</normaloff>:/ui/toolicons/ruler.png</iconset>
+             <normaloff>:/ui/toolicons/ruler_snapto_inlet.png</normaloff>:/ui/toolicons/ruler_snapto_inlet.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -762,20 +716,89 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QToolButton" name="toolResetImage_2">
+         <item row="1" column="1">
+          <widget class="QToolButton" name="toolLeftBoundaryFromRuler">
            <property name="toolTip">
-            <string>Resets the processed image</string>
+            <string>Use as min boundary</string>
            </property>
            <property name="statusTip">
-            <string>Resets the processed image back to the source image and all processing parameters to default</string>
+            <string>Uses the angle of this ruler as min boundary for the main inlet</string>
            </property>
            <property name="text">
             <string>...</string>
            </property>
            <property name="icon">
             <iconset resource="../topino.qrc">
-             <normaloff>:/ui/toolicons/ruler.png</normaloff>:/ui/toolicons/ruler.png</iconset>
+             <normaloff>:/ui/toolicons/ruler_leftboundary.png</normaloff>:/ui/toolicons/ruler_leftboundary.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QToolButton" name="toolRefAngleFromRuler">
+           <property name="toolTip">
+            <string>Use as reference angle</string>
+           </property>
+           <property name="statusTip">
+            <string>Uses the angle of this ruler as a reference angle for the main inlet</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../topino.qrc">
+             <normaloff>:/ui/toolicons/ruler_refangle.png</normaloff>:/ui/toolicons/ruler_refangle.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QToolButton" name="toolRightBoundaryFromRuler">
+           <property name="toolTip">
+            <string>Use as max boundary</string>
+           </property>
+           <property name="statusTip">
+            <string>Uses the angle of this ruler as max boundary for the main inlet</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../topino.qrc">
+             <normaloff>:/ui/toolicons/ruler_rightboundary.png</normaloff>:/ui/toolicons/ruler_rightboundary.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QToolButton" name="toolMaxRadiusToRuler">
+           <property name="toolTip">
+            <string>Extend inlet to ruler</string>
+           </property>
+           <property name="statusTip">
+            <string>Extend the outer radius of the inlet up to the ruler</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../topino.qrc">
+             <normaloff>:/ui/toolicons/ruler_maxradius.png</normaloff>:/ui/toolicons/ruler_maxradius.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -810,7 +833,7 @@
          </property>
         </widget>
        </item>
-       <item row="6" column="0" colspan="4">
+       <item row="8" column="0" colspan="4">
         <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -823,7 +846,43 @@
          </property>
         </spacer>
        </item>
-       <item row="4" column="0" colspan="4">
+       <item row="1" column="0" colspan="3">
+        <widget class="QLabel" name="label_3">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Point 1:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="3">
+        <widget class="QLabel" name="propRulerLength">
+         <property name="text">
+          <string>192.72 pixel</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0" colspan="3">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>Length:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0" colspan="4">
         <spacer name="verticalSpacer_7">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -836,6 +895,42 @@
          </property>
         </spacer>
        </item>
+       <item row="2" column="0" colspan="3">
+        <widget class="QLabel" name="label_9">
+         <property name="text">
+          <string>Point 2:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="3">
+        <widget class="QLabel" name="label_27">
+         <property name="text">
+          <string>Angle:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="3">
+        <widget class="QLabel" name="propRulerAngle">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>5</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>90°</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
       </layout>
       <zorder>propRulerP2</zorder>
       <zorder>propRulerP1</zorder>
@@ -845,6 +940,8 @@
       <zorder>propRulerLength</zorder>
       <zorder>label_9</zorder>
       <zorder>label_7</zorder>
+      <zorder>label_27</zorder>
+      <zorder>propRulerAngle</zorder>
      </widget>
      <widget class="QWidget" name="page">
       <layout class="QGridLayout" name="gridLayout_2">
@@ -1870,6 +1967,102 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>toolSnapRulerToCorner</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolSnapRulerToCorner()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>735</x>
+     <y>438</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolSnapRulerToInlet</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolSnapRulerToInlet()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>814</x>
+     <y>438</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolRefAngleFromRuler</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolRulerAsRefAngle()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>735</x>
+     <y>483</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolLeftBoundaryFromRuler</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolRulerAsMinBoundary()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>814</x>
+     <y>483</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolRightBoundaryFromRuler</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolRulerAsMaxBoundary()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>893</x>
+     <y>483</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolMaxRadiusToRuler</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolExtendInletToRuler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>893</x>
+     <y>438</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onQuit()</slot>
@@ -1890,5 +2083,11 @@
   <slot>onToolResetImage()</slot>
   <slot>onToolAngulagram()</slot>
   <slot>onToolInputImage()</slot>
+  <slot>onToolSnapRulerToCorner()</slot>
+  <slot>onToolSnapRulerToInlet()</slot>
+  <slot>onToolRulerAsRefAngle()</slot>
+  <slot>onToolRulerAsMinBoundary()</slot>
+  <slot>onToolRulerAsMaxBoundary()</slot>
+  <slot>onToolExtendInletToRuler()</slot>
  </slots>
 </ui>

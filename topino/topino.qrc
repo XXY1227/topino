@@ -38,5 +38,11 @@
         <file>ui/toolicons/image_switch.png</file>
         <file>ui/toolicons/image_reset.png</file>
         <file>ui/toolicons/angulagram.png</file>
+        <file>ui/toolicons/ruler_snapto_image.png</file>
+        <file>ui/toolicons/ruler_snapto_inlet.png</file>
+        <file>ui/toolicons/ruler_rightboundary.png</file>
+        <file>ui/toolicons/ruler_leftboundary.png</file>
+        <file>ui/toolicons/ruler_refangle.png</file>
+        <file>ui/toolicons/ruler_maxradius.png</file>
     </qresource>
 </RCC>

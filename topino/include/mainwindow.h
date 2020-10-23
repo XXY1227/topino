@@ -40,6 +40,7 @@ class MainWindow : public QMainWindow, public IObserver {
     void onAboutQt();
     void onAboutTopino();
 
+    /* Change tool buttons */
     void onToolSelection() {
         changeTool(TopinoAbstractView::selection);
     }
@@ -50,13 +51,25 @@ class MainWindow : public QMainWindow, public IObserver {
         changeTool(TopinoAbstractView::inletCircle);
     }
 
+    /* Viewing buttons/functions */
     void onToolInputImage();
     void onToolAngulagram();
 
+    /* Image buttons/functions */
     void onToolEditImage();
     void onToolSwitchImage();
     void onToolResetImage();
 
+    /* Ruler buttons/functions */
+    void onToolSnapRulerToCorner();
+    void onToolSnapRulerToInlet();
+    void onToolExtendInletToRuler();
+    void onToolRulerAsRefAngle();
+    void onToolRulerAsMinBoundary();
+    void onToolRulerAsMaxBoundary();
+    void onToolRulerAsMinMaxBoundary(bool max);
+
+    /* Event slots */
     void onViewHasChanged();
     void onSelectionHasChanged();
     void onItemHasChanged(int itemID);

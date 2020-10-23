@@ -408,6 +408,30 @@ void ImageAnalysisView::createToolsFromDocument() {
     emit viewHasChanged();
 }
 
+TopinoGraphicsItem*ImageAnalysisView::getToolbyTypeAndId(TopinoGraphicsItem::itemtype type, int id = 0) {
+    /* Check every item for type */
+    QList<QGraphicsItem *> items = this->items();
+    for(auto iter = items.begin(); iter != items.end(); ++iter) {
+        TopinoGraphicsItem *item = dynamic_cast<TopinoGraphicsItem *>(*iter);
+
+        if ((item != nullptr) && (item->getItemType() == type)) {
+            /* If id > 0, check also for the ID of the item */
+            if (((id > 0) && (item->getItemid() == id)) || (id == 0)) {
+                return item;
+            }
+        }
+    }
+
+    /* No item found */
+    return nullptr;
+}
+
+PolarCircleToolItem* ImageAnalysisView::getMainInletTool() {
+    /* Convenience function */
+    return dynamic_cast<PolarCircleToolItem*>(getToolbyTypeAndId(TopinoGraphicsItem::itemtype::inlet,
+                                                                 document.getData().getMainInletID()));
+}
+
 bool ImageAnalysisView::isSourceImageShown() const {
     return sourceImageShown;
 }
