@@ -9,7 +9,7 @@ TopinoData::TopinoData() {
     mainInletID = 0;
     neutralAngle = -90;
     minAngle = -30;
-    maxAngle = +30;    
+    maxAngle = +30;
     outerRadius = 120;
     counterClockwise = false;
 
@@ -92,6 +92,11 @@ void TopinoData::setInlets(const QList<TopinoData::InletData>& value) {
     inlets = value;
 }
 
+int TopinoData::addInlet(const TopinoData::InletData& data) {
+    /* Function for convenience */
+    return updateInlet(data, true);
+}
+
 int TopinoData::updateInlet(const TopinoData::InletData& data, bool create) {
     /* Look through all inlets, check if the data can be overwritten */
     for (auto iter = inlets.begin(); iter != inlets.end(); ++iter) {
@@ -121,6 +126,18 @@ int TopinoData::updateInlet(const TopinoData::InletData& data, bool create) {
 
     /* Did not find anything to update and did not add any data! */
     return 0;
+}
+
+void TopinoData::removeInlet(int ID) {
+    /* Removes the inlet data with ID if it exists. */
+    for (int index = 0; index < inlets.size(); ++index) {
+        /* If the data ID is found, remove it, and break out of loop
+         * since the indices are now invalid anyway. */
+        if (inlets[index].ID == ID) {
+            inlets.removeAt(index);
+            break;
+        }
+    }
 }
 
 TopinoData::InletData TopinoData::getInletData(int ID) const {
@@ -534,13 +551,11 @@ QVector<QPointF> TopinoData::getAngulagramPoints() const {
     return angulagramPoints;
 }
 
-int TopinoData::getCoordOuterRadius() const
-{
+int TopinoData::getCoordOuterRadius() const {
     return outerRadius;
 }
 
-void TopinoData::setCoordOuterRadius(int value)
-{
+void TopinoData::setCoordOuterRadius(int value) {
     outerRadius = value;
 }
 

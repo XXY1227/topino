@@ -51,7 +51,9 @@ class TopinoData {
 
     QList<InletData> getInlets() const;
     void setInlets(const QList<InletData>& value);
+    int addInlet(const InletData &data);
     int updateInlet(const InletData &data, bool create = false);
+    void removeInlet(int ID);
     TopinoData::InletData getInletData(int ID) const;
 
     /* XML functions for loading and saving */

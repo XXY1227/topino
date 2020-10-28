@@ -102,6 +102,39 @@ const QRectF ImageAnalysisView::getImageViewPoint() {
     return mapToScene(viewport()->geometry()).boundingRect();
 }
 
+bool ImageAnalysisView::event(QEvent* event) {
+    /* Catch some events that might not be catched otherwise here */
+    switch (event->type()) {
+    /* Catch tab key here and forward it to our key-press event */
+    case QEvent::KeyPress: {
+        QKeyEvent *k = dynamic_cast<QKeyEvent *>(event);
+
+        if (k == nullptr)
+            break;
+
+        if ((k->key() == Qt::Key_Backtab) || (k->key() == Qt::Key_Tab)
+                || (k->key() == Qt::Key_Tab && (k->modifiers() & Qt::ShiftModifier))) {
+            /* Key press handling */
+            keyPressEvent(k);
+
+            /* Make sure there are no side effects by removing this event from the event
+             * queue */
+            event->accept();
+            return true;
+        }
+
+        break;
+    }
+
+    /* Default behaviour is to do nothing */
+    default:
+        break;
+    }
+
+    /* Default behaviour */
+    return TopinoAbstractView::event( event );
+}
+
 void ImageAnalysisView::resizeEvent(QResizeEvent *event) {
     /* Make sure that resizing checks and shows scrollbars if needed */
     setResizeAnchor(QGraphicsView::AnchorViewCenter);
@@ -119,6 +152,34 @@ void ImageAnalysisView::resizeEvent(QResizeEvent *event) {
     TopinoAbstractView::resizeEvent(event);
 
     emit viewHasChanged();
+}
+
+void ImageAnalysisView::keyPressEvent(QKeyEvent* event) {
+    qDebug("Key pressed on view %d", event->key());
+
+    /* Check keys */
+    switch(event->key()) {
+    /* Tab key => Select prev/next item (and bring it to the foreground) */
+    case Qt::Key_Tab:
+        selectNextItem();
+        break;
+
+    /* Escape key => Clear selection/Unselect everything */
+    case Qt::Key_Escape:
+        scene()->clearSelection();
+        break;
+
+    /* Delete key => Remove all currently selected items */
+    case Qt::Key_Delete:
+        removeAllSelectedItems();
+        break;
+
+    default:
+        break;
+    }
+
+    /* Call abstract class implementation */
+    TopinoAbstractView::keyPressEvent(event);
 }
 
 void ImageAnalysisView::mousePressEvent(QMouseEvent* event) {
@@ -324,6 +385,16 @@ void ImageAnalysisView::onSelectionChange() {
         inputImage->setSelected(false);
     }
 
+    /* Put all items in the foreground that are selected */
+    QList<QGraphicsItem *> items = scene()->selectedItems();
+    for(auto iter = items.begin(); iter != items.end(); ++iter) {
+        TopinoGraphicsItem *item = dynamic_cast<TopinoGraphicsItem *>(*iter);
+
+        if ((item != nullptr) && (item != inputImage)) {
+            selectItem(item);
+        }
+    }
+
     /* Tell everyone about the selection change */
     emit selectionHasChanged();
 }
@@ -429,7 +500,7 @@ TopinoGraphicsItem*ImageAnalysisView::getToolbyTypeAndId(TopinoGraphicsItem::ite
 PolarCircleToolItem* ImageAnalysisView::getMainInletTool() {
     /* Convenience function */
     return dynamic_cast<PolarCircleToolItem*>(getToolbyTypeAndId(TopinoGraphicsItem::itemtype::inlet,
-                                                                 document.getData().getMainInletID()));
+            document.getData().getMainInletID()));
 }
 
 bool ImageAnalysisView::isSourceImageShown() const {
@@ -446,6 +517,130 @@ void ImageAnalysisView::showSourceImage(bool value) {
         setImage(document.getData().getProcessedImage());
     }
 }
+
+void ImageAnalysisView::selectNextItem() {
+    /* No items in the scene? Leave! */
+    if (this->items().size() == 0) {
+        return;
+    }
+
+    /* Behaviour:
+     * - if _none_ or _multiple_ items are selected, select the first element of items()
+     * - if exactly _one_ item is selected, select the item with the lowest stacking index. */
+    QGraphicsItem *toSelect = this->items()[0];
+
+    if (scene()->selectedItems().size() == 1) {
+        /* By using the _ascending_ order, we can make sure to always select an item that
+         * has a low stacking index. We use the first non-selected item that is also NOT
+         * the background image. */
+        QList<QGraphicsItem *> items = scene()->items(Qt::AscendingOrder);
+        QListIterator iter(items);
+        while(iter.hasNext()) {
+            QGraphicsItem *item = iter.next();
+
+            /* This is the item we are look for */
+            if ((item != nullptr) && (item != inputImage)) {
+                toSelect = item;
+                break;
+            }
+        }
+    }
+
+    /* Unselect everything, select new item from above, and
+     * notify scene/viewport of changes. */
+    scene()->clearSelection();
+
+    if (toSelect != nullptr) {
+        selectItem(dynamic_cast<TopinoGraphicsItem *>(toSelect));
+    }
+
+    viewport()->update();
+}
+
+void ImageAnalysisView::selectItem(TopinoGraphicsItem* item) {
+    /* Select an item and make sure that the item is put in the foreground
+     * above all items that might be on top of it. This function does NOT
+     * unselect other items. Don't restack the image item. */
+    if ((item == nullptr) || (item == inputImage)) {
+        return;
+    }
+
+    item->setSelected(true);
+
+    /* Get all items that are physically above this item */
+    QList<QGraphicsItem *> items = this->items(mapFromScene(item->boundingRect()));
+
+    /* If there is at least one item in this list (that would be the item
+     * itself) then stack item before the first element in the list. The list
+     * is given in descending stacking order, i.e. the first element is on top
+     * of everything else.
+     * NOTE: Stack _before_ means to the _BACKGROUND_! Therefore, we need to
+     * call the function of the foreground item! */
+    if (items.size() > 0) {
+        QListIterator iter(items);
+        iter.toBack();
+        while(iter.hasPrevious()) {
+            QGraphicsItem *stackItem = iter.previous();
+
+            if (stackItem != inputImage) {
+                stackItem->stackBefore(item);
+            }
+        }
+    }
+}
+
+void ImageAnalysisView::removeItem(TopinoGraphicsItem* item) {
+    /* Remove the item if it exists and it is not the image background. */
+    if ((item == nullptr) || (item == inputImage)) {
+        return;
+    }
+
+    /* First, delete it from the scene. This also gives us back control
+     * over the memory, i.e. we are allowed to delete it. */
+    scene()->removeItem(item);
+
+    /* Specifics for individual item types. For instance, the document
+     * needs to remove the inlet entry for an inlet item. */
+    switch(item->getItemType()) {
+    /* Inlet: remove inlet with ID from document. */
+    case TopinoGraphicsItem::inlet: {
+        TopinoData data = document.getData();
+        data.removeInlet(item->getItemid());
+        document.setData(data);
+    }
+    break;
+    /* Default: nothing to do for all other types. */
+    default:
+        break;
+    }
+
+    /* Delete occupied memory of this item */
+    delete item;
+}
+
+void ImageAnalysisView::removeAllSelectedItems()
+{
+    QList<TopinoGraphicsItem *> delitems;
+
+    /* Search all selected items and add them to the del-list if they are
+     * a TopinoGraphicsItem and not the background image. This is necessary
+     * since by deleting items, the selectedItems list will change. */
+    QList<QGraphicsItem *> items = scene()->selectedItems();
+    for(auto iter = items.begin(); iter != items.end(); ++iter) {
+        TopinoGraphicsItem *item = dynamic_cast<TopinoGraphicsItem *>(*iter);
+
+        if ((item != nullptr) && (item != inputImage)) {
+            delitems.push_back(item);
+        }
+    }
+
+    /* Delete now all items we found */
+    for(auto iter = delitems.begin(); iter != delitems.end(); ++iter) {
+        removeItem(*iter);
+    }
+
+}
+
 
 InputImageToolItem* ImageAnalysisView::createInputImageToolItem(const QPixmap& pixmap) {
     /* First of all we remove all other image tools (only one allowed!) */

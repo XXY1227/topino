@@ -38,7 +38,9 @@ class ImageAnalysisView : public TopinoAbstractView {
 
     const QRectF getImageViewPoint();
 
+    bool event(QEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
@@ -59,6 +61,11 @@ class ImageAnalysisView : public TopinoAbstractView {
 
     bool isSourceImageShown() const;
     void showSourceImage(bool value);
+
+    void selectNextItem();
+    void selectItem(TopinoGraphicsItem* item);
+    void removeItem(TopinoGraphicsItem* item);
+    void removeAllSelectedItems();
 
   signals:
     void viewHasChanged();
