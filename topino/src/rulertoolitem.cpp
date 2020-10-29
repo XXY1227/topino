@@ -84,6 +84,7 @@ QLineF RulerToolItem::getLine() const {
 }
 
 void RulerToolItem::setLine(const QLineF& value) {
+    prepareGeometryChange();
     line = value;
 }
 
