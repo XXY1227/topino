@@ -625,7 +625,61 @@ void MainWindow::onToolResetImage() {
 }
 
 void MainWindow::onToolSnapRulerToCorner() {
-    qDebug("Snap to corner");
+    /* Check if there is a single ruler selected */
+    if (imageView.scene()->selectedItems().size() != 1)
+        return;
+
+    RulerToolItem *ruler = dynamic_cast<RulerToolItem*>(imageView.scene()->selectedItems()[0]);
+
+    if (ruler == nullptr)
+        return;
+
+    /* Receive inlet position (if it exists) */
+    QPointF inletPos = document.getData().getCoordOrigin();
+    QPointF rulerPos[2] = {ruler->getLine().p1(), ruler->getLine().p2()};
+
+    /* Snap both points to a density point near their terminal points (using the respective
+     * bounding rectangle to determine the search area). Only exception: one of the points
+     * is snapped the main inlet, i.e. inside the inner radius. */
+    for (int p = 0; p < 2; ++p) {
+        /* Compare point with inlet position; it is better to use the integer version for comparison
+         * here (floats are not precise enough for equality-comparison) */
+        if ((document.getData().getMainInletID() != 0) && (rulerPos[p].toPoint() == inletPos.toPoint())) {
+            continue;
+        }
+
+        /* Rectangle as search area, create a sum area table from it and find max value */
+        QImage searchImage = document.getData().getImage().copy(ruler->getRectOfTerminalPoint(p).toRect());
+        QImage satImage = TopinoTools::imageSumAreaTable(searchImage);
+        int maxValue = TopinoTools::imageMaxColorValue(satImage);
+
+        /* Count number of points on the image with this max value. Should this be over 50% of the total
+         * pixel number, then we invert the image here and calculate again (that usually is the case with
+         * reflectometric images in which the background is very bright). */
+        QList<QPointF> list;
+        TopinoTools::imagePointsGrayValue(satImage, list, maxValue);
+
+        if (list.size() > ((satImage.width() * satImage.height()) / 2)) {
+            searchImage.invertPixels();
+            satImage = TopinoTools::imageSumAreaTable(searchImage);
+            maxValue = TopinoTools::imageMaxColorValue(satImage);
+
+            list.clear();
+            TopinoTools::imagePointsGrayValue(satImage, list, maxValue);
+        }
+
+        /* Calculate the mass center of the points found and set the ruler position
+         * to this new center. Don't forget to add the top-left corner of the rectangle
+         * to adjust for the origin! */
+        rulerPos[p] = TopinoTools::getMassCenter(list) + ruler->getRectOfTerminalPoint(p).toRect().topLeft();
+    }
+
+    /* Set ruler positions */
+    ruler->setLine(QLineF(rulerPos[0], rulerPos[1]));
+
+    /* Update the ruler page and the view(port) */
+    updateObjectPage(rulerProps);
+    getCurrentView()->viewport()->update();
 }
 
 void MainWindow::onToolSnapRulerToInlet() {

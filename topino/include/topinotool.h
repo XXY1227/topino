@@ -2,8 +2,10 @@
 #define TOPINOTOOL_H
 
 #include <QColor>
-#include <QString>
+#include <QImage>
 #include <QRgb>
+#include <QString>
+#include <QtMath>
 
 namespace TopinoTools {
 
@@ -91,6 +93,32 @@ inline Q_DECL_CONSTEXPR int qMaximum(QRgb rgb) {
 /* This function receives the unit prefixes and matching double values for a
  * given value. */
 QString getUnitPrefix(qreal &value);
+
+/* Function to calculate the moment (M_pq) of a gray image (8bit). See the following
+ * Wikipedia article for more details: https://en.wikipedia.org/wiki/Image_moment. */
+qreal imageMoment(const QImage &grayImage, int p, int q);
+
+/* Function to calculate the centroid of an image. See the Wikipedia article above
+ * for more details. */
+QPointF imageCentroid(const QImage &image);
+
+/* Function to create a summed area table from the top left to the bottom right of
+ * an image. See https://en.wikipedia.org/wiki/Summed-area_table for details. */
+QImage imageSumAreaTable(const QImage &image);
+
+/* Function to find max color value of a gray image (8bit). Returns 255 if image
+ * is not gray. */
+uchar imageMaxColorValue(const QImage &grayImage);
+
+/* Function to find min color value of a gray image (8bit). Returns 0 if image
+ * is not gray. */
+uchar imageMinColorValue(const QImage &grayImage);
+
+/* Get all points in a gray image with the provided color value and added to list. */
+void imagePointsGrayValue(const QImage &grayImage, QList<QPointF>& list, uchar value);
+
+/* Calculates the mass center of a given list of points */
+QPointF getMassCenter(const QList<QPointF>& list);
 
 }
 
