@@ -69,6 +69,11 @@ class MainWindow : public QMainWindow, public IObserver {
     void onToolRulerAsMaxBoundary();
     void onToolRulerAsMinMaxBoundary(bool max);
 
+    /* Multiple object functions */
+    void onToolSelectOnlyRulers();
+    void onToolSelectOnlyInlets();
+    void onToolInletAtIntersection();
+
     /* Event slots */
     void onViewHasChanged();
     void onSelectionHasChanged();
@@ -81,7 +86,8 @@ class MainWindow : public QMainWindow, public IObserver {
         rulerProps = 2,
         inletProps = 3,
         angulagramProps = 4,
-        countPropPages = 5
+        multipleRulerProps = 5,
+        countPropPages = 6
     };
 
     enum viewPages {

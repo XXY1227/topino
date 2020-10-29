@@ -174,10 +174,27 @@ void MainWindow::onSelectionHasChanged() {
         return;
     }
 
-    /* More items are selected; in this case, select the multiple page
-     * and change the data there */
-    updateObjectPage(objectPages::multipleProps);
-    ui->propertiesPages->setCurrentIndex(objectPages::multipleProps);
+    /* More items are selected; check if all are of the same type. If yes,
+     * show the respective object page, if it exists. */
+    TopinoGraphicsItem::itemtype type = imageView.getItemTypeOfSelection();
+
+    objectPages selectPage = objectPages::multipleProps;
+    switch(type) {
+    /* Multiple rulers selected */
+    case TopinoGraphicsItem::itemtype::ruler:
+        selectPage = objectPages::multipleRulerProps;
+        break;
+
+    /* That means either there are multiple items of different types
+     * selected or there is no page of a group of the same item type,
+     * yet. So, let's show the standard page for multiple items. */
+    default:
+        break;
+    }
+
+    /* Update respective page and then make sure it is shown */
+    updateObjectPage(selectPage);
+    ui->propertiesPages->setCurrentIndex(selectPage);
 }
 
 void MainWindow::onItemHasChanged(int itemID) {
@@ -271,27 +288,9 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
         break;
     case multipleProps:
         /* Second page: multiple objects of multiple types selected; we do not test here, just update */
-    {
-        /* More items are selected: check all selected items and count the different types  */
-        QList<QGraphicsItem *> items = imageView.scene()->selectedItems();
-        int counter[TopinoGraphicsItem::itemtype::count] = {0};
-        for (auto iter = items.begin(); iter != items.end(); ++iter) {
-            TopinoGraphicsItem *item = dynamic_cast<TopinoGraphicsItem*>(*iter);
+        ui->propObjectsAmount->setText(QString::number(imageView.scene()->selectedItems().size()));
+        break;
 
-            if (item != nullptr) {
-                counter[item->getItemType()]++;
-            }
-        }
-
-        /* Update the counters for the individual items on the page */
-        for (int i = 0; i < TopinoGraphicsItem::itemtype::count; ++i) {
-            qDebug("Itemtype %d: count %d", i, counter[i]);
-        }
-
-        /* Total amount of items selected */
-        ui->propObjectsAmount->setText(QString(tr("%1 objects selected")).arg(imageView.scene()->selectedItems().size()));
-    }
-    break;
     case rulerProps:
         /* Third page: ruler properties */
         if (imageView.scene()->selectedItems().size() == 1) {
@@ -309,6 +308,7 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
             }
         }
         break;
+
     case inletProps:
         /* Fourth page: inlet properties */
         if (imageView.scene()->selectedItems().size() == 1) {
@@ -336,9 +336,17 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
             }
         }
         break;
+
     case angulagramProps:
         /* Fifth page: angulagram properties */
         break;
+
+    case multipleRulerProps:
+        /* Sixth page: multiple rulers selected */
+        ui->propRulersAmount->setText(QString::number(imageView.scene()->selectedItems().size()));
+        ui->propRulersIntersections->setText(QString::number(imageView.getNumberOfRulerIntersections(true)));
+        break;
+
     default:
         break;
     }
@@ -747,18 +755,18 @@ void MainWindow::onToolExtendInletToRuler() {
     if (rulerLine.p1() == rulerLine.p2()) {
         dist = qSqrt(qPow(inletPos.x() - rulerLine.p1().x(), 2.0) + qPow(inletPos.y() - rulerLine.p1().y(), 2.0));
 
-    /* Special case: ruler is a vertical line (both points have same x values); in this case,
-     * the distance to the inlet position is simply the difference between the x values. */
+        /* Special case: ruler is a vertical line (both points have same x values); in this case,
+         * the distance to the inlet position is simply the difference between the x values. */
     } else if (rulerLine.p1().x() == rulerLine.p2().x()) {
         dist = qAbs(inletPos.x() - rulerLine.p1().x());
 
-    /* Special case: ruler is a horizontal line (both points have same y values); in this case,
-     * the distance to the inlet position is simply the difference between the y values. */
+        /* Special case: ruler is a horizontal line (both points have same y values); in this case,
+         * the distance to the inlet position is simply the difference between the y values. */
     } else if (rulerLine.p1().y() == rulerLine.p2().y()) {
         dist = qAbs(inletPos.y() - rulerLine.p1().y());
 
-    /* Otherwise, simply calculcate the slope and intercept of the ruler line, find the normal line to it, and
-     * calculate the distance from the intercept to the inlet position. */
+        /* Otherwise, simply calculcate the slope and intercept of the ruler line, find the normal line to it, and
+         * calculate the distance from the intercept to the inlet position. */
     } else {
         qreal rulerSlope = (rulerLine.p1().y() - rulerLine.p2().y()) / (rulerLine.p1().x() - rulerLine.p2().x());
         qreal rulerIntercept = rulerLine.p1().y() - rulerSlope * rulerLine.p1().x();
@@ -875,6 +883,27 @@ void MainWindow::onToolRulerAsMinMaxBoundary(bool max) {
     /* Update the ruler page and the view(port) */
     updateObjectPage(rulerProps);
     getCurrentView()->viewport()->update();
+}
+
+void MainWindow::onToolSelectOnlyRulers() {
+    imageView.selectItemType(TopinoGraphicsItem::ruler, true);
+}
+
+void MainWindow::onToolSelectOnlyInlets() {
+    imageView.selectItemType(TopinoGraphicsItem::inlet, true);
+}
+
+void MainWindow::onToolInletAtIntersection() {
+    /* Get a list of intersection points and calculate the mass center
+     * of these points. This mass center will be used to create a new
+     * inlet. */
+    QList<QPointF> list;
+    imageView.getPointsOfRulerIntersections(list, true);
+    QPointF center = TopinoTools::getMassCenter(list);
+
+    /* Create an inlet a this center position. We do not provide a radius
+     * here, so the view will just try to make one up. */
+    imageView.createInletAtPos(center);
 }
 
 

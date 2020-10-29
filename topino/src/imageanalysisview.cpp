@@ -288,9 +288,9 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
                 RulerToolItem *tool = createRulerToolItem(mapToScene(rubberBand->getSrcPoint()),
                                       mapToScene(rubberBand->getDestPoint()));
 
-                QPainterPath path;
-                path.addRect(tool->boundingRect());
-                imagescene->setSelectionArea(path);
+                /* Select only the new item */
+                scene()->clearSelection();
+                selectItem(tool);
 
                 setCurrentTool(tools::selection);
 
@@ -314,32 +314,9 @@ void ImageAnalysisView::mouseReleaseEvent(QMouseEvent *event) {
                 int radius = qSqrt(qPow(srcPoint.x() - destPoint.x(), 2.0) + qPow(srcPoint.y() - destPoint.y(), 2.0));
                 PolarCircleToolItem *tool = createInletToolItem(srcPoint, radius, true);
 
-                /* Make sure that the initial direction of the tool is towards the middle of the picture; for
-                 * this, we separate the picture into four triangles (left, bottom, right, top) and select the
-                 * respective angle (fixed 90°-wise) */
-                QPointF center = inputImage->boundingRect().center();
-                int width = inputImage->boundingRect().width();
-                int height = inputImage->boundingRect().height();
-                QPolygonF triangles[4] = {
-                    QPolygonF({QPointF(0.0, 0.0), center, QPointF(0.0, height), QPointF(0.0, 0.0)}),
-                    QPolygonF({QPointF(0.0, height), center, QPointF(width, height), QPointF(0.0, height)}),
-                    QPolygonF({QPointF(width, height), center, QPointF(width, 0.0), QPointF(width, height)}),
-                    QPolygonF({QPointF(0.0, 0.0), QPointF(width, 0.0), center, QPointF(0.0, 0.0)})
-                };
-
-                int angle = 90;
-                for (int a = 0; a < 4; ++a) {
-                    if (triangles[a].containsPoint(srcPoint, Qt::OddEvenFill)) {
-                        angle = a * 90;
-                        break;
-                    }
-                }
-                tool->setZeroAngle(angle);
-
-                /* Select the new tool by boundary */
-                QPainterPath path;
-                path.addRect(tool->boundingRect());
-                imagescene->setSelectionArea(path);
+                /* Select only the new item */
+                scene()->clearSelection();
+                selectItem(tool);
 
                 setCurrentTool(tools::selection);
 
@@ -503,6 +480,43 @@ PolarCircleToolItem* ImageAnalysisView::getMainInletTool() {
             document.getData().getMainInletID()));
 }
 
+void ImageAnalysisView::getPointsOfRulerIntersections(QList<QPointF>& list, bool currentSelection) const {
+    /* Function to get all intersections of all rulers currently in view */
+    QList<RulerToolItem *> rulers;
+
+    /* Search all items in the scene and add them to the ruler-list if they are
+     * of the respective class; important is here that we create a temporary
+     * QList and not call items() every time - otherwise the iterator will not
+     * be constant/fitting and the dynamic cast will crash. */
+    QList<QGraphicsItem *> items = this->items();
+    for(auto iter = items.begin(); iter != items.end(); ++iter) {
+        RulerToolItem *item = dynamic_cast<RulerToolItem *>(*iter);
+
+        /* Check if caller wants just selected items */
+        if ((item != nullptr) && ((currentSelection && item->isSelected()) || !currentSelection)) {
+            rulers.push_back(item);
+        }
+    }
+
+    /* Iterate through all rulers and find intersections with all other rulers */
+    QPointF pt;
+    for(auto ruler1 = rulers.begin(); ruler1 != rulers.end(); ++ruler1) {
+        for(auto ruler2 = ruler1; ruler2 != rulers.end(); ++ruler2) {
+            /* Only take intersections that are INSIDE the visible lines */
+            if ((*ruler1)->getLine().intersect((*ruler2)->getLine(), &pt) == QLineF::BoundedIntersection) {
+                list.append(pt);
+            }
+        }
+    }
+}
+
+int ImageAnalysisView::getNumberOfRulerIntersections(bool currentSelection) const {
+    /* Convenience function that returns simply the number of points for all ruler intersections */
+    QList<QPointF> list;
+    getPointsOfRulerIntersections(list, currentSelection);
+    return list.size();
+}
+
 bool ImageAnalysisView::isSourceImageShown() const {
     return sourceImageShown;
 }
@@ -589,6 +603,32 @@ void ImageAnalysisView::selectItem(TopinoGraphicsItem* item) {
     }
 }
 
+void ImageAnalysisView::selectItemType(TopinoGraphicsItem::itemtype type, bool currentSelection) {
+    /* Search all items in the scene and select them if they are of the respective type;
+     * important is here that we create a temporary QList and not call items() every time
+     * - otherwise the iterator will not be constant/fitting and the dynamic cast will
+     * crash. See C++ reference:
+     *  https://en.cppreference.com/w/cpp/language/range-for#Temporary_range_expression */
+    QList<QGraphicsItem *> items = this->items();
+
+    /* Only from currently selected items */
+    if (currentSelection) {
+        items = scene()->selectedItems();
+    }
+
+    /* Check list */
+    for(auto iter = items.begin(); iter != items.end(); ++iter) {
+        TopinoGraphicsItem *item = dynamic_cast<TopinoGraphicsItem *>(*iter);
+
+        if (item == nullptr) {
+            continue;
+        }
+
+        /* Select if of the right type */
+        item->setSelected(item->getItemType() == type);
+    }
+}
+
 void ImageAnalysisView::removeItem(TopinoGraphicsItem* item) {
     /* Remove the item if it exists and it is not the image background. */
     if ((item == nullptr) || (item == inputImage)) {
@@ -618,8 +658,7 @@ void ImageAnalysisView::removeItem(TopinoGraphicsItem* item) {
     delete item;
 }
 
-void ImageAnalysisView::removeAllSelectedItems()
-{
+void ImageAnalysisView::removeAllSelectedItems() {
     QList<TopinoGraphicsItem *> delitems;
 
     /* Search all selected items and add them to the del-list if they are
@@ -641,6 +680,71 @@ void ImageAnalysisView::removeAllSelectedItems()
 
 }
 
+TopinoGraphicsItem::itemtype ImageAnalysisView::getItemTypeOfSelection() const {
+    /* Check if all items currently selected have the same item type. If yes,
+     * return it. If no, return nonspecific. */
+    QList<QGraphicsItem *> items = scene()->selectedItems();
+
+    /* There should be at least one item. */
+    if (items.size() == 0) {
+        return TopinoGraphicsItem::nonspecific;
+    }
+
+    TopinoGraphicsItem::itemtype type = TopinoGraphicsItem::nonspecific;
+    for(auto iter = items.begin(); iter != items.end(); ++iter) {
+        TopinoGraphicsItem *item = dynamic_cast<TopinoGraphicsItem *>(*iter);
+
+        /* If there is an item that could not be casted to TopinoGraphicsItem,
+         * then return with nonspecific. */
+        if (item == nullptr) {
+            return TopinoGraphicsItem::nonspecific;
+        }
+
+        /* Use the first itemtype encountered as reference */
+        if (type == TopinoGraphicsItem::nonspecific) {
+            type = item->getItemType();
+            continue;
+        }
+
+        /* Check if types are compatible. Return if they are not. */
+        if (type != item->getItemType()) {
+            return TopinoGraphicsItem::nonspecific;
+        }
+    }
+
+    /* If we are here, then all items in the selection must have the same itemtype,
+     * so let's return it. */
+    return type;
+}
+
+void ImageAnalysisView::createInletAtPos(const QPointF& pt, int radius) {
+    /* Create an inlet at the given coordinates and by taking a standard radius. Also,
+     * add the inlet to the document. Should not be called to create inlets from the
+     * document. Creates no inlet if there is no image loaded. */
+    if (inputImage->getPixmap().isNull()) {
+        return;
+    }
+
+    /* If the point is outside the scene, then do not create an inlet */
+    if (!sceneRect().contains(pt)) {
+        return;
+    }
+
+    /* If no radius is given, use the image dimensions to get a good one */
+    if (radius == 0) {
+        int width = inputImage->getPixmap().width();
+        int height = inputImage->getPixmap().height();
+        radius = qMax((int)(qMin(width, height) * 0.01), 10);
+    }
+
+    /* Create tool by using a good guess of the inlet radius */
+    PolarCircleToolItem *tool = createInletToolItem(pt, radius, true);
+
+    /* Select only the new item */
+    scene()->clearSelection();
+    selectItem(tool);
+}
+
 
 InputImageToolItem* ImageAnalysisView::createInputImageToolItem(const QPixmap& pixmap) {
     /* First of all we remove all other image tools (only one allowed!) */
@@ -655,12 +759,8 @@ InputImageToolItem* ImageAnalysisView::createInputImageToolItem(const QPixmap& p
 }
 
 RulerToolItem* ImageAnalysisView::createRulerToolItem(QPointF srcPoint, QPointF destPoint) {
-    /* First of all we remove all other ruler tools (only one allowed!) */
-    deleteToolItemByType(TopinoGraphicsItem::itemtype::ruler);
-
     /* Create a new tool, scale it to 0.2% of the image width, and connect it to the event chain */
     RulerToolItem *tool = new RulerToolItem(0);
-    //tool->setScaling(currentimage->pixmap().width() * 0.002);
     tool->setScaling(inputImage->getPixmap().width() * 0.002);
     tool->setLine(QLineF(srcPoint, destPoint));
     imagescene->addItem(tool);
@@ -673,7 +773,6 @@ RulerToolItem* ImageAnalysisView::createRulerToolItem(QPointF srcPoint, QPointF 
 PolarCircleToolItem* ImageAnalysisView::createInletToolItem(QPointF srcPoint, int radius, bool addToDocument) {
     /* Create a new tool, scale it to 0.2% of the image width, and connect it to the event chain */
     PolarCircleToolItem *tool = new PolarCircleToolItem(0);
-    //tool->setScaling(currentimage->pixmap().width() * 0.002);
     tool->setScaling(inputImage->getPixmap().width() * 0.002);
 
     tool->setOrigin(srcPoint);
@@ -710,6 +809,31 @@ PolarCircleToolItem* ImageAnalysisView::createInletToolItem(QPointF srcPoint, in
         /* Add the new inlet data to the document */
         document.setData(data);
     }
+
+    /* Make sure that the initial direction of the tool is towards the middle of the picture; for
+     * this, we separate the picture into four triangles (left, bottom, right, top) and select the
+     * respective angle (fixed 90°-wise). Important: take the scenerect, not the image rect, in
+     * case the user decides to create an inlet outside of the image */
+    QPointF center = sceneRect().center();
+    int x = sceneRect().left();
+    int y = sceneRect().top();
+    int width = sceneRect().width();
+    int height = sceneRect().height();
+    QPolygonF triangles[4] = {
+        QPolygonF({QPointF(x, y), center, QPointF(x, height), QPointF(x, y)}),
+        QPolygonF({QPointF(x, height), center, QPointF(width, height), QPointF(x, height)}),
+        QPolygonF({QPointF(width, height), center, QPointF(width, y), QPointF(width, height)}),
+        QPolygonF({QPointF(x, y), QPointF(width, y), center, QPointF(x, y)})
+    };
+
+    int angle = 90;
+    for (int a = 0; a < 4; ++a) {
+        if (triangles[a].containsPoint(srcPoint, Qt::OddEvenFill)) {
+            angle = a * 90;
+            break;
+        }
+    }
+    tool->setZeroAngle(angle);
 
     /* Add the tool itself to the scene and connect it to the event chain */
     imagescene->addItem(tool);

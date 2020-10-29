@@ -58,14 +58,20 @@ class ImageAnalysisView : public TopinoAbstractView {
     void createToolsFromDocument();
     TopinoGraphicsItem* getToolbyTypeAndId(TopinoGraphicsItem::itemtype type, int id);
     PolarCircleToolItem* getMainInletTool();
+    void getPointsOfRulerIntersections(QList<QPointF> &list, bool currentSelection = false) const;
+    int getNumberOfRulerIntersections(bool currentSelection = false) const;
 
     bool isSourceImageShown() const;
     void showSourceImage(bool value);
 
     void selectNextItem();
     void selectItem(TopinoGraphicsItem* item);
+    void selectItemType(TopinoGraphicsItem::itemtype type, bool currentSelection = false);
     void removeItem(TopinoGraphicsItem* item);
     void removeAllSelectedItems();
+    TopinoGraphicsItem::itemtype getItemTypeOfSelection() const;
+
+    void createInletAtPos(const QPointF &pt, int radius = 0);
 
   signals:
     void viewHasChanged();
