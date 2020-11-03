@@ -37,6 +37,14 @@ class MainWindow : public QMainWindow, public IObserver {
     void onExportImage();
     void onQuit();
 
+    void onCut();
+    void onCopy();
+    void onPaste();
+    void onErase();
+    void onSelectAll();
+    void onSelectNone();
+    void onSelectNext();
+
     void onAboutQt();
     void onAboutTopino();
 

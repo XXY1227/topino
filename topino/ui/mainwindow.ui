@@ -1852,6 +1852,9 @@
    <property name="text">
     <string>Zoom &amp;in</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl++</string>
+   </property>
   </action>
   <action name="action_zoom_out">
    <property name="icon">
@@ -1860,6 +1863,9 @@
    </property>
    <property name="text">
     <string>Zoom &amp;out</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
    </property>
   </action>
   <action name="action_zoom_fit_in_window">
@@ -1870,6 +1876,9 @@
    <property name="text">
     <string>&amp;Fit in window</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+*</string>
+   </property>
   </action>
   <action name="action_zoom_original_size">
    <property name="icon">
@@ -1878,6 +1887,9 @@
    </property>
    <property name="text">
     <string>O&amp;riginal size</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+0</string>
    </property>
   </action>
   <action name="action_angulagram">
@@ -1891,6 +1903,9 @@
    <property name="toolTip">
     <string>Show and edit the angulagram</string>
    </property>
+   <property name="shortcut">
+    <string>F6</string>
+   </property>
   </action>
   <action name="action_inputimage">
    <property name="icon">
@@ -1902,6 +1917,9 @@
    </property>
    <property name="toolTip">
     <string>Show and edit input image</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
    </property>
   </action>
   <action name="action_help_content">
@@ -1986,6 +2004,9 @@
    </property>
    <property name="toolTip">
     <string>Select all items</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
    </property>
   </action>
   <actiongroup name="action_group_tools">
@@ -2451,6 +2472,118 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>action_cut</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onCut()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_copy</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onCopy()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_paste</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onPaste()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_delete</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onErase()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_select_all</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onSelectAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_select_none</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onSelectNone()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_next_item</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onSelectNext()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onQuit()</slot>
@@ -2480,5 +2613,12 @@
   <slot>onToolInletAtIntersection()</slot>
   <slot>onToolSelectOnlyRulers()</slot>
   <slot>onToolSelectOnlyInlets()</slot>
+  <slot>onCut()</slot>
+  <slot>onCopy()</slot>
+  <slot>onPaste()</slot>
+  <slot>onErase()</slot>
+  <slot>onSelectAll()</slot>
+  <slot>onSelectNone()</slot>
+  <slot>onSelectNext()</slot>
  </slots>
 </ui>

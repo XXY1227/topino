@@ -86,6 +86,41 @@ bool AngulagramView::isToolSupported(const TopinoAbstractView::tools& value) con
     return (value == tools::selection);
 }
 
+void AngulagramView::cut() {
+    /* Not supported yet. */
+}
+
+void AngulagramView::copy() {
+    /* Not supported yet. */
+}
+
+void AngulagramView::paste() {
+    /* Not supported yet. */
+}
+
+void AngulagramView::erase() {
+    /* Not supported yet. */
+}
+
+void AngulagramView::selectAll() {
+    /* Not supported yet. */
+}
+
+void AngulagramView::selectNone() {
+    /* Not supported yet. */
+}
+
+void AngulagramView::selectNext() {
+    /* Not supported yet. */
+}
+
+bool AngulagramView::isEditFunctionSupported(const TopinoAbstractView::editfunc& value) const {
+    Q_UNUSED(value);
+
+    /* None of the edit functions is (yet) supported by this view */
+    return false;
+}
+
 void AngulagramView::resizeEvent(QResizeEvent* event) {
     /* Resize the chart and adapt the scene */
     chart->resize(event->size());

@@ -18,6 +18,19 @@ class AngulagramView : public TopinoAbstractView {
         void modelHasChanged() override;
         bool isToolSupported(const TopinoAbstractView::tools& value) const override;
 
+        /* Edit functions to call. */
+        void cut() override;
+        void copy() override;
+        void paste() override;
+        void erase() override;
+
+        void selectAll() override;
+        void selectNone() override;
+        void selectNext() override;
+
+        /* Which edit functions are available to the user in the image view? */
+        bool isEditFunctionSupported(const TopinoAbstractView::editfunc& value) const override;
+
     protected:
         void resizeEvent(QResizeEvent *event) override;
 

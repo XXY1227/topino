@@ -19,6 +19,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     /* All tools are exclusive to select */
     ui->action_group_tools->setExclusive(true);
 
+    /* Add these shortcuts 'manually' and just as text to these action items since they are
+     * handled by the view(s) themselves (if supported/available). Otherwise, these keyboard
+     * shortcuts are globally registered for Topino (which is a bad idea for standard keys
+     * such as TAB, ESC, etc.). */
+    ui->action_delete->setText(ui->action_delete->text() + "\t" + tr("Delete"));
+    ui->action_select_none->setText(ui->action_select_none->text() + "\t" + tr("Escape"));
+    ui->action_next_item->setText(ui->action_next_item->text() + "\t" + tr("Tab"));
+
     /* Add a label to the zoom toolbar that is updated with the current zoom level */
     zoomlabel.setText(tr("Zoom: 100%"));
     //zoomlabel.setStyleSheet("QLabel {color: #B8B8B8;}");
@@ -223,6 +231,20 @@ void MainWindow::changeToView(const viewPages value) {
     };
     for (int i = 0; i < TopinoAbstractView::tools::toolCount; ++i) {
         tools[i]->setEnabled(getCurrentView()->isToolSupported(static_cast<TopinoAbstractView::tools>(i)));
+    }
+
+    /* Check availability of edit functions for the respective view */
+    QAction *editfuncs[TopinoAbstractView::editfunc::editfuncCOUNT] = {
+        ui->action_cut,
+        ui->action_copy,
+        ui->action_paste,
+        ui->action_delete,
+        ui->action_select_all,
+        ui->action_select_none,
+        ui->action_next_item
+    };
+    for (int i = 0; i < TopinoAbstractView::editfunc::editfuncCOUNT; ++i) {
+        editfuncs[i]->setEnabled(getCurrentView()->isEditFunctionSupported(static_cast<TopinoAbstractView::editfunc>(i)));
     }
 
     /* Select the selection tool as standard */
@@ -518,6 +540,34 @@ void MainWindow::onExportImage() {
 
 void MainWindow::onQuit() {
     this->close();
+}
+
+void MainWindow::onCut() {
+    getCurrentView()->cut();
+}
+
+void MainWindow::onCopy() {
+    getCurrentView()->copy();
+}
+
+void MainWindow::onPaste() {
+    getCurrentView()->paste();
+}
+
+void MainWindow::onErase() {
+    getCurrentView()->erase();
+}
+
+void MainWindow::onSelectAll() {
+    getCurrentView()->selectAll();
+}
+
+void MainWindow::onSelectNone() {
+    getCurrentView()->selectNone();
+}
+
+void MainWindow::onSelectNext() {
+    getCurrentView()->selectNext();
 }
 
 void MainWindow::onAboutQt() {

@@ -23,12 +23,36 @@ class TopinoAbstractView : public QGraphicsView, public IObserver {
         toolCount = 3
     };
 
+    enum editfunc {
+        editCut = 0,
+        editCopy = 1,
+        editPaste = 2,
+        editErase = 3,
+        editSelectAll = 4,
+        editSelectNone = 5,
+        editSelectNext = 6,
+        editfuncCOUNT = 7
+    };
+
     /* Tool functions to get and select the current tool used by the view. */
     TopinoAbstractView::tools getCurrentTool() const;
     void setCurrentTool(const TopinoAbstractView::tools& value);
 
     /* This function will determine which tools are available to the user by selecting a particular view. */
     virtual bool isToolSupported(const TopinoAbstractView::tools& value) const = 0;
+
+    /* Virtual edit functions to call */
+    virtual void cut() = 0;
+    virtual void copy() = 0;
+    virtual void paste() = 0;
+    virtual void erase() = 0;
+
+    virtual void selectAll() = 0;
+    virtual void selectNone() = 0;
+    virtual void selectNext() = 0;
+
+    /* This function will determine which edit functions are available to the user by selecting a particular view */
+    virtual bool isEditFunctionSupported(const TopinoAbstractView::editfunc& value) const = 0;
 
     /* Zoom functions for handling the zooming in a particular view. */
     double getZoomFactor() const ;

@@ -55,6 +55,19 @@ class ImageAnalysisView : public TopinoAbstractView {
 
     bool isToolSupported(const TopinoAbstractView::tools& value) const;
 
+    /* Edit functions to call */
+    void cut() override;
+    void copy() override;
+    void paste() override;
+    void erase() override;
+
+    void selectAll() override;
+    void selectNone() override;
+    void selectNext() override;
+
+    /* Which edit functions are available to the user in the image view? */
+    bool isEditFunctionSupported(const TopinoAbstractView::editfunc& value) const override;
+
     void createToolsFromDocument();
     TopinoGraphicsItem* getToolbyTypeAndId(TopinoGraphicsItem::itemtype type, int id);
     PolarCircleToolItem* getMainInletTool();
@@ -64,11 +77,9 @@ class ImageAnalysisView : public TopinoAbstractView {
     bool isSourceImageShown() const;
     void showSourceImage(bool value);
 
-    void selectNextItem();
     void selectItem(TopinoGraphicsItem* item);
     void selectItemType(TopinoGraphicsItem::itemtype type, bool currentSelection = false);
     void removeItem(TopinoGraphicsItem* item);
-    void removeAllSelectedItems();
     TopinoGraphicsItem::itemtype getItemTypeOfSelection() const;
 
     void createInletAtPos(const QPointF &pt, int radius = 0);
