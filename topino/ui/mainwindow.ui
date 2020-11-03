@@ -41,6 +41,8 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="action_help_content"/>
+    <addaction name="separator"/>
     <addaction name="action_about_Qt"/>
     <addaction name="action_about_Topino"/>
    </widget>
@@ -48,18 +50,29 @@
     <property name="title">
      <string>&amp;View</string>
     </property>
-    <widget class="QMenu" name="menu_Zoom">
-     <property name="title">
-      <string>&amp;Zoom</string>
-     </property>
-     <addaction name="action_zoom_in"/>
-     <addaction name="action_zoom_out"/>
-     <addaction name="action_zoom_fit_in_window"/>
-     <addaction name="action_zoom_original_size"/>
-    </widget>
-    <addaction name="menu_Zoom"/>
+    <addaction name="action_inputimage"/>
+    <addaction name="action_angulagram"/>
+    <addaction name="separator"/>
+    <addaction name="action_zoom_in"/>
+    <addaction name="action_zoom_out"/>
+    <addaction name="action_zoom_fit_in_window"/>
+    <addaction name="action_zoom_original_size"/>
+   </widget>
+   <widget class="QMenu" name="menu_Edit">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="action_cut"/>
+    <addaction name="action_copy"/>
+    <addaction name="action_paste"/>
+    <addaction name="action_delete"/>
+    <addaction name="separator"/>
+    <addaction name="action_select_all"/>
+    <addaction name="action_select_none"/>
+    <addaction name="action_next_item"/>
    </widget>
    <addaction name="menu_File"/>
+   <addaction name="menu_Edit"/>
    <addaction name="menu_View"/>
    <addaction name="menu_Help"/>
   </widget>
@@ -1753,8 +1766,8 @@
   </widget>
   <action name="action_new">
    <property name="icon">
-    <iconset theme="document-new">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../topino.qrc">
+     <normaloff>:/ui/toolicons/file_new.png</normaloff>:/ui/toolicons/file_new.png</iconset>
    </property>
    <property name="text">
     <string>&amp;New</string>
@@ -1765,8 +1778,8 @@
   </action>
   <action name="action_open">
    <property name="icon">
-    <iconset theme="document-open">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../topino.qrc">
+     <normaloff>:/ui/toolicons/file_open.png</normaloff>:/ui/toolicons/file_open.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Open ...</string>
@@ -1777,8 +1790,8 @@
   </action>
   <action name="action_save">
    <property name="icon">
-    <iconset theme="document-save">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../topino.qrc">
+     <normaloff>:/ui/toolicons/file_save.png</normaloff>:/ui/toolicons/file_save.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Save</string>
@@ -1797,8 +1810,8 @@
   </action>
   <action name="action_quit">
    <property name="icon">
-    <iconset theme="application-exit">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../topino.qrc">
+     <normaloff>:/ui/toolicons/file_exit.png</normaloff>:/ui/toolicons/file_exit.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Quit</string>
@@ -1808,18 +1821,14 @@
    </property>
   </action>
   <action name="action_about_Qt">
-   <property name="icon">
-    <iconset theme="help-info">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
    <property name="text">
     <string>About Qt...</string>
    </property>
   </action>
   <action name="action_about_Topino">
    <property name="icon">
-    <iconset theme="help-info">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../topino.qrc">
+     <normaloff>:/ui/toolicons/help_info.png</normaloff>:/ui/toolicons/help_info.png</iconset>
    </property>
    <property name="text">
     <string>About Topino...</string>
@@ -1893,6 +1902,90 @@
    </property>
    <property name="toolTip">
     <string>Show and edit input image</string>
+   </property>
+  </action>
+  <action name="action_help_content">
+   <property name="icon">
+    <iconset resource="../topino.qrc">
+     <normaloff>:/ui/toolicons/help_help.png</normaloff>:/ui/toolicons/help_help.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Contents</string>
+   </property>
+   <property name="toolTip">
+    <string>Shows help information</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+  </action>
+  <action name="action_cut">
+   <property name="text">
+    <string>C&amp;ut</string>
+   </property>
+   <property name="toolTip">
+    <string>Cut the currently selected item(s)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="action_copy">
+   <property name="icon">
+    <iconset resource="../topino.qrc">
+     <normaloff>:/ui/toolicons/edit_copy.png</normaloff>:/ui/toolicons/edit_copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Copy</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy the currently selected item(s)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="action_paste">
+   <property name="text">
+    <string>&amp;Paste</string>
+   </property>
+   <property name="toolTip">
+    <string>Paste item(s) or an image from the clipboard</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="action_delete">
+   <property name="text">
+    <string>&amp;Delete</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete the currently selected item(s)</string>
+   </property>
+  </action>
+  <action name="action_next_item">
+   <property name="text">
+    <string>&amp;Next item</string>
+   </property>
+   <property name="toolTip">
+    <string>Select the next item</string>
+   </property>
+  </action>
+  <action name="action_select_none">
+   <property name="text">
+    <string>Select n&amp;one</string>
+   </property>
+   <property name="toolTip">
+    <string>Deselect everything</string>
+   </property>
+  </action>
+  <action name="action_select_all">
+   <property name="text">
+    <string>Select a&amp;ll</string>
+   </property>
+   <property name="toolTip">
+    <string>Select all items</string>
    </property>
   </action>
   <actiongroup name="action_group_tools">

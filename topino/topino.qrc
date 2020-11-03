@@ -44,5 +44,12 @@
         <file>ui/toolicons/ruler_leftboundary.png</file>
         <file>ui/toolicons/ruler_refangle.png</file>
         <file>ui/toolicons/ruler_maxradius.png</file>
+        <file>ui/toolicons/file_new.png</file>
+        <file>ui/toolicons/file_open.png</file>
+        <file>ui/toolicons/file_save.png</file>
+        <file>ui/toolicons/file_exit.png</file>
+        <file>ui/toolicons/help_info.png</file>
+        <file>ui/toolicons/help_help.png</file>
+        <file>ui/toolicons/edit_copy.png</file>
     </qresource>
 </RCC>
