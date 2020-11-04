@@ -7,6 +7,7 @@
 #include <QGraphicsView>
 #include <QMimeData>
 #include <QScrollBar>
+#include <QSvgGenerator>
 #include <QWheelEvent>
 
 #include "include/topinoabstractview.h"

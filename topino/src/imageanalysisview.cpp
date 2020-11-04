@@ -451,14 +451,23 @@ void ImageAnalysisView::copy(QClipboard *clipboard) {
     /* These are the different data streams/objects that will represent the selected
      * items. The simplest form is the textual data, which is just a set of lines
      * describing the various items. */
-    QStringList textData;    
-    QImage imageData(selectRect.size().toSize(), QImage::Format_ARGB32);
+    QStringList textData;
 
-    /* Prepare everything for painting; don't forget to translate the coordinate
-     * system. Otherwise, the items do not get drawn on the right positions. */
-    QPainter paint(&imageData);
-    paint.fillRect(QRectF(0, 0, selectRect.width(), selectRect.height()), QBrush(Qt::transparent));
-    paint.translate(- selectRect.topLeft().toPoint());
+    /* Prepare everything for raster painting; don't forget to translate the
+     * coordinate system. Otherwise, the items do not get drawn on the right
+     * positions. */
+    QImage imageData(selectRect.size().toSize(), QImage::Format_ARGB32);
+    QPainter paintRaster(&imageData);
+    paintRaster.fillRect(QRectF(0, 0, selectRect.width(), selectRect.height()), QBrush(Qt::transparent));
+    paintRaster.translate(- selectRect.topLeft().toPoint());
+
+    /* Prepare everything for vector painting; same things as above apply. */
+    QSvgGenerator generator;
+    QBuffer svgBuffer;
+    generator.setOutputDevice(&svgBuffer);
+    generator.setSize(selectRect.size().toSize());
+    generator.setViewBox(QRect(QPoint(0, 0), selectRect.size().toSize()));
+    QPainter paintVector(&generator);
 
     /* Create a list with all objects selected and iterate through it. We need
      * to ask each item for the representation. */
@@ -472,17 +481,20 @@ void ImageAnalysisView::copy(QClipboard *clipboard) {
 
             /* For painting, remove the selection */
             item->setSelected(false);
-            item->paint(&paint, nullptr);
+            item->paint(&paintRaster, nullptr);
+            item->paint(&paintVector, nullptr);
             item->setSelected(true);
         }
     }
 
-    paint.end();
+    paintRaster.end();
+    paintVector.end();
 
     /* Add the data to our mime object and feed the clipboard with it. Ownership
      * is transfered to the clipboard. */
     mimeData->setText(textData.join("\n") + "\n");
     mimeData->setImageData(imageData);
+    mimeData->setData("image/svg+xml", svgBuffer.buffer());
     clipboard->setMimeData(mimeData);
 }
 
@@ -823,8 +835,7 @@ TopinoGraphicsItem::itemtype ImageAnalysisView::getItemTypeOfSelection() const {
     return type;
 }
 
-QRectF ImageAnalysisView::getSelectionBoundary() const
-{
+QRectF ImageAnalysisView::getSelectionBoundary() const {
     QRectF rect;
 
     /* Create a list with all objects selected and iterate through it. We need
