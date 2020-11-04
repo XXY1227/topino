@@ -709,9 +709,15 @@ void ImageAnalysisView::removeItem(TopinoGraphicsItem* item) {
         return;
     }
 
-    /* First, delete it from the scene. This also gives us back control
-     * over the memory, i.e. we are allowed to delete it. */
-    scene()->removeItem(item);
+    /* It is actually MANDATORY to NOT remove the item from the scene but simply
+     * delete it. The reason is not completely clear, but removing it prior
+     * deleting results in random crashes (SEGFAULTS) during the runtime of
+     * Topino. According to the following forum thread, the problem occurs when
+     * scene()->removeItem(...) is called from an event handler and there are
+     * still events in to process for this respective (Topino)QGraphicsItem:
+     * https://forum.qt.io/topic/87303/crash-in-qgraphicsscene-event-when-removing-and-deleting-items-that-use-sceneeventfilters/4
+     * It seems to be more stable after remove scene()->removeitem(...) from
+     * here (2020-11-03) - so fixed? */
 
     /* Specifics for individual item types. For instance, the document
      * needs to remove the inlet entry for an inlet item. */
@@ -729,6 +735,7 @@ void ImageAnalysisView::removeItem(TopinoGraphicsItem* item) {
     }
 
     /* Delete occupied memory of this item */
+    item->setVisible(false);
     delete item;
 }
 

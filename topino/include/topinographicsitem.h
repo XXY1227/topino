@@ -10,7 +10,7 @@ class TopinoGraphicsItem : public QGraphicsObject {
 
   public:
     TopinoGraphicsItem(int newitemid, QGraphicsItem *parent = nullptr);
-    ~TopinoGraphicsItem();
+    virtual ~TopinoGraphicsItem();
 
     /* These enums define what type of item the user can interact with
      * and which property page is shown in the user interface, etc. */

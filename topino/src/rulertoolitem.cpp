@@ -131,6 +131,7 @@ void RulerToolItem::updateScale() {
     offset = offset * scaling;
     lineWidth = lineWidth * scaling;
     linePen.setWidth(lineWidth);
+    prepareGeometryChange();
 }
 
 void RulerToolItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {

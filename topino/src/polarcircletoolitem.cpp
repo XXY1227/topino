@@ -22,15 +22,21 @@ PolarCircleToolItem::PolarCircleToolItem(int newitemid, QGraphicsItem* parent) :
 
     /* Set standard visual appearance of this polar circle item */
     offset = 5;
-    innerCircleBrush = QBrush(QColor(255,0,0, 100));
-    segmentBrushOdd = QBrush(QColor(255,0,0, 50));
-    segmentBrushEven = QBrush(QColor(255,0,0, 25));
-    coordlinePen = QPen(QColor(215, 135, 0));
+    QColor colorOdd = TopinoTools::colorsTableau10[1]; colorOdd.setAlpha(50);
+    QColor colorEven = TopinoTools::colorsTableau10[1].darker(250); colorEven.setAlpha(50);
+    QColor colorInner = TopinoTools::colorsTableau10[1]; colorInner.setAlpha(100);
+
+    innerCircleBrush = QBrush(colorInner);
+    segmentBrushOdd = QBrush(colorOdd);
+    segmentBrushEven = QBrush(colorEven);
+
+    coordlinePen = QPen(TopinoTools::colorsTableau10[1]);
     coordlineWidth = 2;
     coordlinePen.setWidth(coordlineWidth);
-    grabLinePen = QPen(QColor(50, 20, 0));
-    grabLinePen.setWidth(coordlineWidth * 3);
-    grabLinePen.setStyle(Qt::DashLine);
+
+    grabLinePen = QPen(TopinoTools::colorsTableau10[1].darker(300));
+    grabLinePen.setWidth(coordlineWidth);
+
     fontAngleLabels = QFont("Helvetica", 16, QFont::Bold);
     fontOutline = QPen(Qt::black);
     fontOutline.setWidth(coordlineWidth / 2);
@@ -128,18 +134,6 @@ void PolarCircleToolItem::paint(QPainter* painter, const QStyleOptionGraphicsIte
             drawAngleLabel(painter, a);
         }
 
-        /* Draw "grabbing" lines at the outer and the neutral line ONLY if the inlet is selected */
-        if (isSelected()) {
-            int radiusdiff = outerRadius - innerRadius;
-            int radiusmin = (int)(0.45 * radiusdiff + innerRadius);
-            int radiusmax = (int)(0.55 * radiusdiff + innerRadius);
-
-            painter->setPen(grabLinePen);
-            painter->drawLine(polarToCartesianCoords(minAngle, radiusmin), polarToCartesianCoords(minAngle, radiusmax));
-            painter->drawLine(polarToCartesianCoords(0, radiusmin), polarToCartesianCoords(0, radiusmax));
-            painter->drawLine(polarToCartesianCoords(maxAngle, radiusmin), polarToCartesianCoords(maxAngle, radiusmax));
-        }
-
         /* Remove clipping again */
         painter->setClipRect(fullRect);
         painter->setClipping(false);
@@ -154,10 +148,28 @@ void PolarCircleToolItem::paint(QPainter* painter, const QStyleOptionGraphicsIte
                              2 * segmentSize * c + innerRadius * 2, 2 * segmentSize * c + innerRadius * 2,
                              16 * (zeroAngle + minAngle), 16 * (maxAngle - minAngle));
         }
+
+        /* Draw "grabbing" lines at the outer and the neutral line ONLY if the inlet is selected */
+        if (isSelected()) {
+            painter->setPen(grabLinePen);
+
+            /* Draw new outer lines and a new zero line that is darker to indicate interaction */
+            painter->drawLine(polarToCartesianCoords(minAngle, innerRadius), polarToCartesianCoords(minAngle, outerRadius));
+            painter->drawLine(polarToCartesianCoords(       0, innerRadius), polarToCartesianCoords(       0, outerRadius));
+            painter->drawLine(polarToCartesianCoords(maxAngle, innerRadius), polarToCartesianCoords(maxAngle, outerRadius));
+
+            /* Draw a new outer arc to indicate interaction */
+            painter->drawArc(drawRect, (zeroAngle + fixMinAngle) * 16, 16 * (fixMaxAngle - fixMinAngle));
+        }
     }
 
-    /* Draw the inner circle, the actual inlet (basically what the user selected with the rubber band) */
+    /* Draw the inner circle, the actual inlet (basically what the user selected with the rubber band) */    
     painter->setPen(coordlinePen);
+    if (isSelected()) {
+        /* Use the darker pen for the inner circle if the inlet is selected
+         * to indicate interaction */
+        painter->setPen(grabLinePen);
+    }
     painter->setBrush(innerCircleBrush);
     painter->drawEllipse(origin, innerRadius, innerRadius);
 
@@ -183,7 +195,7 @@ QPainterPath PolarCircleToolItem::shape() const {
         /* In contrast to the drawing functions, the QPainterPath.arcTo function takes
          * FULL degrees and not 1/16th of a degree */
         pathLine.moveTo(origin);
-        pathLine.arcTo(drawRect, zeroAngle + minAngle, (maxAngle - minAngle));
+        pathLine.arcTo(drawRect, zeroAngle + minAngle, maxAngle - minAngle);
         pathLine.closeSubpath();
 
         path = path.united(pathLine);
@@ -203,10 +215,11 @@ void PolarCircleToolItem::updateScale() {
     offset = offset * scaling;
     coordlineWidth = coordlineWidth * scaling;
     coordlinePen.setWidth(coordlineWidth);
-    grabLinePen.setWidth(coordlineWidth * 3);
-    fontOutline.setWidth(coordlineWidth / 2);
+    grabLinePen.setWidth(coordlineWidth);
 
+    fontOutline.setWidth(coordlineWidth / 2);
     fontAngleLabels.setPointSizeF(fontAngleLabels.pointSizeF() * scaling);
+    prepareGeometryChange();
 }
 
 void PolarCircleToolItem::mousePressEvent(QGraphicsSceneMouseEvent* event) {
@@ -245,16 +258,19 @@ void PolarCircleToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     switch (partClicked) {
     case parts::center:
         origin = event->pos();
+        prepareGeometryChange();
         break;
     case parts::centerBorder:
         if ((distance > 0) && (!drawSegments || (distance < outerRadius))) {
             innerRadius = distance;
         }
+        prepareGeometryChange();
         break;
     case parts::segmentOuterBorder:
         if (distance > innerRadius) {
             outerRadius = distance;
         }
+        prepareGeometryChange();
         break;
     case parts::grabAngleZero:
         if (event->modifiers() == Qt::ShiftModifier) {
@@ -267,6 +283,7 @@ void PolarCircleToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
         } else if (zeroAngle < 0) {
             zeroAngle += 360;
         }
+        prepareGeometryChange();
         break;
     case parts::grabAngleMin:
         if ((anglefixed >= -180) && (anglefixed < 0)) {
@@ -276,6 +293,7 @@ void PolarCircleToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
                 minAngle = anglefixed;
             }
         }
+        prepareGeometryChange();
         break;
     case parts::grabAngleMax:
         if ((anglefixed <= 180) && (anglefixed > 0)) {
@@ -285,6 +303,7 @@ void PolarCircleToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
                 maxAngle = anglefixed;
             }
         }
+        prepareGeometryChange();
         break;
     default:
         /* If clicked just on the line part, run the default movement-code */
@@ -336,6 +355,7 @@ QPointF PolarCircleToolItem::getOrigin() const {
 void PolarCircleToolItem::setOrigin(const QPointF& value) {
     origin = value;
     calculateBoundingRect();
+    prepareGeometryChange();
 }
 
 int PolarCircleToolItem::getSegments() const {
@@ -345,6 +365,7 @@ int PolarCircleToolItem::getSegments() const {
 void PolarCircleToolItem::setSegments(int value) {
     segments = value;
     calculateSegmentSize();
+    prepareGeometryChange();
 }
 
 bool PolarCircleToolItem::segmentsVisible() const {
@@ -353,6 +374,7 @@ bool PolarCircleToolItem::segmentsVisible() const {
 
 void PolarCircleToolItem::showSegments(bool value) {
     drawSegments = value;
+    prepareGeometryChange();
 }
 
 int PolarCircleToolItem::getInnerRadius() const {
@@ -363,6 +385,7 @@ void PolarCircleToolItem::setInnerRadius(int value) {
     innerRadius = value;
     calculateBoundingRect();
     calculateSegmentSize();
+    prepareGeometryChange();
 }
 
 int PolarCircleToolItem::getOuterRadius() const {
@@ -376,6 +399,7 @@ void PolarCircleToolItem::setOuterRadius(int value) {
         calculateBoundingRect();
         calculateSegmentSize();
     }
+    prepareGeometryChange();
 }
 
 void PolarCircleToolItem::calculateSegmentSize() {
@@ -395,6 +419,7 @@ bool PolarCircleToolItem::getCounterClockwise() const {
 
 void PolarCircleToolItem::setCounterClockwise(bool value) {
     counterClockwise = value;
+    prepareGeometryChange();
 }
 
 bool PolarCircleToolItem::inOriginCenter(const QPointF& pos) const {
@@ -416,16 +441,13 @@ bool PolarCircleToolItem::inSegmentOuterBorder(const QPointF& pos) const {
 }
 
 bool PolarCircleToolItem::inAngleGrabber(const QPointF& pos, int angle) const {
-    int radiusdiff = outerRadius - innerRadius;
-    int radiusmin = (int)(0.45 * radiusdiff + innerRadius);
-    int radiusmax = (int)(0.55 * radiusdiff + innerRadius);
-
+    /* Set up the polygon to check for interaction */
     QPolygonF polygon;
-    polygon.append(polarToCartesianCoords(angle - 1, radiusmin));
-    polygon.append(polarToCartesianCoords(angle - 1, radiusmax));
-    polygon.append(polarToCartesianCoords(angle + 1, radiusmax));
-    polygon.append(polarToCartesianCoords(angle + 1, radiusmin));
-    polygon.append(polarToCartesianCoords(angle - 1, radiusmin));
+    polygon.append(polarToCartesianCoords(angle - 1, innerRadius));
+    polygon.append(polarToCartesianCoords(angle - 1, outerRadius));
+    polygon.append(polarToCartesianCoords(angle + 1, outerRadius));
+    polygon.append(polarToCartesianCoords(angle + 1, innerRadius));
+    polygon.append(polarToCartesianCoords(angle - 1, innerRadius));
 
     /* While the polygon class has a "contains" function, it is important to use
      * this specific one here - otherwise it will practically always return false */
@@ -522,6 +544,7 @@ int PolarCircleToolItem::getDiffAngle() const {
 
 void PolarCircleToolItem::setDiffAngle(int value) {
     diffAngle = value;
+    prepareGeometryChange();
 }
 
 int PolarCircleToolItem::getMaxAngle() const {
@@ -534,6 +557,7 @@ void PolarCircleToolItem::setMaxAngle(int value) {
     if ((value > 0) && (value > minAngle)) {
         maxAngle = value;
     }
+    prepareGeometryChange();
 }
 
 int PolarCircleToolItem::getMinAngle() const {
@@ -546,6 +570,7 @@ void PolarCircleToolItem::setMinAngle(int value) {
     if ((value < 0) && (value < maxAngle)) {
         minAngle = value;
     }
+    prepareGeometryChange();
 }
 
 int PolarCircleToolItem::getZeroAngle() const {
@@ -557,11 +582,12 @@ void PolarCircleToolItem::setZeroAngle(int value) {
     if (value > -359 && value < 359) {
         zeroAngle = value;
     }
+    prepareGeometryChange();
 }
 
 void PolarCircleToolItem::calculateBoundingRect() {
     /* Calculates the bounding rectangle of the circle */
     fullRect = QRectF(origin.x() - outerRadius - offset, origin.y() - outerRadius - offset,
                       2 * outerRadius + 2 * offset, 2 * outerRadius + 2 * offset);
-    drawRect = fullRect.adjusted(offset, offset, -offset, -offset);
+    drawRect = fullRect.adjusted(offset, offset, -offset, -offset);    
 }

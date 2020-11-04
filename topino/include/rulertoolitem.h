@@ -12,6 +12,8 @@
 #include "include/topinographicsitem.h"
 
 class RulerToolItem : public TopinoGraphicsItem {
+    Q_OBJECT
+
   public:
     RulerToolItem(int newitemid, QGraphicsItem *parent = nullptr);
     ~RulerToolItem();

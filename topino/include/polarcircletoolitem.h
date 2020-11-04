@@ -9,8 +9,11 @@
 #include <QGraphicsSceneMouseEvent>
 
 #include "topinographicsitem.h"
+#include "topinotool.h"
 
 class PolarCircleToolItem : public virtual TopinoGraphicsItem {
+    Q_OBJECT
+
   public:
     PolarCircleToolItem(int newitemid, QGraphicsItem *parent = nullptr);
     ~PolarCircleToolItem();

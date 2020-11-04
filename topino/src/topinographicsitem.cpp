@@ -28,6 +28,7 @@ double TopinoGraphicsItem::getScaling() const {
 void TopinoGraphicsItem::setScaling(double value) {
     scaling = value;
     updateScale();
+    prepareGeometryChange();
 }
 
 QVariant TopinoGraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
