@@ -431,15 +431,62 @@ bool ImageAnalysisView::isToolSupported(const TopinoAbstractView::tools& value) 
     return true;
 }
 
-void ImageAnalysisView::cut() {
-    qDebug("ImageAnalysisView cut");
+void ImageAnalysisView::cut(QClipboard *clipboard) {
+    /* Cut = Copy + Erase */
+    copy(clipboard);
+    erase();
 }
 
-void ImageAnalysisView::copy() {
+void ImageAnalysisView::copy(QClipboard *clipboard) {
     qDebug("ImageAnalysisView copy");
+
+    /* Create a mimedata object that will store our items in different formats, so
+     * that they can be used in different programs */
+    QMimeData *mimeData = new QMimeData();
+
+    /* For creating images, etc. We need actually to get the boundary rect of all
+     * selected items */
+    QRectF selectRect = getSelectionBoundary();
+
+    /* These are the different data streams/objects that will represent the selected
+     * items. The simplest form is the textual data, which is just a set of lines
+     * describing the various items. */
+    QStringList textData;    
+    QImage imageData(selectRect.size().toSize(), QImage::Format_ARGB32);
+
+    /* Prepare everything for painting; don't forget to translate the coordinate
+     * system. Otherwise, the items do not get drawn on the right positions. */
+    QPainter paint(&imageData);
+    paint.fillRect(QRectF(0, 0, selectRect.width(), selectRect.height()), QBrush(Qt::transparent));
+    paint.translate(- selectRect.topLeft().toPoint());
+
+    /* Create a list with all objects selected and iterate through it. We need
+     * to ask each item for the representation. */
+    QList<QGraphicsItem *> items = scene()->selectedItems();
+
+    for(auto iter = items.begin(); iter != items.end(); ++iter) {
+        TopinoGraphicsItem *item = dynamic_cast<TopinoGraphicsItem *>(*iter);
+
+        if ((item != nullptr) && (item != inputImage)) {
+            textData.append(item->toString());
+
+            /* For painting, remove the selection */
+            item->setSelected(false);
+            item->paint(&paint, nullptr);
+            item->setSelected(true);
+        }
+    }
+
+    paint.end();
+
+    /* Add the data to our mime object and feed the clipboard with it. Ownership
+     * is transfered to the clipboard. */
+    mimeData->setText(textData.join("\n") + "\n");
+    mimeData->setImageData(imageData);
+    clipboard->setMimeData(mimeData);
 }
 
-void ImageAnalysisView::paste() {
+void ImageAnalysisView::paste(QClipboard *clipboard) {
     qDebug("ImageAnalysisView paste");
 }
 
@@ -774,6 +821,27 @@ TopinoGraphicsItem::itemtype ImageAnalysisView::getItemTypeOfSelection() const {
     /* If we are here, then all items in the selection must have the same itemtype,
      * so let's return it. */
     return type;
+}
+
+QRectF ImageAnalysisView::getSelectionBoundary() const
+{
+    QRectF rect;
+
+    /* Create a list with all objects selected and iterate through it. We need
+     * to ask each item for the representation. */
+    QList<QGraphicsItem *> items = scene()->selectedItems();
+
+    for(auto iter = items.begin(); iter != items.end(); ++iter) {
+        TopinoGraphicsItem *item = dynamic_cast<TopinoGraphicsItem *>(*iter);
+
+        if ((item != nullptr) && (item != inputImage)) {
+            /* Simply combining both rectangles by | will
+             * give the boundary rect of both */
+            rect |= item->boundingRect();
+        }
+    }
+
+    return rect;
 }
 
 void ImageAnalysisView::createInletAtPos(const QPointF& pt, int radius) {

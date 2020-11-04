@@ -37,6 +37,11 @@ class TopinoGraphicsItem : public QGraphicsObject {
     double getScaling() const;
     void setScaling(double value);
 
+    /* These methods create data representations of the item in various
+     * formats (and allow converting it back, too!) */
+    virtual QString toString() const = 0;
+    virtual void fromString(const QString &value) = 0;
+
   protected:
     /* Pen used to draw the selection line; it should be the same for all items and
      * purely cosmetic (not scaling at all). */

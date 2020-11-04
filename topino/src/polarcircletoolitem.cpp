@@ -22,9 +22,12 @@ PolarCircleToolItem::PolarCircleToolItem(int newitemid, QGraphicsItem* parent) :
 
     /* Set standard visual appearance of this polar circle item */
     offset = 5;
-    QColor colorOdd = TopinoTools::colorsTableau10[1]; colorOdd.setAlpha(50);
-    QColor colorEven = TopinoTools::colorsTableau10[1].darker(250); colorEven.setAlpha(50);
-    QColor colorInner = TopinoTools::colorsTableau10[1]; colorInner.setAlpha(100);
+    QColor colorOdd = TopinoTools::colorsTableau10[1];
+    colorOdd.setAlpha(50);
+    QColor colorEven = TopinoTools::colorsTableau10[1].darker(250);
+    colorEven.setAlpha(50);
+    QColor colorInner = TopinoTools::colorsTableau10[1];
+    colorInner.setAlpha(100);
 
     innerCircleBrush = QBrush(colorInner);
     segmentBrushOdd = QBrush(colorOdd);
@@ -163,7 +166,7 @@ void PolarCircleToolItem::paint(QPainter* painter, const QStyleOptionGraphicsIte
         }
     }
 
-    /* Draw the inner circle, the actual inlet (basically what the user selected with the rubber band) */    
+    /* Draw the inner circle, the actual inlet (basically what the user selected with the rubber band) */
     painter->setPen(coordlinePen);
     if (isSelected()) {
         /* Use the darker pen for the inner circle if the inlet is selected
@@ -422,6 +425,25 @@ void PolarCircleToolItem::setCounterClockwise(bool value) {
     prepareGeometryChange();
 }
 
+QString PolarCircleToolItem::toString() const {
+    QPoint pt = origin.toPoint();
+    QString text = QString("Inlet: (%1, %2) with %3 pixel inner radius").arg(pt.x()).arg(pt.y()).arg(innerRadius);
+
+    if (drawSegments) {
+        text += "\t" + QString("defines coord system (ref: %1°, range: %2° – %3° %4, %5 pixel outer radius)")
+                .arg(zeroAngle)
+                .arg(counterClockwise ? minAngle : -maxAngle)
+                .arg(counterClockwise ? maxAngle : -minAngle)
+                .arg(counterClockwise ? tr("ccw") : tr("cw"))
+                .arg(outerRadius);
+    }
+    return text;
+}
+
+void PolarCircleToolItem::fromString(const QString& value) {
+    /* TODO: Implement */
+}
+
 bool PolarCircleToolItem::inOriginCenter(const QPointF& pos) const {
     /* Origin center is defined as inside the circle with half radius */
     return (qSqrt(qPow(origin.x() - pos.x(), 2.0) + qPow(origin.y() - pos.y(), 2.0)) <= (innerRadius/2.0));
@@ -589,5 +611,5 @@ void PolarCircleToolItem::calculateBoundingRect() {
     /* Calculates the bounding rectangle of the circle */
     fullRect = QRectF(origin.x() - outerRadius - offset, origin.y() - outerRadius - offset,
                       2 * outerRadius + 2 * offset, 2 * outerRadius + 2 * offset);
-    drawRect = fullRect.adjusted(offset, offset, -offset, -offset);    
+    drawRect = fullRect.adjusted(offset, offset, -offset, -offset);
 }

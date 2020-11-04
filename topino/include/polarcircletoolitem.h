@@ -61,6 +61,11 @@ class PolarCircleToolItem : public virtual TopinoGraphicsItem {
     bool getCounterClockwise() const;
     void setCounterClockwise(bool value);
 
+    /* These methods create data representations of the item in various
+     * formats (and allow converting it back, too!) */
+    QString toString() const override;
+    void fromString(const QString &value) override;
+
   private:
     /* Individual parts of the inlet item to keep track of what the user is interacting with
      * at the moment. */

@@ -345,9 +345,12 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
 
                 /* Check for main inlet data */
                 if (document.getData().getMainInletID() == inlet->getItemid()) {
+                    bool ccw = inlet->getCounterClockwise();
                     ui->propInletRefAngle->setText(QString("%1°").arg(inlet->getZeroAngle()));
                     ui->propInletOuterRadius->setText(QString("%1 pixel").arg(inlet->getOuterRadius()));
-                    ui->propInletAngleRange->setText(QString("%1° – %2°").arg(inlet->getMinAngle()).arg(inlet->getMaxAngle()));
+                    ui->propInletAngleRange->setText(QString("%1° – %2°")
+                                                     .arg(ccw ? inlet->getMinAngle() : -inlet->getMaxAngle())
+                                                     .arg(ccw ? inlet->getMaxAngle() : -inlet->getMinAngle()));
                     ui->propInletSector->setText(QString("%1 / %2°").arg(inlet->getSegments()).arg(inlet->getDiffAngle()));
                 } else {
                     ui->propInletRefAngle->setText("-");
@@ -543,15 +546,15 @@ void MainWindow::onQuit() {
 }
 
 void MainWindow::onCut() {
-    getCurrentView()->cut();
+    getCurrentView()->cut(QGuiApplication::clipboard());
 }
 
 void MainWindow::onCopy() {
-    getCurrentView()->copy();
+    getCurrentView()->copy(QGuiApplication::clipboard());
 }
 
 void MainWindow::onPaste() {
-    getCurrentView()->paste();
+    getCurrentView()->paste(QGuiApplication::clipboard());
 }
 
 void MainWindow::onErase() {

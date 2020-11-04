@@ -3,6 +3,7 @@
 
 #include <include/iobserver.h>
 
+#include <QClipboard>
 #include <QtMath>
 #include <QGraphicsView>
 
@@ -42,9 +43,9 @@ class TopinoAbstractView : public QGraphicsView, public IObserver {
     virtual bool isToolSupported(const TopinoAbstractView::tools& value) const = 0;
 
     /* Virtual edit functions to call */
-    virtual void cut() = 0;
-    virtual void copy() = 0;
-    virtual void paste() = 0;
+    virtual void cut(QClipboard *clipboard) = 0;
+    virtual void copy(QClipboard *clipboard) = 0;
+    virtual void paste(QClipboard *clipboard) = 0;
     virtual void erase() = 0;
 
     virtual void selectAll() = 0;

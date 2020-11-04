@@ -1,11 +1,12 @@
 #ifndef IMAGEANALYSISVIEW_H
 #define IMAGEANALYSISVIEW_H
 
-#include <QGraphicsView>
-#include <QScrollBar>
 #include <QGraphicsItem>
-#include <QGraphicsSimpleTextItem>
 #include <QGraphicsPixmapItem>
+#include <QGraphicsSimpleTextItem>
+#include <QGraphicsView>
+#include <QMimeData>
+#include <QScrollBar>
 #include <QWheelEvent>
 
 #include "include/topinoabstractview.h"
@@ -56,9 +57,9 @@ class ImageAnalysisView : public TopinoAbstractView {
     bool isToolSupported(const TopinoAbstractView::tools& value) const;
 
     /* Edit functions to call */
-    void cut() override;
-    void copy() override;
-    void paste() override;
+    void cut(QClipboard *clipboard) override;
+    void copy(QClipboard *clipboard) override;
+    void paste(QClipboard *clipboard) override;
     void erase() override;
 
     void selectAll() override;
@@ -81,6 +82,7 @@ class ImageAnalysisView : public TopinoAbstractView {
     void selectItemType(TopinoGraphicsItem::itemtype type, bool currentSelection = false);
     void removeItem(TopinoGraphicsItem* item);
     TopinoGraphicsItem::itemtype getItemTypeOfSelection() const;
+    QRectF getSelectionBoundary() const;
 
     void createInletAtPos(const QPointF &pt, int radius = 0);
 

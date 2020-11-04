@@ -86,15 +86,15 @@ bool AngulagramView::isToolSupported(const TopinoAbstractView::tools& value) con
     return (value == tools::selection);
 }
 
-void AngulagramView::cut() {
+void AngulagramView::cut(QClipboard *clipboard) {
     /* Not supported yet. */
 }
 
-void AngulagramView::copy() {
+void AngulagramView::copy(QClipboard *clipboard) {
     /* Not supported yet. */
 }
 
-void AngulagramView::paste() {
+void AngulagramView::paste(QClipboard *clipboard) {
     /* Not supported yet. */
 }
 

@@ -207,6 +207,17 @@ void RulerToolItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event) {
     }
 }
 
+QString RulerToolItem::toString() const {
+    QPoint p1 = line.p1().toPoint();
+    QPoint p2 = line.p2().toPoint();
+    return QString("Ruler: (%1, %2) to (%3, %4) - %5 pixels in length, %6° to abscissa")
+           .arg(p1.x()).arg(p1.y()).arg(p2.x()).arg(p2.y()).arg(line.length()).arg(getAngleToAbscissa());
+}
+
+void RulerToolItem::fromString(const QString& value) {
+    /* TODO: Implement */
+}
+
 bool RulerToolItem::inTerminalPoint(const QPointF& termPoint, const QPointF& pos) const {
     return QRectF(termPoint.x() - offset, termPoint.y() - offset, 2 * offset, 2 * offset).contains(pos);
 }

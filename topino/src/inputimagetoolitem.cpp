@@ -77,6 +77,16 @@ void InputImageToolItem::hoverMoveEvent(QGraphicsSceneHoverEvent* event) {
     TopinoGraphicsItem::hoverMoveEvent(event);
 }
 
+QString InputImageToolItem::toString() const {
+    return QString("Image: %1 × %2 Px²").arg(pixmap.width()).arg(pixmap.height());
+}
+
+void InputImageToolItem::fromString(const QString& value) {
+    Q_UNUSED(value)
+
+    /* There is not much we can do with a string here */
+}
+
 void InputImageToolItem::calculateRect() {
     /* Make sure that the tool has some dimensions, even if there is no image; also
      * add a 10% border to each side of the image (i.e. 2 * 10% = 20%), so that other
