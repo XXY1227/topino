@@ -239,7 +239,7 @@
       <number>1</number>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>5</number>
      </property>
      <widget class="QWidget" name="general">
       <layout class="QGridLayout" name="gridLayout_4">
@@ -1627,7 +1627,7 @@
          <item>
           <widget class="QToolButton" name="toolRulersInletAtIntersection">
            <property name="toolTip">
-            <string>Create an inlet near the rulers' intersection</string>
+            <string>Create an inlet on or near the rulers' intersection</string>
            </property>
            <property name="statusTip">
             <string>Creates an inlet near the intersection points of all rulers</string>
@@ -1637,7 +1637,7 @@
            </property>
            <property name="icon">
             <iconset resource="../topino.qrc">
-             <normaloff>:/ui/toolicons/ruler.png</normaloff>:/ui/toolicons/ruler.png</iconset>
+             <normaloff>:/ui/toolicons/rulers_inletatcross.png</normaloff>:/ui/toolicons/rulers_inletatcross.png</iconset>
            </property>
            <property name="iconSize">
             <size>

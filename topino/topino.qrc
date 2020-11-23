@@ -51,5 +51,6 @@
         <file>ui/toolicons/help_info.png</file>
         <file>ui/toolicons/help_help.png</file>
         <file>ui/toolicons/edit_copy.png</file>
+        <file>ui/toolicons/rulers_inletatcross.png</file>
     </qresource>
 </RCC>
