@@ -9,8 +9,8 @@ PolarCircleToolItem::PolarCircleToolItem(int newitemid, QGraphicsItem* parent) :
 
     /* Set standard angles to draw */
     zeroAngle = 90;
-    minAngle = -30;  /* the min angle _counterclockwise_ */
-    maxAngle = +30;  /* the max angle _counterclockwise_ */
+    minAngle = -30;  /* the min angle _counterclockwise_ (i.e. cw boundary) */
+    maxAngle = +30;  /* the max angle _counterclockwise_ (i.e. ccw boundary) */
     diffAngle = 15;
 
     /* This parameter is only used for _displaying_ the angle to the user */
@@ -441,7 +441,27 @@ QString PolarCircleToolItem::toString() const {
 }
 
 void PolarCircleToolItem::fromString(const QString& value) {
+    Q_UNUSED(value)
+
     /* TODO: Implement */
+}
+
+QLineF PolarCircleToolItem::getZeroLine() const {
+    /* First point is always the origin; second point calculcated
+     * by angle and max radius */
+    return QLineF(origin, polarToCartesianCoords(0, outerRadius));
+}
+
+QLineF PolarCircleToolItem::getMinLine() const {
+    /* First point is always the origin; second point calculcated
+     * by angle and max radius */
+    return QLineF(origin, polarToCartesianCoords(minAngle, outerRadius));
+}
+
+QLineF PolarCircleToolItem::getMaxLine() const {
+    /* First point is always the origin; second point calculcated
+     * by angle and max radius */
+    return QLineF(origin, polarToCartesianCoords(maxAngle, outerRadius));
 }
 
 bool PolarCircleToolItem::inOriginCenter(const QPointF& pos) const {
@@ -576,7 +596,7 @@ int PolarCircleToolItem::getMaxAngle() const {
 void PolarCircleToolItem::setMaxAngle(int value) {
     /* The new maximum angle should be larger than zero and
      * larger than the minimum angle */
-    if ((value > 0) && (value > minAngle)) {
+    if ((value > 0) && (value > minAngle) && (value <= 180)) {
         maxAngle = value;
     }
     prepareGeometryChange();
@@ -589,7 +609,7 @@ int PolarCircleToolItem::getMinAngle() const {
 void PolarCircleToolItem::setMinAngle(int value) {
     /* The new minimum angle should be smaller than zero and
      * smaller than the maximum angle */
-    if ((value < 0) && (value < maxAngle)) {
+    if ((value < 0) && (value < maxAngle) && (value >= -180)) {
         minAngle = value;
     }
     prepareGeometryChange();

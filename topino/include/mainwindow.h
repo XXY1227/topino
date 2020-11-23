@@ -73,9 +73,9 @@ class MainWindow : public QMainWindow, public IObserver {
     void onToolSnapRulerToInlet();
     void onToolExtendInletToRuler();
     void onToolRulerAsRefAngle();
-    void onToolRulerAsMinBoundary();
-    void onToolRulerAsMaxBoundary();
-    void onToolRulerAsMinMaxBoundary(bool max);
+    void onToolRulerAsCCWBoundary();
+    void onToolRulerAsCWBoundary();
+    void onToolRulerAsBoundary(bool ccw);
 
     /* Multiple object functions */
     void onToolSelectOnlyRulers();

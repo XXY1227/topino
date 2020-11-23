@@ -93,7 +93,7 @@ class ImageAnalysisView : public TopinoAbstractView {
     void itemHasChanged(int itemID);
 
   private:
-    /* The basic scene object + the image at the bottom */
+    /* The basic scene object + the image at the bottom and the brush for the background */
     QGraphicsScene *imagescene = nullptr;
     bool sourceImageShown = true;
 

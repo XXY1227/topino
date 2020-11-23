@@ -239,7 +239,7 @@
       <number>1</number>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="general">
       <layout class="QGridLayout" name="gridLayout_4">
@@ -800,7 +800,7 @@
             <string>Use as min boundary</string>
            </property>
            <property name="statusTip">
-            <string>Uses the angle of this ruler as min boundary for the main inlet</string>
+            <string>Uses the angle of this ruler as boundary (counterclockwise) for the main inlet</string>
            </property>
            <property name="text">
             <string>...</string>
@@ -846,7 +846,7 @@
             <string>Use as max boundary</string>
            </property>
            <property name="statusTip">
-            <string>Uses the angle of this ruler as max boundary for the main inlet</string>
+            <string>Uses the angle of this ruler as boundary (clockwise) for the main inlet</string>
            </property>
            <property name="text">
             <string>...</string>
@@ -2380,7 +2380,7 @@
    <sender>toolLeftBoundaryFromRuler</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>onToolRulerAsMinBoundary()</slot>
+   <slot>onToolRulerAsCCWBoundary()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>814</x>
@@ -2396,7 +2396,7 @@
    <sender>toolRightBoundaryFromRuler</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>onToolRulerAsMaxBoundary()</slot>
+   <slot>onToolRulerAsCWBoundary()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>893</x>
@@ -2607,8 +2607,8 @@
   <slot>onToolSnapRulerToCorner()</slot>
   <slot>onToolSnapRulerToInlet()</slot>
   <slot>onToolRulerAsRefAngle()</slot>
-  <slot>onToolRulerAsMinBoundary()</slot>
-  <slot>onToolRulerAsMaxBoundary()</slot>
+  <slot>onToolRulerAsCCWBoundary()</slot>
+  <slot>onToolRulerAsCWBoundary()</slot>
   <slot>onToolExtendInletToRuler()</slot>
   <slot>onToolInletAtIntersection()</slot>
   <slot>onToolSelectOnlyRulers()</slot>

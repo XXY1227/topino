@@ -66,6 +66,11 @@ class PolarCircleToolItem : public virtual TopinoGraphicsItem {
     QString toString() const override;
     void fromString(const QString &value) override;
 
+    /* Get a representation line for the two boundaries and the central line */
+    QLineF getZeroLine() const;
+    QLineF getMinLine() const;
+    QLineF getMaxLine() const;
+
   private:
     /* Individual parts of the inlet item to keep track of what the user is interacting with
      * at the moment. */

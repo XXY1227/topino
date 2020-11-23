@@ -808,18 +808,18 @@ void MainWindow::onToolExtendInletToRuler() {
     if (rulerLine.p1() == rulerLine.p2()) {
         dist = qSqrt(qPow(inletPos.x() - rulerLine.p1().x(), 2.0) + qPow(inletPos.y() - rulerLine.p1().y(), 2.0));
 
-        /* Special case: ruler is a vertical line (both points have same x values); in this case,
-         * the distance to the inlet position is simply the difference between the x values. */
+    /* Special case: ruler is a vertical line (both points have same x values); in this case,
+     * the distance to the inlet position is simply the difference between the x values. */
     } else if (rulerLine.p1().x() == rulerLine.p2().x()) {
         dist = qAbs(inletPos.x() - rulerLine.p1().x());
 
-        /* Special case: ruler is a horizontal line (both points have same y values); in this case,
-         * the distance to the inlet position is simply the difference between the y values. */
+    /* Special case: ruler is a horizontal line (both points have same y values); in this case,
+     * the distance to the inlet position is simply the difference between the y values. */
     } else if (rulerLine.p1().y() == rulerLine.p2().y()) {
         dist = qAbs(inletPos.y() - rulerLine.p1().y());
 
-        /* Otherwise, simply calculcate the slope and intercept of the ruler line, find the normal line to it, and
-         * calculate the distance from the intercept to the inlet position. */
+    /* Otherwise, simply calculcate the slope and intercept of the ruler line, find the normal line to it, and
+     * calculate the distance from the intercept to the inlet position. */
     } else {
         qreal rulerSlope = (rulerLine.p1().y() - rulerLine.p2().y()) / (rulerLine.p1().x() - rulerLine.p2().x());
         qreal rulerIntercept = rulerLine.p1().y() - rulerSlope * rulerLine.p1().x();
@@ -857,22 +857,23 @@ void MainWindow::onToolRulerAsRefAngle() {
     if ((ruler == nullptr) || (inlet == nullptr))
         return;
 
-    /* Receive inlet reference angle and the angle of the ruler */
-    int refAngle = inlet->getZeroAngle();
-    int rulerAngle = ruler->getAngleToAbscissa();
-
-    /* If the reference angle and the ruler angle are more than 90° away from
-     * each other, then add 180° to the ruler angle to not inverse the inlet;
-     * if the angles are 270° from each other, this means that one is <90° and
-     * the other one >270° - so they are actually closer than 90° to each other */
-    int diffAngle = qAbs(refAngle - rulerAngle);
-    if ((diffAngle > 90) && (diffAngle < 270)) {
-        rulerAngle += 180;
+    /* Get zero line of inlet and calculcate the angle to the ruler line. For the
+     * ruler line make sure that p1 is on the inlet */
+    QLineF inletLine = inlet->getZeroLine();
+    QLineF rulerLine = ruler->getLine();
+    if (rulerLine.p2().toPoint() == inletLine.p1().toPoint()) {
+        rulerLine.setPoints(rulerLine.p2(), rulerLine.p1());
     }
+    int angle = (int)inletLine.angleTo(rulerLine);
 
-    /* Update the inlet item and tell the view that it changed; it will synchronize
-     * the data then automatically with the document */
-    inlet->setZeroAngle(rulerAngle);
+    /* Revert the angle if it is above 180° */
+    if (angle > 180) {
+        angle -= 360;
+    }
+    qDebug("Angle between inlet min/max and ruler: %d", angle);
+
+    inlet->setZeroAngle(inlet->getZeroAngle() + angle);
+
     imageView.onItemDataChanged(inlet);
 
     /* Update the ruler page and the view(port) */
@@ -880,17 +881,17 @@ void MainWindow::onToolRulerAsRefAngle() {
     getCurrentView()->viewport()->update();
 }
 
-void MainWindow::onToolRulerAsMinBoundary() {
-    qDebug("Use as left boundary");
-    onToolRulerAsMinMaxBoundary(false);
+void MainWindow::onToolRulerAsCCWBoundary() {
+    qDebug("Use as left (ccw) boundary");
+    onToolRulerAsBoundary(true);
 }
 
-void MainWindow::onToolRulerAsMaxBoundary() {
-    qDebug("Use as right boundary");
-    onToolRulerAsMinMaxBoundary(true);
+void MainWindow::onToolRulerAsCWBoundary() {
+    qDebug("Use as right (cw) boundary");
+    onToolRulerAsBoundary(false);
 }
 
-void MainWindow::onToolRulerAsMinMaxBoundary(bool max) {
+void MainWindow::onToolRulerAsBoundary(bool ccw) {
     /* Check if there is a single ruler selected */
     if (imageView.scene()->selectedItems().size() != 1)
         return;
@@ -907,30 +908,28 @@ void MainWindow::onToolRulerAsMinMaxBoundary(bool max) {
     if ((ruler == nullptr) || (inlet == nullptr))
         return;
 
-    /* Get all inlet angles and the angle of the ruler */
-    int refAngle = inlet->getZeroAngle();
-    int minAngle = inlet->getMinAngle() + refAngle;
-    int maxAngle = inlet->getMaxAngle() + refAngle;
-    int rulerAngle = ruler->getAngleToAbscissa();
-
-    qDebug("Angles (ref, min, max, ruler): %d %d %d %d", refAngle, minAngle, maxAngle, rulerAngle);
-
-    /* If the reference angle and the ruler angle are more than 90° away from
-     * each other, then add 180° to the ruler angle to not inverse the inlet;
-     * if the angles are 270° from each other, this means that one is <90° and
-     * the other one >270° - so they are actually closer than 90° to each other */
-    int diffAngle = qAbs(minAngle - rulerAngle);
-    if ((diffAngle > 90) && (diffAngle < 270)) {
-        rulerAngle -= 180;
+    /* Get min/max line of inlet and calculcate the angle to the ruler line. For the
+     * ruler line make sure that p1 is on the inlet */
+    QLineF inletLine = ccw ? inlet->getMaxLine() : inlet->getMinLine();
+    QLineF rulerLine = ruler->getLine();
+    if (rulerLine.p2().toPoint() == inletLine.p1().toPoint()) {
+        rulerLine.setPoints(rulerLine.p2(), rulerLine.p1());
     }
+    int angle = (int)inletLine.angleTo(rulerLine);
 
-    /* Update the inlet item and tell the view that it changed; it will synchronize
-     * the data then automatically with the document */
-    if (max) {
-        inlet->setMaxAngle(rulerAngle - refAngle);
+    /* Revert the angle if it is above 180° */
+    if (angle > 180) {
+        angle -= 360;
+    }
+    qDebug("Angle between inlet min/max and ruler: %d", angle);
+
+    /* CCW means "max" angle gets set, CW means "min" angle gets set */
+    if (ccw) {
+        inlet->setMaxAngle(inlet->getMaxAngle() + angle);
     } else {
-        inlet->setMinAngle(rulerAngle - refAngle);
+        inlet->setMinAngle(inlet->getMinAngle() + angle);
     }
+
     imageView.onItemDataChanged(inlet);
 
     /* Update the ruler page and the view(port) */

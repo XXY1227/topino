@@ -7,6 +7,7 @@ ImageAnalysisView::ImageAnalysisView(QWidget *parent, TopinoDocument &doc) :
     setAlignment( Qt::AlignHCenter | Qt::AlignVCenter );
 
     /* Create scene and input image tool */
+    setBackgroundBrush(QBrush(QColor(50,50,50), Qt::SolidPattern));
     imagescene = new QGraphicsScene(contentsRect(), this);
     inputImage = createInputImageToolItem(QPixmap());
     setScene(imagescene);
@@ -80,15 +81,18 @@ void ImageAnalysisView::setImageBasedSceneRect() {
     /* Get the boundary rect of the image; this is the focus point after all */
     QRectF rect = inputImage->boundingRect();
 
-    /* Border added to the image is a minimum of 20 pixels, or 5% of the width
-     * or height of the image - whatever is larger */
-    qreal border = qMax(qMax(0.05 * rect.width(), 0.05 * rect.height()), 20.0);
+    /* Only add a border if there is an image loaded */
+    if (!inputImage->getPixmap().isNull()) {
+        /* Border added to the image is a minimum of 20 pixels, or 20% of the width
+         * or height of the image - whatever is larger */
+        qreal border = qMax(qMax(0.20 * rect.width(), 0.20 * rect.height()), 20.0);
 
-    /* Negative coordinate, because we want the top-left of the image to be (0,0);
-     * also, border needs to be added only one time to width and height! */
-    rect.setTopLeft(QPointF(-border, -border));
-    rect.setWidth(rect.width() + border);
-    rect.setHeight(rect.height() + border);
+        /* Negative coordinate, because we want the top-left of the image to be (0,0);
+         * also, border needs to be added only one time to width and height! */
+        rect.setTopLeft(QPointF(-border, -border));
+        rect.setWidth(rect.width() + border);
+        rect.setHeight(rect.height() + border);
+    }
 
     /* Set the modified scene rect */
     setSceneRect(rect);
@@ -675,7 +679,7 @@ void ImageAnalysisView::getPointsOfRulerIntersections(QList<QPointF>& list, bool
     for(auto ruler1 = rulers.begin(); ruler1 != rulers.end(); ++ruler1) {
         for(auto ruler2 = ruler1; ruler2 != rulers.end(); ++ruler2) {
             /* Only take intersections that are INSIDE the visible lines */
-            if ((*ruler1)->getLine().intersect((*ruler2)->getLine(), &pt) == QLineF::BoundedIntersection) {
+            if ((*ruler1)->getLine().intersect((*ruler2)->getLine(), &pt) != QLineF::NoIntersection) {
                 list.append(pt);
             }
         }
@@ -863,9 +867,25 @@ void ImageAnalysisView::createInletAtPos(const QPointF& pt, int radius) {
         return;
     }
 
-    /* If the point is outside the scene, then do not create an inlet */
-    if (!sceneRect().contains(pt)) {
-        return;
+    /* If the point is outside the scene, then modify the point to move it
+     * into the scene (at the border) */
+    QPointF center = pt;
+    if (!sceneRect().contains(center)) {
+        qDebug("Point (%.1f, %.1f) is outside the scene, so let's modify it a bit.", pt.x(), pt.y());
+
+        if (center.x() < sceneRect().left()) {
+            center.setX(sceneRect().left() + 1);
+        } else if (center.x() > sceneRect().right()) {
+            center.setX(sceneRect().right() - 1);
+        }
+
+        if (center.y() < sceneRect().top()) {
+            center.setY(sceneRect().top() + 1);
+        } else if (center.y() > sceneRect().bottom()) {
+            center.setY(sceneRect().bottom() - 1);
+        }
+
+        qDebug("Point moved to (%.1f, %.1f).", center.x(), center.y());
     }
 
     /* If no radius is given, use the image dimensions to get a good one */
@@ -876,7 +896,7 @@ void ImageAnalysisView::createInletAtPos(const QPointF& pt, int radius) {
     }
 
     /* Create tool by using a good guess of the inlet radius */
-    PolarCircleToolItem *tool = createInletToolItem(pt, radius, true);
+    PolarCircleToolItem *tool = createInletToolItem(center, radius, true);
 
     /* Select only the new item */
     scene()->clearSelection();
