@@ -219,8 +219,8 @@
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>248</width>
-       <height>350</height>
+       <width>256</width>
+       <height>348</height>
       </rect>
      </property>
      <property name="sizePolicy">
@@ -239,7 +239,7 @@
       <number>1</number>
      </property>
      <property name="currentIndex">
-      <number>5</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="general">
       <layout class="QGridLayout" name="gridLayout_4">
@@ -1168,21 +1168,21 @@
         </widget>
        </item>
        <item row="10" column="0" colspan="3">
-        <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,0,0">
-         <item>
-          <widget class="QToolButton" name="toolEditImage_4">
+        <layout class="QGridLayout" name="gridLayout_7">
+         <item row="0" column="1">
+          <widget class="QToolButton" name="toolSwapSignsOfInlet">
            <property name="toolTip">
-            <string>Preprocess image</string>
+            <string>Swap signs of angles at boundaries</string>
            </property>
            <property name="statusTip">
-            <string>Select options for preprocessing the image to make it ready for angulargram creation</string>
+            <string>Swaps the signs of the clockwise and counterclockwise boundary angles</string>
            </property>
            <property name="text">
             <string>...</string>
            </property>
            <property name="icon">
             <iconset resource="../topino.qrc">
-             <normaloff>:/ui/toolicons/inlet.png</normaloff>:/ui/toolicons/inlet.png</iconset>
+             <normaloff>:/ui/toolicons/inlet_signs.png</normaloff>:/ui/toolicons/inlet_signs.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -1192,20 +1192,20 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QToolButton" name="toolSwitchImage_4">
+         <item row="0" column="0">
+          <widget class="QToolButton" name="toolSetMainInlet">
            <property name="toolTip">
-            <string>Swap source and processed image</string>
+            <string>Set main inlet</string>
            </property>
            <property name="statusTip">
-            <string>Swap source and processed image</string>
+            <string>Sets this inlet as main inlet and origin for the coordinate system</string>
            </property>
            <property name="text">
             <string>...</string>
            </property>
            <property name="icon">
             <iconset resource="../topino.qrc">
-             <normaloff>:/ui/toolicons/inlet.png</normaloff>:/ui/toolicons/inlet.png</iconset>
+             <normaloff>:/ui/toolicons/inlet_maininlet.png</normaloff>:/ui/toolicons/inlet_maininlet.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -1215,20 +1215,43 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QToolButton" name="toolResetImage_4">
+         <item row="0" column="2">
+          <widget class="QToolButton" name="toolSnapInletToImage">
            <property name="toolTip">
-            <string>Resets the processed image</string>
+            <string>Snap inlet to image feature</string>
            </property>
            <property name="statusTip">
-            <string>Resets the processed image back to the source image and all processing parameters to default</string>
+            <string>Adjusts the position and the inner radius of this inlet to an (processed) image feature</string>
            </property>
            <property name="text">
             <string>...</string>
            </property>
            <property name="icon">
             <iconset resource="../topino.qrc">
-             <normaloff>:/ui/toolicons/inlet.png</normaloff>:/ui/toolicons/inlet.png</iconset>
+             <normaloff>:/ui/toolicons/inlet_snaptoimage.png</normaloff>:/ui/toolicons/inlet_snaptoimage.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QToolButton" name="toolEditInletProps">
+           <property name="toolTip">
+            <string>Edit inlet properties</string>
+           </property>
+           <property name="statusTip">
+            <string>Edit the properties of this inlet</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../topino.qrc">
+             <normaloff>:/ui/toolicons/inlet_props.png</normaloff>:/ui/toolicons/inlet_props.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -2584,6 +2607,70 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>toolSetMainInlet</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolSetMainInlet()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>736</x>
+     <y>534</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolSwapSignsOfInlet</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolSwapInletBoundaries()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>816</x>
+     <y>534</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolSnapInletToImage</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolSnapInletToImage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>896</x>
+     <y>534</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolEditInletProps</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolEditInlet()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>896</x>
+     <y>579</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onQuit()</slot>
@@ -2620,5 +2707,9 @@
   <slot>onSelectAll()</slot>
   <slot>onSelectNone()</slot>
   <slot>onSelectNext()</slot>
+  <slot>onToolSetMainInlet()</slot>
+  <slot>onToolSwapInletBoundaries()</slot>
+  <slot>onToolSnapInletToImage()</slot>
+  <slot>onToolEditInlet()</slot>
  </slots>
 </ui>

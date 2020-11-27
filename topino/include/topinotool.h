@@ -1,6 +1,7 @@
 #ifndef TOPINOTOOL_H
 #define TOPINOTOOL_H
 
+#include <algorithm>
 #include <QColor>
 #include <QImage>
 #include <QRgb>
@@ -44,6 +45,9 @@ enum desaturationModes {
     desatBlue = 6,
     desatCOUNT = 7
 };
+
+/* Multiplicative epsilon for qreal calculations with very small numbers */
+const qreal MULTIPLICATIVE_EPSILON = 1 + 1e-14;
 
 /* Names for the desaturation modes */
 QString getDesaturationModeName(desaturationModes mode);
@@ -119,6 +123,38 @@ void imagePointsGrayValue(const QImage &grayImage, QList<QPointF>& list, uchar v
 
 /* Calculates the mass center of a given list of points */
 QPointF getMassCenter(const QList<QPointF>& list);
+
+/* Calculates points on 8 directions from the given central point on the given image depending
+ * on the slope going from the central point to the outside. Works only on gray images. */
+QList<QPointF> imageSlopePoints(const QImage &image, const QPointF &center);
+
+/* Calculates the point of slope on a given array of pixels. Returns it as t-value,
+ * i.e. 0.0 for index = 0 and 1.0 for max index. */
+qreal pixelSlopePoint(const QList<uchar>& pixels);
+
+/* Calculate the standard deviation of a list of int values (for the noise) */
+qreal pixelNoise(const QList<int>& values);
+
+/* Calculates the max distance between one point (center) to a list of other points */
+qreal centerMaxDistance(const QPointF &center, const QList<QPointF> &points);
+
+/* Calculates the smallest circle (returned in center, radius) for a given list of points. Algorithm based
+ * on Nayukis version but adapted to Qt (https://www.nayuki.io/page/smallest-enclosing-circle). */
+void calculateSmallestCircle(const QList<QPointF>& points, QPointF &center, qreal &radius);
+
+/* Helper function that calculcates the smallest circle (returned in center, radius) based on two points
+ * that are already IN the circle. */
+void calculateSmallestCircleTwoPoints(const QList<QPointF>& points, int p, int q, QPointF &center, qreal &radius);
+
+/* Helper function that creates a circum circle (returned in center and radius) around three points a, b, and c. This
+ * is based on the algorithm given at Wikipedia (https://en.wikipedia.org/wiki/Circumscribed_circle). */
+void calculateCircumCircle(const QPointF &a, const QPointF &b, const QPointF &c, QPointF &center, qreal &radius);
+
+/* Checks if a point is in the circle given by radius and position */
+bool isPointInCircle(const QPointF &point, const QPointF &center, const qreal radius);
+
+/* Calculates the cross product (p1.x * p2.y - p2.x * p2.y) of two points */
+qreal crossProduct(const QPointF &p, const QPointF &q);
 
 }
 

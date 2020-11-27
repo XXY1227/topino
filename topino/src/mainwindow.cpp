@@ -808,18 +808,18 @@ void MainWindow::onToolExtendInletToRuler() {
     if (rulerLine.p1() == rulerLine.p2()) {
         dist = qSqrt(qPow(inletPos.x() - rulerLine.p1().x(), 2.0) + qPow(inletPos.y() - rulerLine.p1().y(), 2.0));
 
-    /* Special case: ruler is a vertical line (both points have same x values); in this case,
-     * the distance to the inlet position is simply the difference between the x values. */
+        /* Special case: ruler is a vertical line (both points have same x values); in this case,
+         * the distance to the inlet position is simply the difference between the x values. */
     } else if (rulerLine.p1().x() == rulerLine.p2().x()) {
         dist = qAbs(inletPos.x() - rulerLine.p1().x());
 
-    /* Special case: ruler is a horizontal line (both points have same y values); in this case,
-     * the distance to the inlet position is simply the difference between the y values. */
+        /* Special case: ruler is a horizontal line (both points have same y values); in this case,
+         * the distance to the inlet position is simply the difference between the y values. */
     } else if (rulerLine.p1().y() == rulerLine.p2().y()) {
         dist = qAbs(inletPos.y() - rulerLine.p1().y());
 
-    /* Otherwise, simply calculcate the slope and intercept of the ruler line, find the normal line to it, and
-     * calculate the distance from the intercept to the inlet position. */
+        /* Otherwise, simply calculcate the slope and intercept of the ruler line, find the normal line to it, and
+         * calculate the distance from the intercept to the inlet position. */
     } else {
         qreal rulerSlope = (rulerLine.p1().y() - rulerLine.p2().y()) / (rulerLine.p1().x() - rulerLine.p2().x());
         qreal rulerIntercept = rulerLine.p1().y() - rulerSlope * rulerLine.p1().x();
@@ -857,23 +857,22 @@ void MainWindow::onToolRulerAsRefAngle() {
     if ((ruler == nullptr) || (inlet == nullptr))
         return;
 
-    /* Get zero line of inlet and calculcate the angle to the ruler line. For the
-     * ruler line make sure that p1 is on the inlet */
-    QLineF inletLine = inlet->getZeroLine();
-    QLineF rulerLine = ruler->getLine();
-    if (rulerLine.p2().toPoint() == inletLine.p1().toPoint()) {
-        rulerLine.setPoints(rulerLine.p2(), rulerLine.p1());
+    /* Receive inlet reference angle and the angle of the ruler */
+    int refAngle = inlet->getZeroAngle();
+    int rulerAngle = ruler->getAngleToAbscissa();
+
+    /* If the reference angle and the ruler angle are more than 90° away from
+     * each other, then add 180° to the ruler angle to not inverse the inlet;
+     * if the angles are 270° from each other, this means that one is <90° and
+     * the other one >270° - so they are actually closer than 90° to each other */
+    int diffAngle = qAbs(refAngle - rulerAngle);
+    if ((diffAngle > 90) && (diffAngle < 270)) {
+        rulerAngle += 180;
     }
-    int angle = (int)inletLine.angleTo(rulerLine);
 
-    /* Revert the angle if it is above 180° */
-    if (angle > 180) {
-        angle -= 360;
-    }
-    qDebug("Angle between inlet min/max and ruler: %d", angle);
-
-    inlet->setZeroAngle(inlet->getZeroAngle() + angle);
-
+    /* Update the inlet item and tell the view that it changed; it will synchronize
+     * the data then automatically with the document */
+    inlet->setZeroAngle(rulerAngle);
     imageView.onItemDataChanged(inlet);
 
     /* Update the ruler page and the view(port) */
@@ -935,6 +934,136 @@ void MainWindow::onToolRulerAsBoundary(bool ccw) {
     /* Update the ruler page and the view(port) */
     updateObjectPage(rulerProps);
     getCurrentView()->viewport()->update();
+}
+
+void MainWindow::onToolSetMainInlet() {
+    /* Check if there is a single inlet selected */
+    if (imageView.scene()->selectedItems().size() != 1)
+        return;
+
+    /* Get current inlet and main inlet pointer */
+    PolarCircleToolItem *inlet = dynamic_cast<PolarCircleToolItem*>(imageView.scene()->selectedItems()[0]);
+
+    if (inlet == nullptr)
+        return;
+
+    /* Get data */
+    TopinoData data = document.getData();
+
+    /* Is there a main inlet already defined? In this case, we need to
+     * hide its segments drawing (i.e. the coordinate system). However,
+     * we save the segments + diff angle and transfer it to the new one. */
+    int diffangle = 0;
+    int segments = 0;
+    if (data.getMainInletID() > 0) {
+        imageView.getMainInletTool()->showSegments(false);
+        diffangle = imageView.getMainInletTool()->getDiffAngle();
+        segments = imageView.getMainInletTool()->getSegments();
+    }
+
+    /* Change new item id in data */
+    data.setMainInletID(inlet->getItemid());
+    document.setData(data);
+
+    /* Set main inlet ID to the ID of the currently selected inlet. Also
+     * transfer data to new main inlet */
+    inlet->showSegments(true);
+    inlet->setZeroAngle(data.getCoordNeutralAngle());
+    inlet->setMinAngle(data.getCoordMinAngle());
+    inlet->setMaxAngle(data.getCoordMaxAngle());
+    inlet->setCounterClockwise(data.getCoordCounterClockwise());
+    inlet->setOuterRadius(data.getCoordOuterRadius());
+
+    /* Transfer diff angle and segments if possible */
+    if (segments > 0) {
+        inlet->setSegments(segments);
+    }
+
+    if (diffangle > 0) {
+        inlet->setDiffAngle(diffangle);
+    }
+
+    /* Update object page and view port */
+    imageView.onItemDataChanged(inlet);
+    updateObjectPage(inletProps);
+    getCurrentView()->viewport()->update();
+
+}
+
+void MainWindow::onToolSwapInletBoundaries() {
+    /* Check if there is a single inlet selected */
+    if (imageView.scene()->selectedItems().size() != 1)
+        return;
+
+    /* Get inlet pointer */
+    PolarCircleToolItem *inlet = dynamic_cast<PolarCircleToolItem*>(imageView.scene()->selectedItems()[0]);
+
+    if (inlet == nullptr)
+        return;
+
+    /* Reverse direction */
+    inlet->setCounterClockwise(!inlet->getCounterClockwise());
+
+    /* Update item on view, object page, and view port */
+    imageView.onItemDataChanged(inlet);
+    updateObjectPage(inletProps);
+    getCurrentView()->viewport()->update();
+}
+
+void MainWindow::onToolSnapInletToImage() {
+    qDebug("Snap inlet to image");
+    /* Check if there is a single inlet selected */
+    if (imageView.scene()->selectedItems().size() != 1)
+        return;
+
+    /* Get inlet pointer */
+    PolarCircleToolItem *inlet = dynamic_cast<PolarCircleToolItem*>(imageView.scene()->selectedItems()[0]);
+
+    if (inlet == nullptr)
+        return;
+
+    /* Use the rectange of the inner circle as search image - use processed image if available! */
+    QImage searchImage = document.getData().getProcessedImage().copy(inlet->getInnerRect().toRect());
+    QImage grayImage = searchImage.convertToFormat(QImage::Format_Grayscale8);
+    grayImage.save("test2.png");
+
+    /* Calculate centroid and use it as starting point for a set of 4 lines (8 directions) */
+    QPointF centroid = TopinoTools::imageCentroid(grayImage);
+    qDebug("Centroid: %.1f %.1f", centroid.x(), centroid.y());
+
+    QList<QPointF> points = TopinoTools::imageSlopePoints(grayImage, centroid);
+    QPointF massCenter = TopinoTools::getMassCenter(points);
+
+    qDebug("Mass center: %.1f %.1f", massCenter.x(), massCenter.y());
+    for (auto iter = points.begin(); iter != points.end(); ++iter) {
+        qDebug("Point: %.1f %.1f", (*iter).x(), (*iter).y());
+
+        searchImage.setPixelColor((*iter).toPoint(), QColor(255, 0, 0));
+    }
+    searchImage.save("test1.png");
+
+    /* Less than three points make no sense to calculcate a circle and we will leave here. */
+    if (points.size() < 3)
+        return;
+
+    /* Calculate the smallest circle for all points */
+    qreal circleRadius = 0.0;
+    QPointF circleCenter;
+    TopinoTools::calculateSmallestCircle(points, circleCenter, circleRadius);
+    qDebug("Smallest circle at %.1f %.1f with radius %.1f", circleCenter.x(), circleCenter.y(), circleRadius);
+
+    /* Adjust the inlet and tell everyone */
+    inlet->setOrigin(circleCenter + inlet->getInnerRect().topLeft());
+    inlet->setInnerRadius(qRound(circleRadius));
+
+    /* Update item on view, object page, and view port */
+    imageView.onItemDataChanged(inlet);
+    updateObjectPage(inletProps);
+    getCurrentView()->viewport()->update();
+}
+
+void MainWindow::onToolEditInlet() {
+    qDebug("Edit inlet props");
 }
 
 void MainWindow::onToolSelectOnlyRulers() {

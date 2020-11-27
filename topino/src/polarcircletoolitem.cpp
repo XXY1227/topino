@@ -464,6 +464,10 @@ QLineF PolarCircleToolItem::getMaxLine() const {
     return QLineF(origin, polarToCartesianCoords(maxAngle, outerRadius));
 }
 
+QRectF PolarCircleToolItem::getInnerRect() const {
+    return QRectF(origin.x() - innerRadius, origin.y() - innerRadius, 2 * innerRadius, 2 * innerRadius);
+}
+
 bool PolarCircleToolItem::inOriginCenter(const QPointF& pos) const {
     /* Origin center is defined as inside the circle with half radius */
     return (qSqrt(qPow(origin.x() - pos.x(), 2.0) + qPow(origin.y() - pos.y(), 2.0)) <= (innerRadius/2.0));

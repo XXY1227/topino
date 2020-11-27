@@ -513,7 +513,7 @@ void TopinoData::calculatePolarImage() {
     }
 
     /* Testing for now */
-    polarImage.save("/home/sven/Projekte/Anwendungen/polarimage.png");
+    polarImage.save("polarimage.png");
 }
 
 void TopinoData::calculateAngulagramPoints() {

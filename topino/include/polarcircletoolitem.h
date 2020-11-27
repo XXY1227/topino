@@ -71,6 +71,9 @@ class PolarCircleToolItem : public virtual TopinoGraphicsItem {
     QLineF getMinLine() const;
     QLineF getMaxLine() const;
 
+    /* Get the rect of the inner circle */
+    QRectF getInnerRect() const;
+
   private:
     /* Individual parts of the inlet item to keep track of what the user is interacting with
      * at the moment. */

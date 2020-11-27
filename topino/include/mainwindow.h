@@ -77,6 +77,12 @@ class MainWindow : public QMainWindow, public IObserver {
     void onToolRulerAsCWBoundary();
     void onToolRulerAsBoundary(bool ccw);
 
+    /* Inlet buttons/functions */
+    void onToolSetMainInlet();
+    void onToolSwapInletBoundaries();
+    void onToolSnapInletToImage();
+    void onToolEditInlet();
+
     /* Multiple object functions */
     void onToolSelectOnlyRulers();
     void onToolSelectOnlyInlets();

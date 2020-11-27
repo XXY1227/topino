@@ -52,5 +52,9 @@
         <file>ui/toolicons/help_help.png</file>
         <file>ui/toolicons/edit_copy.png</file>
         <file>ui/toolicons/rulers_inletatcross.png</file>
+        <file>ui/toolicons/inlet_maininlet.png</file>
+        <file>ui/toolicons/inlet_signs.png</file>
+        <file>ui/toolicons/inlet_snaptoimage.png</file>
+        <file>ui/toolicons/inlet_props.png</file>
     </qresource>
 </RCC>
