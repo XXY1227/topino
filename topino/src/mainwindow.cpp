@@ -1011,6 +1011,7 @@ void MainWindow::onToolSwapInletBoundaries() {
 }
 
 void MainWindow::onToolSnapInletToImage() {
+    /* Right now, this code is disabled. Too buggy for now. Maybe next release! */
     qDebug("Snap inlet to image");
     /* Check if there is a single inlet selected */
     if (imageView.scene()->selectedItems().size() != 1)
@@ -1064,6 +1065,65 @@ void MainWindow::onToolSnapInletToImage() {
 
 void MainWindow::onToolEditInlet() {
     qDebug("Edit inlet props");
+
+    /* Check if there is a single inlet selected */
+    if (imageView.scene()->selectedItems().size() != 1)
+        return;
+
+    /* Get inlet pointer */
+    PolarCircleToolItem *inlet = dynamic_cast<PolarCircleToolItem*>(imageView.scene()->selectedItems()[0]);
+
+    if (inlet == nullptr)
+        return;
+
+    /* Use the outer rectangle of the inlet as background image */
+    QImage backgroundImage = document.getData().getImage().copy(inlet->boundingRect().toRect());
+
+    /* Opens the inlet properties dialog */
+    InletPropDialog dlg(this);
+
+    /* Copy the data from the inlet to the dialog */
+    dlg.setBackgroundImage(backgroundImage);
+    dlg.setPosition(inlet->getOrigin());
+
+    dlg.setInnerRadius(inlet->getInnerRadius());
+
+    if (inlet->segmentsVisible()) {
+        dlg.setMainInlet(true);
+
+        dlg.setOuterRadius(inlet->getOuterRadius());
+
+        dlg.setRefAngle(inlet->getZeroAngle());
+        dlg.setCCWAngle(inlet->getMaxAngle());
+        dlg.setCWAngle(inlet->getMinAngle());
+        dlg.setCCW(inlet->getCounterClockwise());
+
+        dlg.setSectors(inlet->getSegments());
+        dlg.setSectorAngle(inlet->getDiffAngle());
+    }
+
+    /* Execute in a modal format and apply options if accepted */
+    if (dlg.exec() == QDialog::DialogCode::Accepted) {
+        qDebug("Dialog accepted");
+
+        /* Update the inlet properties */
+        inlet->setInnerRadius(dlg.getInnerRadius());
+        inlet->showSegments(dlg.isMainInlet());
+
+        inlet->setOuterRadius(dlg.getOuterRadius());
+        inlet->setZeroAngle(dlg.getRefAngle());
+        inlet->setMinAngle(dlg.getCWAngle());
+        inlet->setMaxAngle(dlg.getCCWAngle());
+        inlet->setCounterClockwise(dlg.isCCW());
+
+        inlet->setSegments(dlg.getSectors());
+        inlet->setDiffAngle(dlg.getSectorAngle());
+
+        /* Update item on view, object page, and view port */
+        imageView.onItemDataChanged(inlet);
+        updateObjectPage(inletProps);
+        getCurrentView()->viewport()->update();
+    }
 }
 
 void MainWindow::onToolSelectOnlyRulers() {

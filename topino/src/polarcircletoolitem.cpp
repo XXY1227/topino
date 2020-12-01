@@ -130,13 +130,6 @@ void PolarCircleToolItem::paint(QPainter* painter, const QStyleOptionGraphicsIte
             painter->drawPie(drawRect, (zeroAngle + maxAngle) * 16, - 16 * size);
         }
 
-        /* Draw the labels for every angle line */
-        painter->setPen(Qt::black);
-        painter->setFont(fontAngleLabels);
-        for (int a = fixMinAngle; a <= fixMaxAngle; a+=diffAngle) {
-            drawAngleLabel(painter, a);
-        }
-
         /* Remove clipping again */
         painter->setClipRect(fullRect);
         painter->setClipping(false);
@@ -150,6 +143,13 @@ void PolarCircleToolItem::paint(QPainter* painter, const QStyleOptionGraphicsIte
             painter->drawArc(origin.x() - innerRadius - segmentSize * c, origin.y() - innerRadius - segmentSize * c,
                              2 * segmentSize * c + innerRadius * 2, 2 * segmentSize * c + innerRadius * 2,
                              16 * (zeroAngle + minAngle), 16 * (maxAngle - minAngle));
+        }
+
+        /* Draw the labels for every angle line */
+        painter->setPen(Qt::black);
+        painter->setFont(fontAngleLabels);
+        for (int a = fixMinAngle; a <= fixMaxAngle; a+=diffAngle) {
+            drawAngleLabel(painter, a);
         }
 
         /* Draw "grabbing" lines at the outer and the neutral line ONLY if the inlet is selected */
@@ -266,6 +266,12 @@ void PolarCircleToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     case parts::centerBorder:
         if ((distance > 0) && (!drawSegments || (distance < outerRadius))) {
             innerRadius = distance;
+
+            /* If this is not a main inlet, then set the outerRadius to innerRadius+1, just
+             * to be consistent. */
+            if (!drawSegments) {
+                outerRadius = innerRadius + 1;
+            }
         }
         prepareGeometryChange();
         break;
@@ -386,6 +392,13 @@ int PolarCircleToolItem::getInnerRadius() const {
 
 void PolarCircleToolItem::setInnerRadius(int value) {
     innerRadius = value;
+
+    /* If this is not a main inlet, then set outerRadius to innerRadius + 1
+     * just to be consistent. */
+    if (!drawSegments) {
+        outerRadius = innerRadius + 1;
+    }
+
     calculateBoundingRect();
     calculateSegmentSize();
     prepareGeometryChange();

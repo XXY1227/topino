@@ -51,7 +51,8 @@ SOURCES += \
     src/histogramwidget.cpp \
     src/topinotool.cpp \
     src/topinoabstractview.cpp \
-    src/angulagramview.cpp
+    src/angulagramview.cpp \
+    src/inletpropdialog.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -71,11 +72,13 @@ HEADERS += \
     include/topinotool.h \
     include/histogramwidget.h \
     include/topinoabstractview.h \
-    include/angulagramview.h
+    include/angulagramview.h \
+    include/inletpropdialog.h
 
 FORMS += \
     ui/mainwindow.ui \
-    ui/imageeditdialog.ui
+    ui/imageeditdialog.ui \
+    ui/inletpropdialog.ui
 
 RESOURCES += \
     topino.qrc

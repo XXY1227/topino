@@ -10,6 +10,7 @@
 
 #include "include/imageanalysisview.h"
 #include "include/imageeditdialog.h"
+#include "include/inletpropdialog.h"
 
 #include "include/angulagramview.h"
 

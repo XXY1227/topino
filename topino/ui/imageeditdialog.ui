@@ -83,7 +83,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
      <property name="centerButtons">
       <bool>false</bool>
@@ -272,6 +272,14 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>previewModes</tabstop>
+  <tabstop>desaturateModes</tabstop>
+  <tabstop>checkInvert</tabstop>
+  <tabstop>levelMin</tabstop>
+  <tabstop>levelMax</tabstop>
+  <tabstop>imageView</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

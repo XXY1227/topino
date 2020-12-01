@@ -1169,29 +1169,6 @@
        </item>
        <item row="10" column="0" colspan="3">
         <layout class="QGridLayout" name="gridLayout_7">
-         <item row="0" column="1">
-          <widget class="QToolButton" name="toolSwapSignsOfInlet">
-           <property name="toolTip">
-            <string>Swap signs of angles at boundaries</string>
-           </property>
-           <property name="statusTip">
-            <string>Swaps the signs of the clockwise and counterclockwise boundary angles</string>
-           </property>
-           <property name="text">
-            <string>...</string>
-           </property>
-           <property name="icon">
-            <iconset resource="../topino.qrc">
-             <normaloff>:/ui/toolicons/inlet_signs.png</normaloff>:/ui/toolicons/inlet_signs.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>64</width>
-             <height>32</height>
-            </size>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="0">
           <widget class="QToolButton" name="toolSetMainInlet">
            <property name="toolTip">
@@ -1216,29 +1193,6 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QToolButton" name="toolSnapInletToImage">
-           <property name="toolTip">
-            <string>Snap inlet to image feature</string>
-           </property>
-           <property name="statusTip">
-            <string>Adjusts the position and the inner radius of this inlet to an (processed) image feature</string>
-           </property>
-           <property name="text">
-            <string>...</string>
-           </property>
-           <property name="icon">
-            <iconset resource="../topino.qrc">
-             <normaloff>:/ui/toolicons/inlet_snaptoimage.png</normaloff>:/ui/toolicons/inlet_snaptoimage.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>64</width>
-             <height>32</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
           <widget class="QToolButton" name="toolEditInletProps">
            <property name="toolTip">
             <string>Edit inlet properties</string>
@@ -1252,6 +1206,29 @@
            <property name="icon">
             <iconset resource="../topino.qrc">
              <normaloff>:/ui/toolicons/inlet_props.png</normaloff>:/ui/toolicons/inlet_props.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QToolButton" name="toolSwapSignsOfInlet">
+           <property name="toolTip">
+            <string>Swap signs of angles at boundaries</string>
+           </property>
+           <property name="statusTip">
+            <string>Swaps the signs of the clockwise and counterclockwise boundary angles</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../topino.qrc">
+             <normaloff>:/ui/toolicons/inlet_signs.png</normaloff>:/ui/toolicons/inlet_signs.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -2631,22 +2608,6 @@
    <hints>
     <hint type="sourcelabel">
      <x>816</x>
-     <y>534</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>toolSnapInletToImage</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onToolSnapInletToImage()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>896</x>
      <y>534</y>
     </hint>
     <hint type="destinationlabel">
