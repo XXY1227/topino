@@ -50,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
      * they get notified if the model changes */
     document.addObserver(this);
     document.addObserver(&imageView);
+    document.addObserver(&angulagramView);
     document.notifyAllObserver();
 
     /* If the view has been updated (e.g. zoomed in or the like) we need to know this, too. Here we implemeted
@@ -268,6 +269,9 @@ void MainWindow::changeToView(const viewPages value) {
         onSelectionHasChanged();
         break;
     }
+
+    /* Tell view that is about to show */
+    getCurrentView()->showView();
 
     /* View has changed */
     onViewHasChanged();

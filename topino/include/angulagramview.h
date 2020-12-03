@@ -18,6 +18,9 @@ class AngulagramView : public TopinoAbstractView {
         void modelHasChanged() override;
         bool isToolSupported(const TopinoAbstractView::tools& value) const override;
 
+        /* Show this view */
+        void showView();
+
         /* Edit functions to call. */
         void cut(QClipboard *clipboard) override;
         void copy(QClipboard *clipboard) override;

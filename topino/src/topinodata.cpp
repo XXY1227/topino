@@ -545,6 +545,8 @@ void TopinoData::calculateAngulagramPoints() {
          * previous step (see calculatePolarImage() above). */
         angulagramPoints.append(QPointF(minAngle + y * 0.1, intensity));
     }
+
+    qDebug("Angulagram has been calculated");
 }
 
 QVector<QPointF> TopinoData::getAngulagramPoints() const {

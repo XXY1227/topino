@@ -12,18 +12,10 @@ AngulagramView::AngulagramView(QWidget* parent, TopinoDocument& doc) : TopinoAbs
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setRenderHint(QPainter::Antialiasing);
-    //chartView.setRubberBand(QtCharts::QChartView::RectangleRubberBand););
-
-    QtCharts::QLineSeries *series = new QtCharts::QLineSeries();
-    series->append(0, 6);
-    series->append(2, 4);
-    series->append(3, 8);
-    series->append(7, 4);
-    series->append(10, 5);
-    *series << QPointF(11, 1) << QPointF(13, 3) << QPointF(17, 6) << QPointF(18, 3) << QPointF(20, 2);
 
     /* Create a new chart and set the theme; important: the theme has to be set BEFORE everything else,
      * otherwise it will overwrite font sizes, etc. */
+    QtCharts::QLineSeries *series = new QtCharts::QLineSeries();
     chart = new QtCharts::QChart();
     chart->setTheme(QtCharts::QChart::ChartThemeDark);
     chart->legend()->hide();
@@ -51,22 +43,27 @@ void AngulagramView::modelHasChanged() {
     /* Remove the old series and get the new one from the data */
     chart->removeAllSeries();
 
+    /* Get the series from the document and calculate relative intensities */
     QtCharts::QLineSeries *series = new QtCharts::QLineSeries(chart);
     QVector<QPointF> dataPoints = document.getData().getAngulagramPoints();
-    for (auto iter = dataPoints.begin(); iter != dataPoints.end(); ++iter) {
-        qDebug("Add point %.1f %.1f", iter->x(), iter->y());
-        series->append(iter->x(), iter->y());
+
+    QPointF maxPoint = *std::max_element(dataPoints.constBegin(), dataPoints.constEnd(),
+                                   [](const QPointF& a,const QPointF& b) {return a.y() < b.y();});
+    qreal max = maxPoint.y();
+    if (max == 0.0) {
+        max = 1.0;
     }
 
+    for (auto iter = dataPoints.begin(); iter != dataPoints.end(); ++iter) {
+        series->append(iter->x(), iter->y() / max);
+    }
     chart->addSeries(series);
 
     /* Reset the axes ranges; it is important to create new axes here for the new data by
      * calling createDefaultAxes() - otherwise the data will be shown at the wrong positions. */
     chart->createDefaultAxes();
     chart->axisX()->setRange(document.getData().getCoordMinAngle(), document.getData().getCoordMaxAngle());
-    /* TODO: support relative intensities */
-    //double max = *std::max_element(dataPoints.constBegin(), dataPoints.constEnd());
-    //chart->axisY()->setRange(0.0, 1.0);
+    chart->axisY()->setRange(0.0, 1.0);
 
     chart->axisX()->setTitleText("Angle (°)");
     chart->axisY()->setTitleText("Intensity (a.u.)");
@@ -84,6 +81,10 @@ void AngulagramView::modelHasChanged() {
 bool AngulagramView::isToolSupported(const TopinoAbstractView::tools& value) const {
     /* Only support selection tool at the moment */
     return (value == tools::selection);
+}
+
+void AngulagramView::showView() {
+
 }
 
 void AngulagramView::cut(QClipboard *clipboard) {

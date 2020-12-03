@@ -42,6 +42,9 @@ class TopinoAbstractView : public QGraphicsView, public IObserver {
     /* This function will determine which tools are available to the user by selecting a particular view. */
     virtual bool isToolSupported(const TopinoAbstractView::tools& value) const = 0;
 
+    /* View is about to show */
+    virtual void showView() = 0;
+
     /* Virtual edit functions to call */
     virtual void cut(QClipboard *clipboard) = 0;
     virtual void copy(QClipboard *clipboard) = 0;

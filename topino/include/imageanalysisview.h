@@ -57,6 +57,9 @@ class ImageAnalysisView : public TopinoAbstractView {
 
     bool isToolSupported(const TopinoAbstractView::tools& value) const;
 
+    /* Show this view */
+    void showView();
+
     /* Edit functions to call */
     void cut(QClipboard *clipboard) override;
     void copy(QClipboard *clipboard) override;

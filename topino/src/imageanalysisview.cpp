@@ -435,6 +435,10 @@ bool ImageAnalysisView::isToolSupported(const TopinoAbstractView::tools& value) 
     return true;
 }
 
+void ImageAnalysisView::showView() {
+
+}
+
 void ImageAnalysisView::cut(QClipboard *clipboard) {
     /* Cut = Copy + Erase */
     copy(clipboard);
