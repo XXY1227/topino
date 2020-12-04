@@ -13,16 +13,16 @@ namespace TopinoTools {
 /* Tableau10 colors by Chris Gerrard; more information at:
  * http://tableaufriction.blogspot.com/2012/11/finally-you-can-use-tableau-data-colors.html */
 const QColor colorsTableau10[10] = {
-    QColor( 31, 119, 180),
-    QColor(214,  39,  40),
-    QColor( 44, 160,  44),
-    QColor(148, 103, 189),
-    QColor(255, 127,  14),
-    QColor(140,  86,  75),
-    QColor(227, 119, 194),
-    QColor(127, 127, 127),
-    QColor(188, 189,  34),
-    QColor( 23, 190, 207)
+    QColor( 31, 119, 180),  /* 0: */
+    QColor(214,  39,  40),  /* 1: */
+    QColor( 44, 160,  44),  /* 2: */
+    QColor(148, 103, 189),  /* 3: */
+    QColor(255, 127,  14),  /* 4: */
+    QColor(140,  86,  75),  /* 5: */
+    QColor(227, 119, 194),  /* 6: */
+    QColor(127, 127, 127),  /* 7: Gray */
+    QColor(188, 189,  34),  /* 8: */
+    QColor( 23, 190, 207)   /* 9: */
 };
 
 /* Selection color pairs - a dark variant (for the border) and a light variant (for the
