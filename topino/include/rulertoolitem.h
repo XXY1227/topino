@@ -38,9 +38,8 @@ class RulerToolItem : public TopinoGraphicsItem {
     void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
 
     /* These methods create data representations of the item in various
-     * formats (and allow converting it back, too!) */
+     * formats! */
     QString toString() const override;
-    void fromString(const QString &value) override;
 
   private:
     /* Individual parts of the rubber item to keep track of what the user is interacting with

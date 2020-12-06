@@ -507,6 +507,8 @@ void ImageAnalysisView::copy(QClipboard *clipboard) {
 }
 
 void ImageAnalysisView::paste(QClipboard *clipboard) {
+    Q_UNUSED(clipboard);
+    /* Not supported yet. */
     qDebug("ImageAnalysisView paste");
 }
 
@@ -607,8 +609,8 @@ void ImageAnalysisView::selectNext() {
 bool ImageAnalysisView::isEditFunctionSupported(const TopinoAbstractView::editfunc& value) const {
     Q_UNUSED(value)
 
-    /* All edit functions are supported */
-    return true;
+    /* All edit functions except Paste are supported */
+    return !(value == TopinoAbstractView::editPaste);
 }
 
 void ImageAnalysisView::createToolsFromDocument() {

@@ -57,7 +57,7 @@ void AngulagramView::modelHasChanged() {
 
     /* Recreate the axes after adding all series so that it is ensured that
      * all points/lines show at the correct positions. */
-    createAxes();    
+    createAxes();
 
     /* View has changed */
     emit viewHasChanged();
@@ -78,8 +78,46 @@ void AngulagramView::cut(QClipboard *clipboard) {
 }
 
 void AngulagramView::copy(QClipboard *clipboard) {
-    Q_UNUSED(clipboard);
-    /* Not supported yet. */
+    qDebug("AngulagramView copy");
+
+    /* Create a mimedata object that will store our chart in different formats, so
+     * that they can be used in different programs */
+    QMimeData *mimeData = new QMimeData();
+
+    /* First, let's turn the chart into a transparent pixel image (PNG) */
+    QImage imageData(this->size(), QImage::Format_ARGB32);
+    QPainter paintRaster(&imageData);
+    paintRaster.setRenderHint(QPainter::Antialiasing);
+    paintRaster.setCompositionMode (QPainter::CompositionMode_Source);
+    paintRaster.fillRect(QRectF(QPointF(0, 0), this->size()), Qt::transparent);
+    paintRaster.setCompositionMode (QPainter::CompositionMode_SourceOver);
+    this->render(&paintRaster);
+    paintRaster.end();
+
+    /* Second, let's make a vector painting; same things as above apply. */
+    QSvgGenerator generator;
+    QBuffer svgBuffer;
+    generator.setOutputDevice(&svgBuffer);
+    generator.setSize(chart->size().toSize());
+    generator.setViewBox(QRect(QPoint(0, 0), this->size()));
+    QPainter paintVector(&generator);
+    this->render(&paintVector);
+    paintVector.end();
+
+    /* Create the text item consisting of a general overview of the raw data and
+     * potential stream functions. Additionally, the rawdata + calculated stream
+     * curves are added. */
+    QStringList textData;
+    createDataHeader(textData);
+    textData.append("");
+    createDataTable(textData);
+
+    /* Add the data to our mime object and feed the clipboard with it. Ownership
+     * is transfered to the clipboard. */
+    mimeData->setText(textData.join("\n") + "\n");
+    mimeData->setImageData(imageData);
+    mimeData->setData("image/svg+xml", svgBuffer.buffer());
+    clipboard->setMimeData(mimeData);
 }
 
 void AngulagramView::paste(QClipboard *clipboard) {
@@ -106,8 +144,8 @@ void AngulagramView::selectNext() {
 bool AngulagramView::isEditFunctionSupported(const TopinoAbstractView::editfunc& value) const {
     Q_UNUSED(value);
 
-    /* None of the edit functions is (yet) supported by this view */
-    return false;
+    /* Only support copy function */
+    return (value == TopinoAbstractView::editCopy);
 }
 
 void AngulagramView::resizeEvent(QResizeEvent* event) {
@@ -262,5 +300,72 @@ void AngulagramView::createDataSeries() {
         item.rsquare = lorentzians[i].rsquare;
         item.color   = chart->legend()->markers(lorentzLine)[0]->brush().color();
         legendItems.append(item);
+    }
+}
+
+void AngulagramView::createDataHeader(QStringList& textData) const {
+    /* First, let's put in the name of the file we are evaluating here and then
+     * some information about the image */
+    const TopinoData data = document.getData();
+
+    textData.append(tr("Timestamp:") +"\t" + QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss"));
+
+    if (document.hasFileName()) {
+        textData.append(tr("File:") + "\t" + document.getFilename());
+    }
+    textData.append(QString(tr("Image:") + "\t%1 × %2 Px²").arg(data.getImage().width()).arg(data.getImage().height()));
+    textData.append("");
+
+    /* Stream data: first the data of each stream */
+    textData.append("\t\t𝜑\t𝜔\tL²");
+    for(int i = 0; i < legendItems.length(); ++i) {
+        QString line;
+        line.sprintf("Stream\t%d\t%+.1f°\t%.1f°\t%.2f", i+1, legendItems[i].pos, legendItems[i].width, legendItems[i].rsquare);
+        textData.append(line);
+    }
+    textData.append("");
+
+    /* Stream data: add the resolutions between each stream */
+    textData.append("1. Stream\t2.Stream\tR₁₂");
+    for(int i = 0; i < legendItems.length(); ++i) {
+        for(int j = (i+1); j < legendItems.length(); ++j) {
+            QString line;
+            line.sprintf("%d\t%d\t%.2f", i+1, j+1, TopinoTools::calculateResolution(
+                             legendItems[i].pos, legendItems[i].width,
+                             legendItems[j].pos, legendItems[j].width));
+            textData.append(line);
+        }
+    }
+}
+
+void AngulagramView::createDataTable(QStringList& textData) const {
+    /* For each point in data points, we add the respective raw data point and the
+     * stream fits. */
+    QVector<TopinoTools::Lorentzian> parameters = document.getData().getStreamParameters();
+    int fits = parameters.length();
+
+    /* Header of table */
+    textData.append(tr("All data intensities are in arbitrary units."));
+    QString header = "𝜑 (°)\traw data int";
+    for (int i = 0; i < fits; ++i) {
+        header += "\tStream " + QString::number(i+1);
+    }
+    textData.append(header);
+
+    /* Contents of table */
+    QVector<QPointF> data = document.getData().getAngulagramPoints();
+    for(int i = 0; i < data.length(); ++i) {
+        QStringList line;
+
+        /* Raw data */
+        line.append(QString::number(data[i].x()));
+        line.append(QString::number(data[i].y()));
+
+        /* Data for the fits */
+        for(int j = 0; j < fits; ++j) {
+            line.append(QString::number(parameters[j].f(data[i].x())));
+        }
+
+        textData.append(line.join("\t"));
     }
 }

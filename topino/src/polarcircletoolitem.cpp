@@ -453,12 +453,6 @@ QString PolarCircleToolItem::toString() const {
     return text;
 }
 
-void PolarCircleToolItem::fromString(const QString& value) {
-    Q_UNUSED(value)
-
-    /* TODO: Implement */
-}
-
 QLineF PolarCircleToolItem::getZeroLine() const {
     /* First point is always the origin; second point calculcated
      * by angle and max radius */

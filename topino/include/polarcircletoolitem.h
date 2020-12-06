@@ -62,9 +62,8 @@ class PolarCircleToolItem : public virtual TopinoGraphicsItem {
     void setCounterClockwise(bool value);
 
     /* These methods create data representations of the item in various
-     * formats (and allow converting it back, too!) */
+     * formats. */
     QString toString() const override;
-    void fromString(const QString &value) override;
 
     /* Get a representation line for the two boundaries and the central line */
     QLineF getZeroLine() const;

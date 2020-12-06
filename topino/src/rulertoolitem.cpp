@@ -214,10 +214,6 @@ QString RulerToolItem::toString() const {
            .arg(p1.x()).arg(p1.y()).arg(p2.x()).arg(p2.y()).arg(line.length()).arg(getAngleToAbscissa());
 }
 
-void RulerToolItem::fromString(const QString& value) {
-    /* TODO: Implement */
-}
-
 bool RulerToolItem::inTerminalPoint(const QPointF& termPoint, const QPointF& pos) const {
     return QRectF(termPoint.x() - offset, termPoint.y() - offset, 2 * offset, 2 * offset).contains(pos);
 }
