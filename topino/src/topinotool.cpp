@@ -747,3 +747,9 @@ qreal TopinoTools::calculateLorentzianR2(const QVector<QPointF>& points, const T
     /* Calculate the R-square value */
     return 1.0 - (ss_res / ss_tot);
 }
+
+qreal TopinoTools::calculateResolution(qreal pos1, qreal width1, qreal pos2, qreal width2) {
+    /* Uses the definition with 1/2 and FWHM. See the Angulagram paper at
+     * https://pubs.acs.org/doi/10.1021/acs.analchem.8b02186 (Equation 7) */
+    return 2.0 * qAbs(pos2 - pos1) / (width1 + width2);
+}

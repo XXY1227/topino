@@ -377,11 +377,17 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
             ui->propAnguDataPoints->setText(QString::number(document.getData().getAngulagramPoints().length()));
             ui->propAnguStreams->setText(QString::number(document.getData().getStreamParameters().length()));
 
+            QVector<AngulagramView::LegendItem> legendItems = angulagramView.getLegendItems();
+
+            if (legendItems.length() == 0) {
+                break;
+            }
+
             /* Clear all data in the table first */
             ui->tableAnguStreams->clearContents();
+            ui->tableAnguResolution->clearContents();
 
-            /* For each item, we create a row and include all the data */
-            QVector<AngulagramView::LegendItem> legendItems = angulagramView.getLegendItems();
+            /* For each item, we create a row and include all the data */            
             ui->tableAnguStreams->setRowCount(legendItems.length());
 
             for(int i = 0; i < legendItems.length(); ++i) {
@@ -403,6 +409,37 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
                 ui->tableAnguStreams->setItem(i, 0, pos);
                 ui->tableAnguStreams->setItem(i, 1, width);
                 ui->tableAnguStreams->setItem(i, 2, lin);
+            }
+
+            /* For each item, calculate the resolution between itself and all other ones. Combining them
+             * without having one resolution line doubled means we have (n * (n-1) / 2) lines! */
+            ui->tableAnguResolution->setRowCount(legendItems.length() * (legendItems.length() - 1) / 2);
+
+            int row = 0;
+            for(int i = 0; i < legendItems.length(); ++i) {
+                for(int j = (i+1); j < legendItems.length(); ++j) {
+                    /* Create a simple icon for both streams */
+                    QPixmap pixmap1(14, 14); pixmap1.fill(legendItems[i].color);
+                    QPixmap pixmap2(14, 14); pixmap2.fill(legendItems[j].color);
+
+                    /* For some reason, the QTableWidget does not allow to simply center the
+                     * icon in the table. So, we use a QLabel here, give it the icon and put
+                     * it in the respective cell. */
+                    QLabel *stream1 = new QLabel(); stream1->setPixmap(pixmap1); stream1->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+                    QLabel *stream2 = new QLabel(); stream2->setPixmap(pixmap2); stream2->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+                    QString resLabel; resLabel.sprintf("%.2f", TopinoTools::calculateResolution(
+                                                           legendItems[i].pos, legendItems[i].width,
+                                                           legendItems[j].pos, legendItems[j].width));
+                    QTableWidgetItem *res = new QTableWidgetItem(resLabel);
+                    res->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+                    ui->tableAnguResolution->setCellWidget(row, 0, stream1);
+                    ui->tableAnguResolution->setCellWidget(row, 1, stream2);
+                    ui->tableAnguResolution->setItem(row, 2, res);
+
+                    row++;
+                }
             }
         }
         break;

@@ -314,6 +314,9 @@ Lorentzian calculateSingleLorentzian(const QVector<QPointF> &points, const Secti
 /* Calculates the R-square value for a given Lorentzian parameter set and real points */
 qreal calculateLorentzianR2(const QVector<QPointF> &points, const Lorentzian &parameters);
 
+/* Calculates the resolution for the given streams/peaks */
+qreal calculateResolution(qreal pos1, qreal width1, qreal pos2, qreal width2);
+
 }
 
 #endif // TOPINOTOOL_H
