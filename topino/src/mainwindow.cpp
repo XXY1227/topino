@@ -82,8 +82,9 @@ void MainWindow::modelHasChanged() {
     newtitle = document.getFilename() + (document.hasChanged() ? tr("*") : tr("")) + tr(" - Topino");
     setWindowTitle(newtitle);
 
-    /* Update the general page of the object properties dock widget */
+    /* Update the general pages of the object properties dock widget */
     updateObjectPage(objectPages::imageProps);
+    updateObjectPage(objectPages::angulagramProps);
 
     /* Set image for the mini and micro view */
     miniImage->setPixmap(QPixmap());
@@ -132,6 +133,12 @@ void MainWindow::onViewHasChanged() {
         break;
     default:
         break;
+    }
+
+    /* If this is the angulagram view, then update the respective
+     * object page. */
+    if(viewManager.currentIndex() == viewPages::angulagram) {
+        updateObjectPage(objectPages::angulagramProps);
     }
 }
 
@@ -366,6 +373,38 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
 
     case angulagramProps:
         /* Fifth page: angulagram properties */
+        if(viewManager.currentIndex() == viewPages::angulagram) {
+            ui->propAnguDataPoints->setText(QString::number(document.getData().getAngulagramPoints().length()));
+            ui->propAnguStreams->setText(QString::number(document.getData().getStreamParameters().length()));
+
+            /* Clear all data in the table first */
+            ui->tableAnguStreams->clearContents();
+
+            /* For each item, we create a row and include all the data */
+            QVector<AngulagramView::LegendItem> legendItems = angulagramView.getLegendItems();
+            ui->tableAnguStreams->setRowCount(legendItems.length());
+
+            for(int i = 0; i < legendItems.length(); ++i) {
+                /* Create a simple icon that will hold the color */
+                QPixmap pixmap(14, 14); pixmap.fill(legendItems[i].color);
+
+                QString posLabel; posLabel.sprintf("%+.1f", legendItems[i].pos);
+                QTableWidgetItem *pos = new QTableWidgetItem(QIcon(pixmap), posLabel);
+                pos->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+                QString widthLabel; widthLabel.sprintf("%.1f", legendItems[i].width);
+                QTableWidgetItem *width = new QTableWidgetItem(widthLabel);
+                width->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+                QString linLabel; linLabel.sprintf("%.2f", legendItems[i].rsquare);
+                QTableWidgetItem *lin = new QTableWidgetItem(linLabel);
+                lin->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+                ui->tableAnguStreams->setItem(i, 0, pos);
+                ui->tableAnguStreams->setItem(i, 1, width);
+                ui->tableAnguStreams->setItem(i, 2, lin);
+            }
+        }
         break;
 
     case multipleRulerProps:
@@ -1161,6 +1200,9 @@ void MainWindow::onToolEvaluateAngulagram() {
         TopinoData data = document.getData();
         data.setStreamParameters(dlg.getLorentzians());
         document.setData(data);
+
+        updateObjectPage(angulagramProps);
+        getCurrentView()->viewport()->update();
     }
 }
 

@@ -1369,14 +1369,10 @@
       </layout>
      </widget>
      <widget class="QWidget" name="angulagram">
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="1">
-        <widget class="QLabel" name="label_17">
-         <property name="text">
-          <string>Angulagram properties</string>
-         </property>
-        </widget>
-       </item>
+      <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0,0">
+       <property name="leftMargin">
+        <number>9</number>
+       </property>
        <item row="0" column="0">
         <widget class="QLabel" name="label_15">
          <property name="minimumSize">
@@ -1405,39 +1401,17 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="2">
-        <widget class="QLabel" name="propInletPos_3">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>5</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
+       <item row="2" column="1">
+        <widget class="QLabel" name="label_20">
          <property name="text">
-          <string>3</string>
+          <string>Streams:</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
-       <item row="1" column="2">
-        <widget class="QLabel" name="propInletPos_2">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>5</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>120</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0" colspan="3">
+       <item row="3" column="1" colspan="3">
         <spacer name="verticalSpacer_12">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -1445,12 +1419,22 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>20</height>
+           <height>40</height>
           </size>
          </property>
         </spacer>
        </item>
-       <item row="4" column="0" colspan="3">
+       <item row="1" column="1">
+        <widget class="QLabel" name="label_18">
+         <property name="text">
+          <string>Data points:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0" colspan="4">
         <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="0,0,0">
          <item>
           <widget class="QToolButton" name="toolEvaluateAngulagram">
@@ -1523,50 +1507,149 @@
          </item>
         </layout>
        </item>
-       <item row="2" column="0" colspan="2">
-        <widget class="QLabel" name="label_20">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>1</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
+       <item row="2" column="2" colspan="2">
+        <widget class="QLabel" name="propAnguStreams">
          <property name="text">
-          <string>Streams:</string>
+          <string>%d</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
-       <item row="5" column="0" colspan="3">
-        <spacer name="verticalSpacer_13">
+       <item row="1" column="2" colspan="2">
+        <widget class="QLabel" name="propAnguDataPoints">
+         <property name="text">
+          <string>%d</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="4">
+        <widget class="QTableWidget" name="tableAnguStreams">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="showDropIndicator" stdset="0">
+          <bool>false</bool>
+         </property>
+         <property name="alternatingRowColors">
+          <bool>false</bool>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::NoSelection</enum>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>14</width>
+           <height>14</height>
+          </size>
+         </property>
+         <property name="wordWrap">
+          <bool>false</bool>
+         </property>
+         <property name="rowCount">
+          <number>0</number>
+         </property>
+         <property name="columnCount">
+          <number>3</number>
+         </property>
+         <attribute name="horizontalHeaderDefaultSectionSize">
+          <number>78</number>
+         </attribute>
+         <attribute name="horizontalHeaderMinimumSectionSize">
+          <number>78</number>
+         </attribute>
+         <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+          <bool>false</bool>
+         </attribute>
+         <attribute name="horizontalHeaderStretchLastSection">
+          <bool>false</bool>
+         </attribute>
+         <attribute name="verticalHeaderVisible">
+          <bool>false</bool>
+         </attribute>
+         <attribute name="verticalHeaderDefaultSectionSize">
+          <number>30</number>
+         </attribute>
+         <attribute name="verticalHeaderHighlightSections">
+          <bool>false</bool>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>𝜑</string>
+          </property>
+          <property name="font">
+           <font>
+            <italic>true</italic>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>𝜔</string>
+          </property>
+          <property name="font">
+           <font>
+            <italic>true</italic>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>L²</string>
+          </property>
+          <property name="font">
+           <font>
+            <italic>true</italic>
+           </font>
+          </property>
+         </column>
+        </widget>
+       </item>
+       <item row="0" column="1" colspan="2">
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>Angulagram properties</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0" colspan="4">
+        <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>160</height>
+           <height>40</height>
           </size>
          </property>
         </spacer>
        </item>
-       <item row="1" column="0" colspan="2">
-        <widget class="QLabel" name="label_18">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>1</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+       <item row="7" column="0" colspan="4">
+        <spacer name="verticalSpacer_13">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
-         <property name="text">
-          <string>Data points:</string>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>0</width>
+           <height>40</height>
+          </size>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -2192,54 +2275,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>toolEditImage</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onToolEditImage()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>731</x>
-     <y>508</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>toolSwitchImage</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onToolSwitchImage()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>802</x>
-     <y>500</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>toolResetImage</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onToolResetImage()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>873</x>
-     <y>500</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>action_angulagram</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
@@ -2264,150 +2299,6 @@
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>toolSnapRulerToCorner</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onToolSnapRulerToCorner()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>735</x>
-     <y>438</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>toolSnapRulerToInlet</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onToolSnapRulerToInlet()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>814</x>
-     <y>438</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>toolRefAngleFromRuler</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onToolRulerAsRefAngle()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>735</x>
-     <y>483</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>toolLeftBoundaryFromRuler</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onToolRulerAsCCWBoundary()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>814</x>
-     <y>483</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>toolRightBoundaryFromRuler</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onToolRulerAsCWBoundary()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>893</x>
-     <y>483</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>toolMaxRadiusToRuler</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onToolExtendInletToRuler()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>893</x>
-     <y>438</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>toolRulersInletAtIntersection</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onToolInletAtIntersection()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>734</x>
-     <y>405</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>toolSelectAllInlets</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onToolSelectOnlyInlets()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>734</x>
-     <y>394</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>toolSelectAllRulers</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onToolSelectOnlyRulers()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>812</x>
-     <y>394</y>
     </hint>
     <hint type="destinationlabel">
      <x>471</x>
@@ -2544,46 +2435,14 @@
    </hints>
   </connection>
   <connection>
-   <sender>toolSwapSignsOfInlet</sender>
+   <sender>toolRefAngleFromRuler</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>onToolSwapInletBoundaries()</slot>
+   <slot>onToolRulerAsRefAngle()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>816</x>
-     <y>534</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>toolEditInletProps</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onToolEditInlet()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>896</x>
-     <y>579</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>471</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>toolEvaluateAngulagram</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onToolEvaluateAngulagram()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>736</x>
-     <y>432</y>
+     <x>735</x>
+     <y>483</y>
     </hint>
     <hint type="destinationlabel">
      <x>471</x>
@@ -2608,6 +2467,70 @@
    </hints>
   </connection>
   <connection>
+   <sender>toolSnapRulerToCorner</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolSnapRulerToCorner()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>735</x>
+     <y>438</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolMaxRadiusToRuler</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolExtendInletToRuler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>893</x>
+     <y>438</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolRightBoundaryFromRuler</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolRulerAsCWBoundary()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>893</x>
+     <y>483</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolSwapSignsOfInlet</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolSwapInletBoundaries()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>816</x>
+     <y>534</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>toolExportAngulagramData</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
@@ -2616,6 +2539,166 @@
     <hint type="sourcelabel">
      <x>896</x>
      <y>432</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolEditInletProps</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolEditInlet()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>896</x>
+     <y>579</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolRulersInletAtIntersection</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolInletAtIntersection()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>734</x>
+     <y>405</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolLeftBoundaryFromRuler</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolRulerAsCCWBoundary()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>814</x>
+     <y>483</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolSelectAllInlets</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolSelectOnlyInlets()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>734</x>
+     <y>394</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolEvaluateAngulagram</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolEvaluateAngulagram()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>736</x>
+     <y>432</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolSwitchImage</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolSwitchImage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>802</x>
+     <y>500</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolSnapRulerToInlet</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolSnapRulerToInlet()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>814</x>
+     <y>438</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolSelectAllRulers</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolSelectOnlyRulers()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>812</x>
+     <y>394</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolEditImage</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolEditImage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>731</x>
+     <y>508</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolResetImage</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolResetImage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>873</x>
+     <y>500</y>
     </hint>
     <hint type="destinationlabel">
      <x>471</x>

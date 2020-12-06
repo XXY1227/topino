@@ -128,6 +128,15 @@ void TopinoData::removeInlet(int ID) {
          * since the indices are now invalid anyway. */
         if (inlets[index].ID == ID) {
             inlets.removeAt(index);
+
+            /* If this inlet was the maininlet, we need to reset
+             * some data here, too. */
+            if (mainInletID == ID) {
+               mainInletID = 0;
+               angulagramPoints.clear();
+               streamParameters.clear();
+            };
+
             break;
         }
     }

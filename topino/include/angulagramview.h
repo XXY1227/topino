@@ -41,6 +41,15 @@ class AngulagramView : public TopinoAbstractView {
         qreal getScalingFactor() const;
         void setScalingFactor(const qreal& value);
 
+        /* Get items for a (external) legend */
+        struct LegendItem {
+            QColor color;
+            qreal pos = 0.0;
+            qreal width = 0.0;
+            qreal rsquare = 0.0;
+        };
+        QVector<LegendItem> getLegendItems() const;
+
     protected:
         void resizeEvent(QResizeEvent *event) override;
 
@@ -48,6 +57,9 @@ class AngulagramView : public TopinoAbstractView {
         /* Scene and chart items */
         QGraphicsScene *chartScene = nullptr;
         QtCharts::QChart *chart = nullptr;
+
+        /* This keeps a list of colors and labels for drawing a legend */
+        QVector<LegendItem> legendItems;
 
         /* This is the scaling factor for the data on the y-axis. All data in the document/data
          * object is scaled by this factor before it is added to the chart. */

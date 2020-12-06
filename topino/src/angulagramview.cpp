@@ -22,7 +22,8 @@ AngulagramView::AngulagramView(QWidget* parent, TopinoDocument& doc) : TopinoAbs
     chart = new QtCharts::QChart();
     chart->setTheme(QtCharts::QChart::ChartThemeDark);
 
-    /* Prepare legend */
+    /* Prepare legend (but it is hidden by default) */
+    chart->legend()->hide();
     chart->legend()->setBackgroundVisible(true);
     chart->legend()->setBrush(QBrush(QColor(128, 128, 128, 128)));
     chart->legend()->setPen(QPen(QColor(192, 192, 192, 192)));
@@ -46,14 +47,20 @@ AngulagramView::~AngulagramView() {
 void AngulagramView::modelHasChanged() {
     /* Remove the old series and get the new one from the data */
     chart->removeAllSeries();
+    legendItems.clear();
 
     /* First, let's add the data as an area series (basically as background) and
      * add all stream fitting functions to it. */
-    createDataSeries();
+    if (document.getData().getMainInletID() != 0) {
+        createDataSeries();
+    }
 
     /* Recreate the axes after adding all series so that it is ensured that
      * all points/lines show at the correct positions. */
-    createAxes();
+    createAxes();    
+
+    /* View has changed */
+    emit viewHasChanged();
 }
 
 bool AngulagramView::isToolSupported(const TopinoAbstractView::tools& value) const {
@@ -107,10 +114,14 @@ void AngulagramView::resizeEvent(QResizeEvent* event) {
     /* Resize the chart and adapt the scene */
     chart->resize(event->size());
     chartScene->setSceneRect(chart->boundingRect());
-    fitInView(chart->boundingRect(), Qt::KeepAspectRatio);    
+    fitInView(chart->boundingRect(), Qt::KeepAspectRatio);
 
     /* Call the original implementation */
     QGraphicsView::resizeEvent(event);
+}
+
+QVector<AngulagramView::LegendItem> AngulagramView::getLegendItems() const {
+    return legendItems;
 }
 
 qreal AngulagramView::getScalingFactor() const {
@@ -207,7 +218,7 @@ void AngulagramView::createDataSeries() {
     QColor colorseries = TopinoTools::colorsTableau10[7];
     areaseries->setPen(QColor(255, 255, 255));
     colorseries.setAlpha(50);
-    areaseries->setBrush(QBrush(colorseries));    
+    areaseries->setBrush(QBrush(colorseries));
 
     chart->addSeries(areaseries);
     chart->legend()->markers(areaseries)[0]->setVisible(false);
@@ -216,6 +227,7 @@ void AngulagramView::createDataSeries() {
     QVector<TopinoTools::Lorentzian> lorentzians = document.getData().getStreamParameters();
 
     /* Finally, let's add Lorentzian curves for each Lorentzian fit */
+    legendItems.clear();
     for(int i = 0; i < lorentzians.length(); ++i) {
         qDebug("Adding Lorentzian %d to chart", i+1);
 
@@ -242,5 +254,13 @@ void AngulagramView::createDataSeries() {
         /* Change label so that every second item contains an "\n" at the end to wrap the
          * legend. */
         chart->legend()->markers(lorentzLine)[0]->setLabel(label);
+
+        /* Add the data to our legend series */
+        LegendItem item;
+        item.pos     = lorentzians[i].pos;
+        item.width   = lorentzians[i].width;
+        item.rsquare = lorentzians[i].rsquare;
+        item.color   = chart->legend()->markers(lorentzLine)[0]->brush().color();
+        legendItems.append(item);
     }
 }
