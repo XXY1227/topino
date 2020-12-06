@@ -95,6 +95,9 @@ void EvalAngulagramDialog::updateLabels() {
     /* Number of minima and maxima */
     ui->labelMinima->setText(QString("%1").arg(TopinoTools::countExtrema(extrema, TopinoTools::extremaMinimum)));
     ui->labelMaxima->setText(QString("%1").arg(TopinoTools::countExtrema(extrema, TopinoTools::extremaMaximum)));
+
+    /* Number of peaks found */
+    ui->labelNoPeaks->setText(QString("%1").arg(lorentzians.length()));
 }
 
 qreal EvalAngulagramDialog::getScalingFactor() const {
@@ -317,6 +320,14 @@ void EvalAngulagramDialog::processData() {
     for(int i = 0; i < lorentzians.length(); ++i) {
         qDebug("Lorentzian %2d: pos %.1f, width %.1f, height %.1f, offset %.1f, r-square %.2f", i+1,
                lorentzians[i].pos, lorentzians[i].width, lorentzians[i].height, lorentzians[i].offset, lorentzians[i].rsquare);
+    }
+
+    /* If there are more than 7 peaks, it is realistic to assume that there are too much peaks. */
+    if (lorentzians.length() > 7) {
+        ui->labelError->setText(QString(tr("There are more than seven peaks. While not impossible, it looks "
+                                           "like there is a lot of noise. Increase the threshold to filter it out.")));
+
+        return;
     }
 }
 
