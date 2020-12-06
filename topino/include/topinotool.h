@@ -8,21 +8,25 @@
 #include <QString>
 #include <QtMath>
 
+/* Important: do not include LevenbergMarquardt directly, but by NLO header! */
+#include <Eigen/Eigen>
+#include <unsupported/Eigen/NonLinearOptimization>
+
 namespace TopinoTools {
 
 /* Tableau10 colors by Chris Gerrard; more information at:
  * http://tableaufriction.blogspot.com/2012/11/finally-you-can-use-tableau-data-colors.html */
 const QColor colorsTableau10[10] = {
-    QColor( 31, 119, 180),  /* 0: */
-    QColor(214,  39,  40),  /* 1: */
-    QColor( 44, 160,  44),  /* 2: */
-    QColor(148, 103, 189),  /* 3: */
-    QColor(255, 127,  14),  /* 4: */
-    QColor(140,  86,  75),  /* 5: */
-    QColor(227, 119, 194),  /* 6: */
+    QColor( 31, 119, 180),  /* 0: Blue */
+    QColor(214,  39,  40),  /* 1: Red */
+    QColor( 44, 160,  44),  /* 2: Green */
+    QColor(148, 103, 189),  /* 3: Violet */
+    QColor(255, 127,  14),  /* 4: Orange */
+    QColor(140,  86,  75),  /* 5: Brown */
+    QColor(227, 119, 194),  /* 6: Pink */
     QColor(127, 127, 127),  /* 7: Gray */
-    QColor(188, 189,  34),  /* 8: */
-    QColor( 23, 190, 207)   /* 9: */
+    QColor(188, 189,  34),  /* 8: Yellow */
+    QColor( 23, 190, 207)   /* 9: Light blue */
 };
 
 /* Selection color pairs - a dark variant (for the border) and a light variant (for the
@@ -155,6 +159,160 @@ bool isPointInCircle(const QPointF &point, const QPointF &center, const qreal ra
 
 /* Calculates the cross product (p1.x * p2.y - p2.x * p2.y) of two points */
 qreal crossProduct(const QPointF &p, const QPointF &q);
+
+/* Smoothes a data set of points by Gaussian Kernel smoothing. See the following Wiki page
+ * for more details: https://en.wikipedia.org/wiki/Kernel_smoother */
+void smoothByGaussianKernel(QVector<QPointF>& points, int size = 5, qreal sigma = 1.0);
+
+/* Helper function: Gaussian kernel function */
+qreal gaussianKernel(qreal value, qreal sigma);
+
+/* Helper structures for finding and defining extrema */
+enum slopeDirection {
+    directionFlat = 0,
+    directionAscending = 1,
+    directionDescending = 2
+};
+
+enum extremaType {
+    extremaMinimum = 0,
+    extremaMaximum = 1
+};
+
+struct Extrema {
+    int index = -1;
+    QPointF pos;
+    extremaType type = extremaMinimum;
+};
+
+/* Finds extrema in a set of points using the y-values. Data should be smoothed
+ * before using this. */
+void getExtrema(const QVector<QPointF> &points, QVector<Extrema>& extrema);
+
+/* Filters extrema and removes the ones which are below the given threshold. */
+void filterExtrema(QVector<Extrema>& extrema, qreal threshold);
+
+/* Counts extrema of a certain type */
+int countExtrema(const QVector<Extrema>& extrema, extremaType type);
+
+/* Splits the extrema and just returns either maxima or minima */
+QVector<Extrema> splitExtrema(const QVector<Extrema>& extrema, extremaType type);
+
+/* Helper structure for finding and working with sections */
+struct Section {
+    int indexLeft = -1;
+    int indexRight = -1;
+    int indexMax = -1;
+
+    bool isNull() {
+        return (indexLeft == -1) || (indexRight == -1) || (indexMax == -1);
+    }
+};
+
+/* Create sections from the given extrema, threshold, and data set. Two sections will be
+ * the border sections, i.e. one from the first point on the left that is above the threshold
+ * to the first minima and one from the last minima to the last point above the threshold
+ * on the right side. */
+QVector<Section> getSections(const QVector<QPointF> &points, const QVector<Extrema>& extrema, qreal threshold);
+
+/* Helper structure for a Lorentzian: y = height * (width/2)^2 / ((width/2)^2 + (pos - x)^2) + offset*/
+struct Lorentzian {
+    qreal pos = 0.0;
+    qreal height = 0.0;
+    qreal width = 0.0;
+    qreal offset = 0.0;
+    qreal rsquare = 0.0;
+
+    qreal f(qreal x) const {
+        qreal denominator = qPow(width/2.0, 2.0) + qPow(pos - x, 2.0);
+
+        if (denominator == 0.0) {
+            return 0.0;
+        }
+
+        return height * qPow(width/2.0, 2.0) / denominator + offset;
+    }
+};
+
+/* Functor for Eigen-Solver. Based on a tutorial of Sarvagya, which can be found at
+ * https://medium.com/@sarvagya.vaish/levenberg-marquardt-optimization-part-2-5a71f7db27a0 */
+struct LorentzianFunctor {
+    /* Data values to fit to */
+    QVector<QPointF> dataValues;
+
+    /* This is what calculates a value at x and respective errors */
+    int operator()(const Eigen::VectorXd &p, Eigen::VectorXd &fvec) const {
+        /* p is a vector with n parameter values and fvec is a vector with m error values
+         * for m data points. */
+        Lorentzian parameters;
+        parameters.pos      = p(0);
+        parameters.height   = p(1);
+        parameters.width    = p(2);
+        parameters.offset   = p(3);
+
+        /* For all values calculate the error between the data value and the predicted value. */
+        for(int i = 0; i < values(); ++i) {
+            fvec(i) = dataValues[i].y() - parameters.f(dataValues[i].x());
+        }
+
+        return 0;
+    }
+
+    // Compute the jacobian of the errors
+    int df(const Eigen::VectorXd &p, Eigen::MatrixXd &fjac) const {
+        /* p is a vector with n parameter values containing the current estimates while
+         * fjac has dimensions m x n containing the jacobian matrix of errors. */
+
+        /* Vary each parameter a little bit by a very small epsilon in plus and minus
+         * direction and see what the difference is -> that is numerically good
+         * approximation of the differential (no derivates needed). */
+        double epsilon = 1e-5;
+
+        for (int i = 0; i < p.size(); ++i) {
+            /* Only vary the current parameter and just copy the rest from p */
+            Eigen::VectorXd paraPlus(p);
+            Eigen::VectorXd paraMinus(p);
+            paraPlus(i) += epsilon;
+            paraMinus(i) -= epsilon;
+
+            /* Calculate the errors */
+            Eigen::VectorXd fvecPlus(values());
+            operator()(paraPlus, fvecPlus);
+            Eigen::VectorXd fvecMinus(values());
+            operator()(paraMinus, fvecMinus);
+
+            /* Calculate the difference (and divide it by the full range, i.e. 2 * epsilon)
+             * to get the slope = differential. */
+            Eigen::VectorXd fvecDiff(values());
+            fvecDiff = (fvecPlus - fvecMinus) / (2.0 * epsilon);
+
+            /* Put it differential vector into the fjac matrix at the respective
+             * position. */
+            fjac.block(0, i, values(), 1) = fvecDiff;
+        }
+
+        return 0;
+    }
+
+    /* Number of data points/values */
+    int values() const {
+        return dataValues.size();
+    }
+
+    /* Number of parameters (also called "inputs"); here there are exactly four parameters. */
+    int inputs() const {
+        return 4;
+    }
+};
+
+/* Fits Lorentzians into the data set and the sections provided. */
+QVector<Lorentzian> calculateLorentzians(const QVector<QPointF> &points, const QVector<Section> &sections, qreal threshold);
+
+/* Calculates one Lorentzian for one section provided */
+Lorentzian calculateSingleLorentzian(const QVector<QPointF> &points, const Section &section, qreal threshold);
+
+/* Calculates the R-square value for a given Lorentzian parameter set and real points */
+qreal calculateLorentzianR2(const QVector<QPointF> &points, const Lorentzian &parameters);
 
 }
 

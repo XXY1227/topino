@@ -8,11 +8,11 @@
 #include "include/iobserver.h"
 #include "include/topinodocument.h"
 
+#include "include/angulagramview.h"
+#include "include/evalangulagramdialog.h"
 #include "include/imageanalysisview.h"
 #include "include/imageeditdialog.h"
 #include "include/inletpropdialog.h"
-
-#include "include/angulagramview.h"
 
 namespace Ui {
 class MainWindow;
@@ -84,6 +84,11 @@ class MainWindow : public QMainWindow, public IObserver {
     void onToolSnapInletToImage();
     void onToolEditInlet();
 
+    /* Angulagram functions */
+    void onToolEvaluateAngulagram();
+    void onToolExportAngulagram();
+    void onToolExportAngulagramData();
+
     /* Multiple object functions */
     void onToolSelectOnlyRulers();
     void onToolSelectOnlyInlets();
@@ -94,7 +99,7 @@ class MainWindow : public QMainWindow, public IObserver {
     void onSelectionHasChanged();
     void onItemHasChanged(int itemID);
 
-  private:
+    private:
     enum objectPages {
         imageProps = 0,
         multipleProps = 1,
@@ -112,8 +117,6 @@ class MainWindow : public QMainWindow, public IObserver {
     };
 
     Ui::MainWindow *ui;
-
-    QLabel zoomlabel;
 
     TopinoDocument document;
     QStackedWidget viewManager;
@@ -134,6 +137,10 @@ class MainWindow : public QMainWindow, public IObserver {
 
     void updateObjectPage(objectPages page);
     void updateImagePage();
+
+    /* Checks if angulagram data exists in the document. If not, it will show
+     * a message to the user. */
+    bool isAngulagramAvailable() const;
 };
 
 #endif // MAINWINDOW_H

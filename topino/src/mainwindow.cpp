@@ -27,10 +27,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->action_select_none->setText(ui->action_select_none->text() + "\t" + tr("Escape"));
     ui->action_next_item->setText(ui->action_next_item->text() + "\t" + tr("Tab"));
 
-    /* Add a label to the zoom toolbar that is updated with the current zoom level */
-    zoomlabel.setText(tr("Zoom: 100%"));
-    //zoomlabel.setStyleSheet("QLabel {color: #B8B8B8;}");
-    ui->zoomBar->addWidget(&zoomlabel);
+    /* Add the zoom level to the Overview docking window */
+    ui->dockViewTools->setWindowTitle(QString("%1 - %2: %3%").arg(tr("Overview")).arg(tr("Zoom")).arg(100));
 
     /* Prepare all things for the object properties */
     ui->propertiesPages->setCurrentIndex(objectPages::imageProps);
@@ -111,7 +109,7 @@ void MainWindow::modelHasChanged() {
 
 void MainWindow::onViewHasChanged() {
     /* Update zoom level */
-    zoomlabel.setText(QString("%1: %2%").arg(tr("Zoom")).arg(imageView.getZoomFactor()*100.0));
+    ui->dockViewTools->setWindowTitle(QString("%1 - %2: %3%").arg(tr("Overview")).arg(tr("Zoom")).arg(imageView.getZoomFactor()*100.0));
 
     /* Set the view rectangle of the image view */
     QRectF viewport = imageView.getImageViewPoint();
@@ -408,6 +406,17 @@ void MainWindow::updateImagePage() {
         ui->propImageInversion->setText("---");
         ui->propImageLevels->setText("---");
     }
+}
+
+bool MainWindow::isAngulagramAvailable() const {
+    if (!document.getData().isAngulagramAvailable()) {
+        QMessageBox::information(nullptr, tr("No angulagram data available"),
+                                 tr("You need to create a main inlet with polar coordinate system (in the image view) to "
+                                    "acquire data for an angulagram."));
+        return false;
+    }
+
+    return true;
 }
 
 void MainWindow::onNew() {
@@ -1130,6 +1139,45 @@ void MainWindow::onToolEditInlet() {
     }
 }
 
+void MainWindow::onToolEvaluateAngulagram() {
+    qDebug("Evaluate angulagram!");
+
+    if (!isAngulagramAvailable())
+        return;
+
+    /* Opens the evaluation dialog for processing and setting parameters */
+    EvalAngulagramDialog dlg(this);
+
+    /* Set data values and some options */
+    dlg.setDataPoints(document.getData().getAngulagramPoints());
+    dlg.setOrientationRTL(document.getData().getCoordCounterClockwise());
+    dlg.setAngularRange(QPair<int, int>(document.getData().getCoordMinAngle(), document.getData().getCoordMaxAngle()));
+
+    /* Execute in a modal format and apply options if accepted */
+    if (dlg.exec() == QDialog::DialogCode::Accepted) {
+        qDebug("Fitting accepted");
+
+        /* Save the fits found as stream parameters in data. */
+        TopinoData data = document.getData();
+        data.setStreamParameters(dlg.getLorentzians());
+        document.setData(data);
+    }
+}
+
+void MainWindow::onToolExportAngulagram() {
+    qDebug("Exporting angulagram image");
+
+    if (!isAngulagramAvailable())
+        return;
+}
+
+void MainWindow::onToolExportAngulagramData() {
+    qDebug("Exporting angulagram data");
+
+    if (!isAngulagramAvailable())
+        return;
+}
+
 void MainWindow::onToolSelectOnlyRulers() {
     imageView.selectItemType(TopinoGraphicsItem::ruler, true);
 }
@@ -1150,6 +1198,4 @@ void MainWindow::onToolInletAtIntersection() {
      * here, so the view will just try to make one up. */
     imageView.createInletAtPos(center);
 }
-
-
 

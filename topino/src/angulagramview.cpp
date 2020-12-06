@@ -21,7 +21,15 @@ AngulagramView::AngulagramView(QWidget* parent, TopinoDocument& doc) : TopinoAbs
      * the creation of the axes otherwise this will crash. */
     chart = new QtCharts::QChart();
     chart->setTheme(QtCharts::QChart::ChartThemeDark);
-    chart->legend()->hide();
+
+    /* Prepare legend */
+    chart->legend()->setBackgroundVisible(true);
+    chart->legend()->setBrush(QBrush(QColor(128, 128, 128, 128)));
+    chart->legend()->setPen(QPen(QColor(192, 192, 192, 192)));
+    chart->legend()->setShowToolTips(true);
+    QFont font;
+    font.setPixelSize(12);
+    chart->legend()->setFont(font);
 
     QtCharts::QLineSeries *series = new QtCharts::QLineSeries();
     chart->addSeries(series);
@@ -39,8 +47,9 @@ void AngulagramView::modelHasChanged() {
     /* Remove the old series and get the new one from the data */
     chart->removeAllSeries();
 
-    /* First, let's add the raw data as an area series (basically as background) */
-    createRawDataSeries();
+    /* First, let's add the data as an area series (basically as background) and
+     * add all stream fitting functions to it. */
+    createDataSeries();
 
     /* Recreate the axes after adding all series so that it is ensured that
      * all points/lines show at the correct positions. */
@@ -98,7 +107,7 @@ void AngulagramView::resizeEvent(QResizeEvent* event) {
     /* Resize the chart and adapt the scene */
     chart->resize(event->size());
     chartScene->setSceneRect(chart->boundingRect());
-    fitInView(chart->boundingRect(), Qt::KeepAspectRatio);
+    fitInView(chart->boundingRect(), Qt::KeepAspectRatio);    
 
     /* Call the original implementation */
     QGraphicsView::resizeEvent(event);
@@ -130,7 +139,7 @@ void AngulagramView::createAxes() {
 
     if (xaxis != nullptr) {
         xaxis->setTitleText("Angle (°)");
-        xaxis->setLabelFormat("%+.0f");
+        xaxis->setLabelFormat("%+.1f");
 
         xaxis->setRange(document.getData().getCoordMinAngle(), document.getData().getCoordMaxAngle());
 
@@ -162,7 +171,7 @@ void AngulagramView::createAxes() {
     chart->axisY()->setLabelsFont(font);
 }
 
-void AngulagramView::createRawDataSeries() {
+void AngulagramView::createDataSeries() {
     /* Get the raw data points from the document. If there is nothing, just leave
      * here immediately. */
     QVector<QPointF> dataPoints = document.getData().getAngulagramPoints();
@@ -174,7 +183,9 @@ void AngulagramView::createRawDataSeries() {
     /* First, let's calculate a scaling factor from this data to scale it to relative
      * intensities (makes the y-axis way more clear!). */
     QPointF maxPoint = *std::max_element(dataPoints.constBegin(), dataPoints.constEnd(),
-                                         [](const QPointF& a,const QPointF& b) {return a.y() < b.y();});
+    [](const QPointF& a,const QPointF& b) {
+        return a.y() < b.y();
+    });
     setScalingFactor(maxPoint.y());
 
     /* Second, let's create a line series first with all the data points. We multiply
@@ -196,7 +207,40 @@ void AngulagramView::createRawDataSeries() {
     QColor colorseries = TopinoTools::colorsTableau10[7];
     areaseries->setPen(QColor(255, 255, 255));
     colorseries.setAlpha(50);
-    areaseries->setBrush(QBrush(colorseries));
+    areaseries->setBrush(QBrush(colorseries));    
 
     chart->addSeries(areaseries);
+    chart->legend()->markers(areaseries)[0]->setVisible(false);
+
+    /* Get stream parameters */
+    QVector<TopinoTools::Lorentzian> lorentzians = document.getData().getStreamParameters();
+
+    /* Finally, let's add Lorentzian curves for each Lorentzian fit */
+    for(int i = 0; i < lorentzians.length(); ++i) {
+        qDebug("Adding Lorentzian %d to chart", i+1);
+
+        /* Create a new line for each Lorentzian and choose one from seven colours
+         * in the Tableau color data. */
+        QtCharts::QLineSeries *lorentzLine = new QtCharts::QLineSeries(chart);
+        lorentzLine->setPen(TopinoTools::colorsTableau10[i % 7]);
+
+        /* Calculate data based on the x-values of the smoothened data */
+        for(int j = 0; j < dataPoints.length(); ++j) {
+            qreal x = dataPoints[j].x() * xFactor;
+            qreal y = lorentzians[i].f(x) / scalingFactor;
+            lorentzLine->append(x, y);
+        }
+
+        /* Name the series for the legend */
+        QString label;
+        label.sprintf("<i>𝜑</i> = %+.1f°, <i>𝜔</i> = %.1f°, <i>L</i>² = %.2f",
+                      lorentzians[i].pos, lorentzians[i].width, lorentzians[i].rsquare);
+        lorentzLine->setName(label);
+
+        chart->addSeries(lorentzLine);
+
+        /* Change label so that every second item contains an "\n" at the end to wrap the
+         * legend. */
+        chart->legend()->markers(lorentzLine)[0]->setLabel(label);
+    }
 }

@@ -950,28 +950,6 @@ PolarCircleToolItem* ImageAnalysisView::createInletToolItem(QPointF srcPoint, in
         tool->showSegments(false);
     }
 
-    /* Create an inlet item and add it to the document - if needed */
-    if (addToDocument) {
-        TopinoData::InletData indata;
-        indata.ID = 0;
-        indata.coord = srcPoint;
-        indata.radius = radius;
-
-        /* Create a document inlet object, receive ID, and connect to the tool */
-        TopinoData data = document.getData();
-        int ID = data.updateInlet(indata, true);
-        qDebug("Created new inlet with ID %d", ID);
-        tool->setItemid(ID);
-
-        /* If no other inlet has been created yet, this will be the main inlet */
-        if (count == 0) {
-            data.setMainInletID(ID);
-        }
-
-        /* Add the new inlet data to the document */
-        document.setData(data);
-    }
-
     /* Make sure that the initial direction of the tool is towards the middle of the picture; for
      * this, we separate the picture into four triangles (left, bottom, right, top) and select the
      * respective angle (fixed 90°-wise). Important: take the scenerect, not the image rect, in
@@ -996,6 +974,36 @@ PolarCircleToolItem* ImageAnalysisView::createInletToolItem(QPointF srcPoint, in
         }
     }
     tool->setZeroAngle(angle);
+
+    /* Create an inlet item and add it to the document - if needed */
+    if (addToDocument) {
+        TopinoData::InletData indata;
+        indata.ID = 0;
+        indata.coord = srcPoint;
+        indata.radius = radius;
+
+        /* Create a document inlet object, receive ID, and connect to the tool */
+        TopinoData data = document.getData();
+        int ID = data.updateInlet(indata, true);
+        qDebug("Created new inlet with ID %d", ID);
+        tool->setItemid(ID);
+
+        /* If no other inlet has been created yet, this will be the main inlet */
+        if (count == 0) {
+            qDebug("This is a main inlet ID");
+            data.setMainInletID(ID);
+
+            data.setCoordOrigin(tool->getOrigin());
+            data.setCoordMinAngle(tool->getMinAngle());
+            data.setCoordMaxAngle(tool->getMaxAngle());
+            data.setCoordNeutralAngle(tool->getZeroAngle());
+            data.setCoordCounterClockwise(tool->getCounterClockwise());
+            data.setCoordOuterRadius(tool->getOuterRadius());
+        }
+
+        /* Add the new inlet data to the document */
+        document.setData(data);
+    }
 
     /* Add the tool itself to the scene and connect it to the event chain */
     imagescene->addItem(tool);

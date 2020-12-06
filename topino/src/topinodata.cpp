@@ -12,13 +12,6 @@ TopinoData::TopinoData() {
     maxAngle = +30;
     outerRadius = 120;
     counterClockwise = false;
-
-    angulagramPoints.append(QPointF(-10.0, 0.0));
-    angulagramPoints.append(QPointF(-5.0, 5.0));
-    angulagramPoints.append(QPointF(0.0, 7.3));
-    angulagramPoints.append(QPointF(5.0, 3.0));
-    angulagramPoints.append(QPointF(10.0, 1.0));
-    angulagramPoints.append(QPointF(15.0, 0.0));
 }
 
 TopinoData::~TopinoData() {
@@ -468,6 +461,15 @@ void TopinoData::resetProcessing() {
 void TopinoData::calculatePolarImage() {
     qDebug("Calculate polar image");
 
+    /* Check for the main inlet. If not defined, we set the polar image to
+     * a null image so that follow-up functions do not process garbage data. */
+    if (mainInletID == 0) {
+        qDebug("No main inlet defined. Did not calculate a polar image.");
+        polarImage = QImage();
+
+        return;
+    }
+
     /* Need the data of the main inlet (radii, etc) */
     TopinoData::InletData mainInletData = getInletData(mainInletID);
 
@@ -523,8 +525,11 @@ void TopinoData::calculateAngulagramPoints() {
     angulagramPoints.clear();
 
     /* Make sure the image has been created */
-    if (polarImage.isNull())
+    if (polarImage.isNull() || (mainInletID == 0)) {
+        qDebug("No polar image or main inlet defined. No angulagram points calculated.");
+
         return;
+    }
 
     /* Process all the data of the image and integrate over the x-axis (radius) */
     QRgb *polarPixels = reinterpret_cast<QRgb *>(polarImage.bits());
@@ -559,6 +564,18 @@ int TopinoData::getCoordOuterRadius() const {
 
 void TopinoData::setCoordOuterRadius(int value) {
     outerRadius = value;
+}
+
+bool TopinoData::isAngulagramAvailable() const {
+    return angulagramPoints.length() > 0;
+}
+
+QVector<TopinoTools::Lorentzian> TopinoData::getStreamParameters() const {
+    return streamParameters;
+}
+
+void TopinoData::setStreamParameters(const QVector<TopinoTools::Lorentzian>& value) {
+    streamParameters = value;
 }
 
 

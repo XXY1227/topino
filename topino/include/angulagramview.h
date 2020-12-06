@@ -4,6 +4,7 @@
 #include <QAreaSeries>
 #include <QChartView>
 #include <QChart>
+#include <QLegendMarker>
 #include <QLineSeries>
 #include <QValueAxis>
 
@@ -55,9 +56,8 @@ class AngulagramView : public TopinoAbstractView {
         /* Re-creates the axes of the chart */
         void createAxes();
 
-        /* Create the diffent series for the chart */
-        void createRawDataSeries();
-
+        /* Create the raw data series for the chart */
+        void createDataSeries();
 };
 
 #endif // ANGULAGRAMVIEW_H

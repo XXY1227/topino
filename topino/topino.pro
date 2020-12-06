@@ -14,7 +14,11 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets charts
 # not allowing the user to double click the file
 QMAKE_LFLAGS += -no-pie
 
-# Select C++14
+# Adding the include path for eigen3, which is in parallel to the topino
+# source directory. Please see license, etc. in the eigen3 directory.
+INCLUDEPATH += ../eigen3
+
+# Select C++17
 QMAKE_CXXFLAGS += -std=c++17
 
 TARGET = topino
@@ -52,7 +56,8 @@ SOURCES += \
     src/topinotool.cpp \
     src/topinoabstractview.cpp \
     src/angulagramview.cpp \
-    src/inletpropdialog.cpp
+    src/inletpropdialog.cpp \
+    src/evalangulagramdialog.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -73,12 +78,14 @@ HEADERS += \
     include/histogramwidget.h \
     include/topinoabstractview.h \
     include/angulagramview.h \
-    include/inletpropdialog.h
+    include/inletpropdialog.h \
+    include/evalangulagramdialog.h
 
 FORMS += \
     ui/mainwindow.ui \
     ui/imageeditdialog.ui \
-    ui/inletpropdialog.ui
+    ui/inletpropdialog.ui \
+    ui/evalangulagramdialog.ui
 
 RESOURCES += \
     topino.qrc

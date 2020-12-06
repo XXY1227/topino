@@ -473,3 +473,277 @@ qreal TopinoTools::crossProduct(const QPointF& p, const QPointF& q) {
     return p.x() * q.y() - p.y() * q.x();
 }
 
+
+void TopinoTools::smoothByGaussianKernel(QVector<QPointF> &points, int size, qreal sigma) {
+    /* First, we need to prepare the kernel weight array. */
+    QVector<qreal> kernel;
+
+    int midIndex = size / 2;
+    for (int i = 0; i < size; ++i) {
+        kernel.push_back(gaussianKernel(i - midIndex, sigma));
+    }
+
+    /* We process through each data point and generate a new value based on the
+     * neighbouring data points and a Gaussian kernel. We start not directly at
+     * the beginning of the array, but at the "midindex" (and end just before
+     * the length - midindex) so that we have enough points to the left and
+     * right to smooth. Ideally, the points to the left and right should be
+     * background anyway. */
+    QVector<QPointF> smoothendPoints;
+    qreal sum = 0.0;
+    for(int i = midIndex; i < (points.length() - midIndex); ++i) {
+        sum = 0.0;
+
+        /* Now smoothen the points around this middle point with the kernel
+         * weights. */
+        for(int k = 0; k < size; ++k) {
+            sum += points[i + k - midIndex].y() * kernel[k];
+        }
+
+        /* Save the new value. */
+        smoothendPoints.append(QPointF(points[i].x(), sum));
+    }
+
+    /* Return the smoothened points in the same array. */
+    points = smoothendPoints;
+}
+
+qreal TopinoTools::gaussianKernel(qreal value, qreal sigma) {
+    return 1.0 / sqrt(2.0 * M_PI * sigma * sigma) * qExp(- (value * value) / (2.0 * sigma * sigma));
+}
+
+void TopinoTools::getExtrema(const QVector<QPointF>& points, QVector<Extrema>& extrema) {
+    /* Clear list to be sure that there is no remaining data in it */
+    extrema.clear();
+
+    /* Make sure there are at least 3 points in points; otherwise this does not make much
+     * sense there. */
+    if (points.length() < 3) {
+        return;
+    }
+
+    /* The idea is here to just go through all points and see if there is a switch from ascending to
+     * descending or vice versa. */
+    TopinoTools::Extrema currentExtrema;
+    TopinoTools::slopeDirection lastDirection = directionAscending;
+
+    currentExtrema.index = 0;
+    currentExtrema.pos = points[0];
+
+    for(int i = 1; i < points.length(); ++i) {
+        /* Delta is always between this point and the last one */
+        qreal delta = points[i].y() - points[i-1].y();
+
+        /* Value changed? Then update the index/value of the current extrema */
+        if (delta != 0.0) {
+            currentExtrema.index = i;
+            currentExtrema.pos = points[i];
+        }
+
+        /* Asceding now, but last direction was descending -> Minima found! */
+        if ((delta > 0) && (lastDirection == directionDescending)) {
+            /* Calculate the average index if we are sitting on a flat point (to get the middle) */
+            currentExtrema.index = (currentExtrema.index + i) / 2;
+            currentExtrema.pos = points[i];
+            currentExtrema.type = extremaMinimum;
+
+            /* Save extrema */
+            extrema.push_back(currentExtrema);
+        }
+        /* Descending now, but last direction was ascending -> Maxima found! */
+        else if ((delta < 0) && (lastDirection == directionAscending)) {
+            /* Calculate the average index if we are sitting on a flat point (to get the middle) */
+            currentExtrema.index = (currentExtrema.index + i) / 2;
+            currentExtrema.pos = points[i];
+            currentExtrema.type = extremaMaximum;
+
+            /* Save extrema */
+            extrema.push_back(currentExtrema);
+        }
+
+        /* Set last direction */
+        /* Ascending */
+        if (delta > 0) {
+            lastDirection = directionAscending;
+            /* Descending */
+        } else if (delta < 0) {
+            lastDirection = directionDescending;
+        }
+    }
+}
+
+void TopinoTools::filterExtrema(QVector<TopinoTools::Extrema>& extrema, qreal threshold) {
+    /* Create a new list with the filtered extrema */
+    QVector<TopinoTools::Extrema> filteredExtrema;
+
+    for(auto it = extrema.begin(); it != extrema.end(); ++it) {
+        if ((*it).pos.y() > threshold) {
+            filteredExtrema.push_back(*it);
+        }
+    }
+
+    /* Copy filtered list to parameter */
+    extrema = filteredExtrema;
+}
+
+int TopinoTools::countExtrema(const QVector<TopinoTools::Extrema>& extrema, TopinoTools::extremaType type) {
+    int count = 0;
+
+    for(auto it = extrema.begin(); it != extrema.end(); ++it) {
+        if (it->type == type) {
+            count++;
+        }
+    }
+
+    return count;
+}
+
+QVector<TopinoTools::Extrema> TopinoTools::splitExtrema(const QVector<TopinoTools::Extrema>& extrema, TopinoTools::extremaType type) {
+    QVector<TopinoTools::Extrema> splitted;
+
+    for(auto it = extrema.begin(); it != extrema.end(); ++it) {
+        if (it->type == type) {
+            splitted.append(*it);
+        }
+    }
+
+    return splitted;
+}
+
+QVector<TopinoTools::Section> TopinoTools::getSections(const QVector<QPointF>& points,
+        const QVector<TopinoTools::Extrema> &extrema, qreal threshold) {
+    QVector<TopinoTools::Section> sections;
+
+    /* Split the extrema into minima and maxima */
+    QVector<TopinoTools::Extrema> minima = splitExtrema(extrema, TopinoTools::extremaMinimum);
+    QVector<TopinoTools::Extrema> maxima = splitExtrema(extrema, TopinoTools::extremaMaximum);
+
+    if (minima.length() != (maxima.length() - 1)) {
+        qDebug("Sections: number of minima (%d) and maxima (%d) wrong.", minima.length(), maxima.length());
+        return sections;
+    }
+
+    /* Add the first and last pseudo minima to the list */
+    for(int i = 0; i < points.length(); ++i) {
+        if (points[i].y() > threshold) {
+            TopinoTools::Extrema first;
+            first.index = i;
+            first.pos = points[i];
+            first.type = TopinoTools::extremaMinimum;
+            minima.insert(0, first);
+            break;
+        }
+    }
+
+    for(int i = 0; i < points.length(); ++i) {
+        if (points[points.length() - i - 1].y() > threshold) {
+            TopinoTools::Extrema last;
+            last.index = points.length() - i - 1;
+            last.pos = points[points.length() - i - 1];
+            last.type = TopinoTools::extremaMinimum;
+            minima.append(last);
+            break;
+        }
+    }
+
+    /* Now, we have n minima and n-1 maxima in the list. We simply go from minima i to minima i+1
+     * and create the respective section i with maxima i. */
+    for (int i = 0; i < (minima.length()-1); ++i) {
+        TopinoTools::Section currentSection;
+
+        currentSection.indexLeft = minima[i].index;
+        currentSection.indexRight = minima[i+1].index;
+        currentSection.indexMax = maxima[i].index;
+
+        sections.append(currentSection);
+    }
+
+    return sections;
+}
+
+
+QVector<TopinoTools::Lorentzian> TopinoTools::calculateLorentzians(const QVector<QPointF>& points,
+        const QVector<TopinoTools::Section>& sections, qreal threshold) {
+    /* Create a vector for returning the fit Lorentzians */
+    QVector<TopinoTools::Lorentzian> data;
+
+    /* Fit each section */
+    for(auto it = sections.begin(); it != sections.end(); ++it) {
+        data.append(calculateSingleLorentzian(points, *it, threshold));
+    }
+
+    /* Return all the Lorentzians! */
+    return data;
+}
+
+TopinoTools::Lorentzian TopinoTools::calculateSingleLorentzian(const QVector<QPointF>& points,
+        const TopinoTools::Section& section, qreal threshold) {
+    /* Prepare data and fill with a good guess of parameters */
+    TopinoTools::Lorentzian data;
+
+    QPointF max = points[section.indexMax];
+    QPointF left = points[section.indexLeft];
+    QPointF right = points[section.indexRight];
+
+    data.height = max.y() - threshold;
+    data.offset = threshold;
+    data.pos = max.x();
+    data.width = (right.x() - left.x()) / 2.0;
+
+    /* Transfer the parameters into an vector. The order is pos (index=0),
+     * height (index=1), width (index=2), and offset (index=3). */
+    Eigen::VectorXd p(4);
+    p(0) = data.pos;
+    p(1) = data.height;
+    p(2) = data.width;
+    p(3) = data.offset;
+
+    /* Create a functor for the solving algorithm */
+    QVector<QPointF> dataPoints = points.mid(section.indexLeft, section.indexRight - section.indexLeft);
+    LorentzianFunctor functor;
+    functor.dataValues = dataPoints;
+
+    Eigen::LevenbergMarquardt<LorentzianFunctor> lm(functor);
+    int status = lm.minimize(p);
+
+    /* Copy the data */
+    qDebug("Minimization return with %d", status);
+    data.pos    = p(0);
+    data.height = p(1);
+    data.width  = p(2);
+    data.offset = p(3);
+
+    /* Additionally, calculate the R2 value to get a guess of the fitting quality (also used for linearity). */
+    data.rsquare = calculateLorentzianR2(dataPoints, data);
+
+    return data;
+}
+
+
+qreal TopinoTools::calculateLorentzianR2(const QVector<QPointF>& points, const TopinoTools::Lorentzian& parameters) {
+    /* No points given? */
+    if (points.length() == 0) {
+        return 0.0;
+    }
+
+    /* Mean value of the points y-values */
+    qreal mean = std::accumulate(points.begin(), points.end(), 0.0,
+    [](const qreal &a, const QPointF& b) {
+        return a + b.y();
+    } ) / points.length();
+
+    qreal ss_res = 0.0;
+    qreal ss_tot = 0.0;
+    for(auto it = points.begin(); it != points.end(); ++it) {
+        ss_res += qPow(it->y() - parameters.f(it->x()), 2.0);
+        ss_tot += qPow(it->y() - mean, 2.0);
+    }
+
+    /* If ss_tot == 0 that means all points y-values are zero */
+    if (ss_tot == 0.0) {
+        return 0.0;
+    }
+
+    /* Calculate the R-square value */
+    return 1.0 - (ss_res / ss_tot);
+}

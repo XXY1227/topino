@@ -22,9 +22,32 @@ class TopinoData {
     };
 
     struct InletData {
-        int ID;
+        int ID = 0;
         QPointF coord;
-        int radius;
+        int radius = 0;
+    };
+
+    struct AngulagramBackground {
+        qreal value = 0.0;
+        int indexLeft = -1;
+        int indexRight = -1;
+    };
+
+    enum extremaType {
+        extremaMinimum = 0,
+        extremaMaximum = 1
+    };
+
+    enum direction {
+        directionFlat = 0,
+        directionAscending = 1,
+        directionDescending = 2
+    };
+
+    struct AngulagramExtrema {
+        int index = -1;
+        QPointF pos;
+        extremaType type = extremaMinimum;
     };
 
     /* Setter and getter for data objects */
@@ -97,13 +120,18 @@ class TopinoData {
 
     /* Calculates the points of the angulagram from the polar image */
     void calculateAngulagramPoints();
-
     QVector<QPointF> getAngulagramPoints() const;
 
     int getCoordOuterRadius() const;
     void setCoordOuterRadius(int value);
 
-    private:
+    /* Is angulagram data available? */
+    bool isAngulagramAvailable() const;
+
+    QVector<TopinoTools::Lorentzian> getStreamParameters() const;
+    void setStreamParameters(const QVector<TopinoTools::Lorentzian>& value);
+
+  private:
     /* Image and image editing data */
     QImage sourceImage;
     QImage processedImage;
@@ -129,6 +157,9 @@ class TopinoData {
 
     /* Calculated points for the angulagram */
     QVector<QPointF> angulagramPoints;
+
+    /* Lorentzian fits as stream parameters if available */
+    QVector<TopinoTools::Lorentzian> streamParameters;
 };
 
 #endif // TOPINODATA_H
