@@ -581,9 +581,6 @@ void TopinoData::calculatePolarImage() {
             polarPixels[a * polarImage.width() + r] = qRgb(intensity, intensity, intensity);
         }
     }
-
-    /* Testing for now */
-    polarImage.save("polarimage.png");
 }
 
 void TopinoData::calculateAngulagramPoints() {
