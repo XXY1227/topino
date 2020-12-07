@@ -206,7 +206,6 @@ void EvalAngulagramDialog::createDataSeries() {
      * factor to just get relative numbers. */
     QtCharts::QLineSeries *series = new QtCharts::QLineSeries(chart);
 
-    //qreal xFactor = orientationRTL ? 1.0 : -1.0;
     for (auto iter = smoothenedDataPoints.begin(); iter != smoothenedDataPoints.end(); ++iter) {
         series->append(iter->x(), iter->y() / scalingFactor);
     }

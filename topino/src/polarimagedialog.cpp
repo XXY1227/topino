@@ -7,6 +7,8 @@ PolarImageDialog::PolarImageDialog(QWidget *parent) :
 
     /* Setup user interface */
     ui->setupUi(this);
+    ui->buttonBox->clear();
+    ui->buttonBox->addButton(tr("Close"), QDialogButtonBox::AcceptRole);
     ui->buttonBox->addButton(tr("Export..."), QDialogButtonBox::ActionRole);
 
     ui->imageView->setBackgroundRole(QPalette::Window);

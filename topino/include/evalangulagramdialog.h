@@ -48,7 +48,7 @@ class EvalAngulagramDialog : public QDialog {
     /* Interface definitions */
     Ui::EvalAngulagramDialog *ui;
 
-    /* Scene and chart items */
+    /* Chart items */
     QtCharts::QChart *chart = nullptr;
 
     QPair<int, int> angularRange;

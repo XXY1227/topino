@@ -1434,6 +1434,26 @@ void MainWindow::onToolShowPolarImage() {
 
 void MainWindow::onToolShowRadialgram() {
     qDebug("Show radialgram");
+
+    /* Only works if there is a polar image available. */
+    if (document.getData().getPolarImage().isNull() || (document.getData().getMainInletID() == 0)) {
+        QMessageBox::information(nullptr, tr("No polar image data available"),
+                                 tr("You need to process the image first by creating an inlet with a polar coordinate system before using"
+                                    "this function."));
+        return;
+    }
+
+    /* Setup the dialog and give it radial data it needs */
+    RadialgramDialog dlg(this);
+
+    /* Calculate the radialgram data */
+    TopinoData data = document.getData();
+    data.calculateRadialgramPoints();
+    dlg.setDataPoints(data.getRadialgramPoints());
+
+    if (dlg.exec() == QDialog::DialogCode::Accepted) {
+        qDebug("Accepted (but useless in this case).");
+    }
 }
 
 void MainWindow::onToolSelectOnlyRulers() {

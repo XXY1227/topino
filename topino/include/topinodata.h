@@ -122,6 +122,10 @@ class TopinoData {
     void calculateAngulagramPoints();
     QVector<QPointF> getAngulagramPoints() const;
 
+    /* Calculates the points of the radialgram from the polar image */
+    void calculateRadialgramPoints();
+    QVector<QPointF> getRadialgramPoints() const;
+
     int getCoordOuterRadius() const;
     void setCoordOuterRadius(int value);
 
@@ -157,8 +161,9 @@ class TopinoData {
     QList<InletData> inlets;
     int nextInletID;
 
-    /* Calculated points for the angulagram */
+    /* Calculated points for the angulagram and radialgram */
     QVector<QPointF> angulagramPoints;
+    QVector<QPointF> radialgramPoints;
 
     /* Lorentzian fits as stream parameters if available */
     QVector<TopinoTools::Lorentzian> streamParameters;

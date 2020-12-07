@@ -571,6 +571,46 @@ QVector<QPointF> TopinoData::getAngulagramPoints() const {
     return angulagramPoints;
 }
 
+void TopinoData::calculateRadialgramPoints() {
+    qDebug("Calculate radialgram points");
+
+    /* Clear old points */
+    radialgramPoints.clear();
+
+    /* Make sure the image has been created */
+    if (polarImage.isNull() || (mainInletID == 0)) {
+        qDebug("No polar image or main inlet defined. No radialgram points calculated.");
+
+        return;
+    }
+
+    /* Process all the data of the image and integrate over the x-axis (radius) */
+    QRgb *polarPixels = reinterpret_cast<QRgb *>(polarImage.bits());
+    int width = polarImage.width();
+    int height = polarImage.height();
+
+    /* Simply go over the image x-axis (= radius) and integrate over y. In this case
+     * the angle sign etc. does not matter. */
+    for (int x = 0; x < width; ++x) {
+        /* Integrate over y-axis (angle). Again, the intensities of each channel
+         * should be the same, so we just take the green channel here. */
+        int intensity = 0;
+
+        for (int y = 0; y < height; ++y) {
+            intensity += qGreen(polarPixels[y * width + x]);
+        }
+
+        /* Finally, add the data point to the radialgram data. */
+        radialgramPoints.append(QPointF(x * 1.0, intensity));
+    }
+
+    qDebug("Radialgram has been calculated with %d points.", radialgramPoints.length());
+}
+
+QVector<QPointF> TopinoData::getRadialgramPoints() const {
+    return radialgramPoints;
+}
+
 int TopinoData::getCoordOuterRadius() const {
     return outerRadius;
 }

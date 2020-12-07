@@ -17,6 +17,8 @@
 #include "include/imageeditdialog.h"
 #include "include/inletpropdialog.h"
 #include "include/polarimagedialog.h"
+#include "include/radialgramdialog.h"
+
 
 namespace Ui {
 class MainWindow;
