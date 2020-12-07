@@ -209,12 +209,15 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_3">
     <widget class="QStackedWidget" name="propertiesPages">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>0</x>
        <y>0</y>
        <width>250</width>
-       <height>500</height>
+       <height>670</height>
       </rect>
      </property>
      <property name="sizePolicy">
@@ -233,7 +236,7 @@
       <number>1</number>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="general">
       <layout class="QGridLayout" name="gridLayout_4" rowstretch="0,0,0,0,0,0,0,0,0,0,0,200">
@@ -492,7 +495,7 @@
            </property>
            <property name="icon">
             <iconset resource="../topino.qrc">
-             <normaloff>:/ui/toolicons/image_edit.png</normaloff>:/ui/toolicons/image_edit.png</iconset>
+             <normaloff>:/ui/toolicons/image_export.png</normaloff>:/ui/toolicons/image_export.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -1395,10 +1398,20 @@
       </layout>
      </widget>
      <widget class="QWidget" name="angulagram">
-      <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,10,60,10,50,10,100" columnstretch="0,0,0,0">
+      <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,5,50,5,40,5,0,0,100" columnstretch="0,0,0,0">
        <property name="leftMargin">
         <number>9</number>
        </property>
+       <item row="1" column="1">
+        <widget class="QLabel" name="label_18">
+         <property name="text">
+          <string>Data points:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
        <item row="4" column="0" colspan="4">
         <widget class="QTableWidget" name="tableAnguStreams">
          <property name="sizePolicy">
@@ -1499,31 +1512,13 @@
          </column>
         </widget>
        </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_15">
-         <property name="minimumSize">
-          <size>
-           <width>32</width>
-           <height>24</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>32</width>
-           <height>24</height>
-          </size>
-         </property>
+       <item row="2" column="2" colspan="2">
+        <widget class="QLabel" name="propAnguStreams">
          <property name="text">
-          <string/>
+          <string>%d</string>
          </property>
-         <property name="textFormat">
-          <enum>Qt::PlainText</enum>
-         </property>
-         <property name="pixmap">
-          <pixmap resource="../topino.qrc">:/ui/toolicons/angulagram.png</pixmap>
-         </property>
-         <property name="scaledContents">
-          <bool>false</bool>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -1537,129 +1532,6 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="1" colspan="3">
-        <spacer name="verticalSpacer_12">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLabel" name="label_18">
-         <property name="text">
-          <string>Data points:</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="0" colspan="4">
-        <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="0,0,0">
-         <item>
-          <widget class="QToolButton" name="toolEvaluateAngulagram">
-           <property name="toolTip">
-            <string>Evaluate angulagram</string>
-           </property>
-           <property name="statusTip">
-            <string>Evaluate the angulagram to find stream parameters</string>
-           </property>
-           <property name="text">
-            <string>...</string>
-           </property>
-           <property name="icon">
-            <iconset resource="../topino.qrc">
-             <normaloff>:/ui/toolicons/angulagram_evaluate.png</normaloff>:/ui/toolicons/angulagram_evaluate.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>64</width>
-             <height>32</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="toolExportAngulagram">
-           <property name="toolTip">
-            <string>Export the angulagram as image</string>
-           </property>
-           <property name="statusTip">
-            <string>Exports the angulagram as image</string>
-           </property>
-           <property name="text">
-            <string>...</string>
-           </property>
-           <property name="icon">
-            <iconset resource="../topino.qrc">
-             <normaloff>:/ui/toolicons/angulagram.png</normaloff>:/ui/toolicons/angulagram.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>64</width>
-             <height>32</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="toolExportAngulagramData">
-           <property name="toolTip">
-            <string>Exports the angulagram data</string>
-           </property>
-           <property name="statusTip">
-            <string>Exports the angulagram data for usage in spreadsheet applications and the like</string>
-           </property>
-           <property name="text">
-            <string>...</string>
-           </property>
-           <property name="icon">
-            <iconset resource="../topino.qrc">
-             <normaloff>:/ui/toolicons/angulagram.png</normaloff>:/ui/toolicons/angulagram.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>64</width>
-             <height>32</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="2" column="2" colspan="2">
-        <widget class="QLabel" name="propAnguStreams">
-         <property name="text">
-          <string>%d</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2" colspan="2">
-        <widget class="QLabel" name="propAnguDataPoints">
-         <property name="text">
-          <string>%d</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1" colspan="2">
-        <widget class="QLabel" name="label_17">
-         <property name="text">
-          <string>Angulagram properties</string>
-         </property>
-        </widget>
-       </item>
        <item row="5" column="0" colspan="4">
         <spacer name="verticalSpacer">
          <property name="orientation">
@@ -1668,19 +1540,6 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="8" column="0" colspan="4">
-        <spacer name="verticalSpacer_13">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>0</width>
            <height>40</height>
           </size>
          </property>
@@ -1785,6 +1644,209 @@
           </property>
          </column>
         </widget>
+       </item>
+       <item row="1" column="2" colspan="2">
+        <widget class="QLabel" name="propAnguDataPoints">
+         <property name="text">
+          <string>%d</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1" colspan="3">
+        <spacer name="verticalSpacer_12">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="7" column="0" colspan="4">
+        <spacer name="verticalSpacer_15">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_15">
+         <property name="minimumSize">
+          <size>
+           <width>32</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>32</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::PlainText</enum>
+         </property>
+         <property name="pixmap">
+          <pixmap resource="../topino.qrc">:/ui/toolicons/angulagram.png</pixmap>
+         </property>
+         <property name="scaledContents">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1" colspan="2">
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>Angulagram properties</string>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="0" colspan="4">
+        <spacer name="verticalSpacer_13">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>0</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="8" column="0" colspan="4">
+        <layout class="QGridLayout" name="gridLayout_9">
+         <item row="0" column="0">
+          <widget class="QToolButton" name="toolEvaluateAngulagram">
+           <property name="toolTip">
+            <string>Evaluate angulagram</string>
+           </property>
+           <property name="statusTip">
+            <string>Evaluate the angulagram to find stream parameters</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../topino.qrc">
+             <normaloff>:/ui/toolicons/angulagram_evaluate.png</normaloff>:/ui/toolicons/angulagram_evaluate.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QToolButton" name="toolExportAngulagram">
+           <property name="toolTip">
+            <string>Export the angulagram as image</string>
+           </property>
+           <property name="statusTip">
+            <string>Exports the angulagram as image</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../topino.qrc">
+             <normaloff>:/ui/toolicons/angulagram_exportgraph.png</normaloff>:/ui/toolicons/angulagram_exportgraph.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QToolButton" name="toolExportAngulagramData">
+           <property name="toolTip">
+            <string>Exports the angulagram data</string>
+           </property>
+           <property name="statusTip">
+            <string>Exports the angulagram data for usage in spreadsheet applications and the like</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../topino.qrc">
+             <normaloff>:/ui/toolicons/angulagram_exportdata.png</normaloff>:/ui/toolicons/angulagram_exportdata.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QToolButton" name="toolShowRadialgram">
+           <property name="toolTip">
+            <string>Show the radialgram</string>
+           </property>
+           <property name="statusTip">
+            <string>Shows the radialgram (integrated over 𝜑 instead of r)</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../topino.qrc">
+             <normaloff>:/ui/toolicons/angulagram_radialgram.png</normaloff>:/ui/toolicons/angulagram_radialgram.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QToolButton" name="toolShowPolarImage">
+           <property name="toolTip">
+            <string>Show the polar image</string>
+           </property>
+           <property name="statusTip">
+            <string>Shows the part of the image used for evaluation in polar coordinates</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../topino.qrc">
+             <normaloff>:/ui/toolicons/angulagram_polarimage.png</normaloff>:/ui/toolicons/angulagram_polarimage.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>32</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -2911,6 +2973,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>toolShowPolarImage</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolShowPolarImage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>812</x>
+     <y>693</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolShowRadialgram</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onToolShowRadialgram()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>890</x>
+     <y>693</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>471</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onQuit()</slot>
@@ -2954,5 +3048,7 @@
   <slot>onToolEvaluateAngulagram()</slot>
   <slot>onToolExportAngulagram()</slot>
   <slot>onToolExportAngulagramData()</slot>
+  <slot>onToolShowPolarImage()</slot>
+  <slot>onToolShowRadialgram()</slot>
  </slots>
 </ui>

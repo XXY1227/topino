@@ -495,6 +495,16 @@ void MainWindow::updateImagePage() {
     }
 }
 
+bool MainWindow::isImageAvailable() const {
+    if (document.getData().getImage().isNull()) {
+        QMessageBox::information(nullptr, tr("No image data available"),
+                                 tr("You need to import an image first before you can use the edit functions."));
+        return false;
+    }
+
+    return true;
+}
+
 bool MainWindow::isAngulagramAvailable() const {
     if (!document.getData().isAngulagramAvailable()) {
         QMessageBox::information(nullptr, tr("No angulagram data available"),
@@ -709,6 +719,10 @@ void MainWindow::onToolAngulagram() {
 }
 
 void MainWindow::onToolEditImage() {
+    /* Check if image is available */
+    if (!isImageAvailable())
+        return;
+
     /* Copy data */
     TopinoData data = document.getData();
 
@@ -759,11 +773,19 @@ void MainWindow::onToolEditImage() {
 }
 
 void MainWindow::onToolSwitchImage() {
+    /* Check if image is available */
+    if (!isImageAvailable())
+        return;
+
     /* Swap processed and source image */
     imageView.showSourceImage(!imageView.isSourceImageShown());
 }
 
 void MainWindow::onToolResetImage() {
+    /* Check if image is available */
+    if (!isImageAvailable())
+        return;
+
     /* Copy data */
     TopinoData data = document.getData();
 
@@ -781,7 +803,7 @@ void MainWindow::onToolResetImage() {
 void MainWindow::onToolExportImage() {
     qDebug("Exporting analysis image");
 
-    if(document.getData().getImage().isNull())
+    if (!isImageAvailable())
         return;
 
     QString filename = document.getFilename();
@@ -1384,6 +1406,34 @@ void MainWindow::onToolExportAngulagramData() {
         return;
 
     document.exportDataToText(filename);
+}
+
+void MainWindow::onToolShowPolarImage() {
+    qDebug("Show polar image");
+
+    /* Only works if there is a polar image available. */
+    if (document.getData().getPolarImage().isNull() || (document.getData().getMainInletID() == 0)) {
+        QMessageBox::information(nullptr, tr("No polar image data available"),
+                                 tr("You need to process the image first by creating an inlet with a polar coordinate system before using"
+                                    "this function."));
+        return;
+    }
+
+    /* Setup the dialog and give it the image data it needs */
+    PolarImageDialog dlg(this);
+
+    dlg.setPolarImage(document.getData().getPolarImage());
+    int sign = document.getData().getCoordCounterClockwise() ? -1 : 1;
+    dlg.setAngleRange(QPair<int, int>(sign * qAbs(document.getData().getCoordMinAngle()),
+                                      -1 * sign * qAbs(document.getData().getCoordMaxAngle())));
+
+    if (dlg.exec() == QDialog::DialogCode::Accepted) {
+        qDebug("Accepted (but useless in this case).");
+    }
+}
+
+void MainWindow::onToolShowRadialgram() {
+    qDebug("Show radialgram");
 }
 
 void MainWindow::onToolSelectOnlyRulers() {

@@ -131,6 +131,8 @@ class TopinoData {
     QVector<TopinoTools::Lorentzian> getStreamParameters() const;
     void setStreamParameters(const QVector<TopinoTools::Lorentzian>& value);
 
+    QImage getPolarImage() const;
+
   private:
     /* Image and image editing data */
     QImage sourceImage;

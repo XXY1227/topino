@@ -132,9 +132,9 @@ void TopinoData::removeInlet(int ID) {
             /* If this inlet was the maininlet, we need to reset
              * some data here, too. */
             if (mainInletID == ID) {
-               mainInletID = 0;
-               angulagramPoints.clear();
-               streamParameters.clear();
+                mainInletID = 0;
+                angulagramPoints.clear();
+                streamParameters.clear();
             };
 
             break;
@@ -585,6 +585,10 @@ QVector<TopinoTools::Lorentzian> TopinoData::getStreamParameters() const {
 
 void TopinoData::setStreamParameters(const QVector<TopinoTools::Lorentzian>& value) {
     streamParameters = value;
+}
+
+QImage TopinoData::getPolarImage() const {
+    return polarImage;
 }
 
 

@@ -57,7 +57,8 @@ SOURCES += \
     src/topinoabstractview.cpp \
     src/angulagramview.cpp \
     src/inletpropdialog.cpp \
-    src/evalangulagramdialog.cpp
+    src/evalangulagramdialog.cpp \
+    src/polarimagedialog.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -79,13 +80,15 @@ HEADERS += \
     include/topinoabstractview.h \
     include/angulagramview.h \
     include/inletpropdialog.h \
-    include/evalangulagramdialog.h
+    include/evalangulagramdialog.h \
+    include/polarimagedialog.h
 
 FORMS += \
     ui/mainwindow.ui \
     ui/imageeditdialog.ui \
     ui/inletpropdialog.ui \
-    ui/evalangulagramdialog.ui
+    ui/evalangulagramdialog.ui \
+    ui/polarimagedialog.ui
 
 RESOURCES += \
     topino.qrc

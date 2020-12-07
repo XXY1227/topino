@@ -57,5 +57,10 @@
         <file>ui/toolicons/inlet_snaptoimage.png</file>
         <file>ui/toolicons/inlet_props.png</file>
         <file>ui/toolicons/angulagram_evaluate.png</file>
+        <file>ui/toolicons/image_export.png</file>
+        <file>ui/toolicons/angulagram_exportgraph.png</file>
+        <file>ui/toolicons/angulagram_exportdata.png</file>
+        <file>ui/toolicons/angulagram_polarimage.png</file>
+        <file>ui/toolicons/angulagram_radialgram.png</file>
     </qresource>
 </RCC>

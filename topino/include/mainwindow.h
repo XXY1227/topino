@@ -16,6 +16,7 @@
 #include "include/imageanalysisview.h"
 #include "include/imageeditdialog.h"
 #include "include/inletpropdialog.h"
+#include "include/polarimagedialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -91,6 +92,8 @@ class MainWindow : public QMainWindow, public IObserver {
     void onToolEvaluateAngulagram();
     void onToolExportAngulagram();
     void onToolExportAngulagramData();
+    void onToolShowPolarImage();
+    void onToolShowRadialgram();
 
     /* Multiple object functions */
     void onToolSelectOnlyRulers();
@@ -140,6 +143,10 @@ class MainWindow : public QMainWindow, public IObserver {
 
     void updateObjectPage(objectPages page);
     void updateImagePage();
+
+    /* Checks if an image is available in the document. If not, it will show
+     * a message to the user. */
+    bool isImageAvailable() const;
 
     /* Checks if angulagram data exists in the document. If not, it will show
      * a message to the user. */
