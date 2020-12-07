@@ -1,9 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
 #include <QLabel>
+#include <QMainWindow>
+#include <QImage>
+#include <QPainter>
 #include <QStackedWidget>
+#include <QSvgGenerator>
 
 #include "include/iobserver.h"
 #include "include/topinodocument.h"
@@ -35,7 +38,6 @@ class MainWindow : public QMainWindow, public IObserver {
     void onSave();
     void onSaveAs();
     void onImportImage();
-    void onExportImage();
     void onQuit();
 
     void onCut();
@@ -68,6 +70,7 @@ class MainWindow : public QMainWindow, public IObserver {
     void onToolEditImage();
     void onToolSwitchImage();
     void onToolResetImage();
+    void onToolExportImage();
 
     /* Ruler buttons/functions */
     void onToolSnapRulerToCorner();

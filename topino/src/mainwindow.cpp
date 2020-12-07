@@ -387,22 +387,26 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
             ui->tableAnguStreams->clearContents();
             ui->tableAnguResolution->clearContents();
 
-            /* For each item, we create a row and include all the data */            
+            /* For each item, we create a row and include all the data */
             ui->tableAnguStreams->setRowCount(legendItems.length());
 
             for(int i = 0; i < legendItems.length(); ++i) {
                 /* Create a simple icon that will hold the color */
-                QPixmap pixmap(14, 14); pixmap.fill(legendItems[i].color);
+                QPixmap pixmap(14, 14);
+                pixmap.fill(legendItems[i].color);
 
-                QString posLabel; posLabel.sprintf("%+.1f", legendItems[i].pos);
+                QString posLabel;
+                posLabel.sprintf("%+.1f", legendItems[i].pos);
                 QTableWidgetItem *pos = new QTableWidgetItem(QIcon(pixmap), posLabel);
                 pos->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
-                QString widthLabel; widthLabel.sprintf("%.1f", legendItems[i].width);
+                QString widthLabel;
+                widthLabel.sprintf("%.1f", legendItems[i].width);
                 QTableWidgetItem *width = new QTableWidgetItem(widthLabel);
                 width->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
-                QString linLabel; linLabel.sprintf("%.2f", legendItems[i].rsquare);
+                QString linLabel;
+                linLabel.sprintf("%.2f", legendItems[i].rsquare);
                 QTableWidgetItem *lin = new QTableWidgetItem(linLabel);
                 lin->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
@@ -419,18 +423,25 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
             for(int i = 0; i < legendItems.length(); ++i) {
                 for(int j = (i+1); j < legendItems.length(); ++j) {
                     /* Create a simple icon for both streams */
-                    QPixmap pixmap1(14, 14); pixmap1.fill(legendItems[i].color);
-                    QPixmap pixmap2(14, 14); pixmap2.fill(legendItems[j].color);
+                    QPixmap pixmap1(14, 14);
+                    pixmap1.fill(legendItems[i].color);
+                    QPixmap pixmap2(14, 14);
+                    pixmap2.fill(legendItems[j].color);
 
                     /* For some reason, the QTableWidget does not allow to simply center the
                      * icon in the table. So, we use a QLabel here, give it the icon and put
                      * it in the respective cell. */
-                    QLabel *stream1 = new QLabel(); stream1->setPixmap(pixmap1); stream1->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-                    QLabel *stream2 = new QLabel(); stream2->setPixmap(pixmap2); stream2->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+                    QLabel *stream1 = new QLabel();
+                    stream1->setPixmap(pixmap1);
+                    stream1->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+                    QLabel *stream2 = new QLabel();
+                    stream2->setPixmap(pixmap2);
+                    stream2->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
-                    QString resLabel; resLabel.sprintf("%.2f", TopinoTools::calculateResolution(
-                                                           legendItems[i].pos, legendItems[i].width,
-                                                           legendItems[j].pos, legendItems[j].width));
+                    QString resLabel;
+                    resLabel.sprintf("%.2f", TopinoTools::calculateResolution(
+                                         legendItems[i].pos, legendItems[i].width,
+                                         legendItems[j].pos, legendItems[j].width));
                     QTableWidgetItem *res = new QTableWidgetItem(resLabel);
                     res->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
@@ -591,8 +602,6 @@ void MainWindow::onSaveAs() {
     if (filename.length() == 0)
         return;
 
-    QMessageBox::information(this, "Blabla", filename);
-
     /* Save and notify everyone */
     document.setFullFilename(filename);
     document.saveToXML();
@@ -624,11 +633,6 @@ void MainWindow::onImportImage() {
     /* Change to default view */
     changeToView(viewPages::image);
 }
-
-void MainWindow::onExportImage() {
-
-}
-
 
 void MainWindow::onQuit() {
     this->close();
@@ -772,6 +776,67 @@ void MainWindow::onToolResetImage() {
 
     /* Update the image page */
     updateImagePage();
+}
+
+void MainWindow::onToolExportImage() {
+    qDebug("Exporting analysis image");
+
+    if(document.getData().getImage().isNull())
+        return;
+
+    QString filename = document.getFilename();
+
+    /* Remove the extension if it exists and add a new one */
+    filename.replace(".topxml", "", Qt::CaseInsensitive);
+    filename += ".png";
+
+    filename = QFileDialog::getSaveFileName(this, tr("Export analysis image"), filename,
+                                            tr("Raster image file (*.png);;Scalable Vector files (*.svg);;All files (*.*)"));
+
+    if (filename.length() == 0)
+        return;
+
+    qDebug("File exported: %s", filename.toStdString().c_str());
+
+    /* Depending on the extension, we save either as vector image (SVG) or
+     * as raster image (whatever QImage/QPixmap supports). */
+    imageView.selectNone();
+    QRectF rect = imageView.scene()->sceneRect();
+
+    if (filename.endsWith(".svg", Qt::CaseInsensitive)) {
+        qDebug("Save as vector image");
+
+        /* Create a SVG generator, let the Angulagram view draw into it and
+         * save the result. */
+        QSvgGenerator generator;
+        generator.setFileName(filename);
+        generator.setTitle(document.getFilename());
+        generator.setDescription(tr("Analysis image generated at ") + QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss"));
+        generator.setSize(rect.size().toSize());
+        generator.setViewBox(rect);
+
+        QPainter paintVector(&generator);
+        paintVector.translate(rect.topLeft().toPoint());
+        imageView.scene()->render(&paintVector);
+        paintVector.end();
+
+        /* Raster image */
+    } else {
+        qDebug("Save as raster image");
+
+        /* Create an image, let the Angulagram view draw into it, and
+         * save the result as a file. */
+        QImage imageData(rect.size().toSize(), QImage::Format_ARGB32);
+        QPainter paintRaster(&imageData);
+        paintRaster.setRenderHint(QPainter::Antialiasing);
+        paintRaster.setCompositionMode (QPainter::CompositionMode_Source);
+        paintRaster.fillRect(QRectF(QPointF(0, 0), rect.size()), Qt::transparent);
+        paintRaster.setCompositionMode (QPainter::CompositionMode_SourceOver);
+        imageView.scene()->render(&paintRaster);
+        paintRaster.end();
+
+        imageData.save(filename);
+    }
 }
 
 void MainWindow::onToolSnapRulerToCorner() {
@@ -1248,6 +1313,56 @@ void MainWindow::onToolExportAngulagram() {
 
     if (!isAngulagramAvailable())
         return;
+
+    QString filename = document.getFilename();
+
+    /* Remove the extension if it exists and add a new one */
+    filename.replace(".topxml", "", Qt::CaseInsensitive);
+    filename += ".png";
+
+    filename = QFileDialog::getSaveFileName(this, tr("Export angulagram graph"), filename,
+                                            tr("Raster image file (*.png);;Scalable Vector files (*.svg);;All files (*.*)"));
+
+    if (filename.length() == 0)
+        return;
+
+    qDebug("File exported: %s", filename.toStdString().c_str());
+
+    /* Depending on the extension, we save either as vector image (SVG) or
+     * as raster image (whatever QImage/QPixmap supports). */
+    if (filename.endsWith(".svg", Qt::CaseInsensitive)) {
+        qDebug("Save as vector image");
+
+        /* Create a SVG generator, let the Angulagram view draw into it and
+         * save the result. */
+        QSvgGenerator generator;
+        generator.setFileName(filename);
+        generator.setTitle(document.getFilename());
+        generator.setDescription(tr("Angulagram graph generated at ") + QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss"));
+        generator.setSize(angulagramView.size());
+        generator.setViewBox(QRect(QPoint(0, 0), angulagramView.size()));
+
+        QPainter paintVector(&generator);
+        angulagramView.render(&paintVector);
+        paintVector.end();
+
+        /* Raster image */
+    } else {
+        qDebug("Save as raster image");
+
+        /* Create an image, let the Angulagram view draw into it, and
+         * save the result as a file. */
+        QImage imageData(angulagramView.size(), QImage::Format_ARGB32);
+        QPainter paintRaster(&imageData);
+        paintRaster.setRenderHint(QPainter::Antialiasing);
+        paintRaster.setCompositionMode (QPainter::CompositionMode_Source);
+        paintRaster.fillRect(QRectF(QPointF(0, 0), angulagramView.size()), Qt::transparent);
+        paintRaster.setCompositionMode (QPainter::CompositionMode_SourceOver);
+        angulagramView.render(&paintRaster);
+        paintRaster.end();
+
+        imageData.save(filename);
+    }
 }
 
 void MainWindow::onToolExportAngulagramData() {
@@ -1255,6 +1370,20 @@ void MainWindow::onToolExportAngulagramData() {
 
     if (!isAngulagramAvailable())
         return;
+
+    QString filename = document.getFilename();
+
+    /* Remove the extension if it exists and add a new one */
+    filename.replace(".topxml", "", Qt::CaseInsensitive);
+    filename += ".txt";
+
+    filename = QFileDialog::getSaveFileName(this, tr("Export angulagram data"), filename,
+                                            tr("Text files (*.txt);;All files (*.*)"));
+
+    if (filename.length() == 0)
+        return;
+
+    document.exportDataToText(filename);
 }
 
 void MainWindow::onToolSelectOnlyRulers() {

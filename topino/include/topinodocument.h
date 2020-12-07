@@ -4,8 +4,9 @@
 #include "include/iobserver.h"
 #include "include/topinodata.h"
 
-#include <QString>
+#include <QDateTime>
 #include <QImage>
+#include <QString>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 #include <vector>
@@ -47,6 +48,16 @@ class TopinoDocument {
     const TopinoData& getData() const;
     void getData(TopinoData &value) const;
     void setData(const TopinoData& value);
+
+    /* Creates the textual representation of the data header (over view of
+     * raw data and fitting parameters) */
+    void createDataHeader(QStringList &textData) const;
+
+    /* Creates the textual representation of the raw data + fitted plots */
+    void createDataTable(QStringList &textData) const;
+
+    /* Export data to a text file */
+    void exportDataToText(const QString &filename) const;
 
   private:
     std::vector<IObserver*> observers;

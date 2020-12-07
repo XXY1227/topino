@@ -73,13 +73,6 @@ class AngulagramView : public TopinoAbstractView {
 
     /* Create the raw data series for the chart */
     void createDataSeries();
-
-    /* Creates the textual representation of the data header (over view of
-     * raw data and fitting parameters) */
-    void createDataHeader(QStringList &textData) const;
-
-    /* Creates the textual representation of the raw data + fitted plots */
-    void createDataTable(QStringList &textData) const;
 };
 
 #endif // ANGULAGRAMVIEW_H

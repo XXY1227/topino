@@ -170,6 +170,97 @@ void TopinoDocument::setData(const TopinoData& value) {
     modify();
 }
 
+void TopinoDocument::createDataHeader(QStringList& textData) const {
+    /* First, let's put in the name of the file we are evaluating here and then
+     * some information about the image */
+    textData.append(QObject::tr("Timestamp:") +"\t" + QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss"));
+
+    if (hasFileName()) {
+        textData.append(QObject::tr("File:") + "\t" + filename);
+    }
+    textData.append(QString(QObject::tr("Image:") + "\t%1 × %2 Px²").arg(data.getImage().width()).arg(data.getImage().height()));
+
+    TopinoData::InletData inletData = data.getInletData(data.getMainInletID());
+    textData.append(QString(QObject::tr("Inlet:") + "\tx:\t%1 Px\ty:\t%2 Px\tRef. angle:\t%3°\tInner radius:\t%4 Px\tOuter radius:\t%5 Px")
+                    .arg(qRound(inletData.coord.x())).arg(qRound(inletData.coord.y()))
+                    .arg(data.getCoordNeutralAngle()).arg(inletData.radius).arg(data.getCoordOuterRadius()));
+    textData.append("");
+
+    /* Stream data: first the data of each stream */
+    textData.append("\t\t𝜑\t𝜔\tL²");
+    QVector<TopinoTools::Lorentzian> streams = data.getStreamParameters();
+    for(int i = 0; i < streams.length(); ++i) {
+        QString line;
+        line.sprintf("Stream %d\t%+.1f°\t%.1f°\t%.2f", i+1, streams[i].pos, streams[i].width, streams[i].rsquare);
+        textData.append(line);
+    }
+    textData.append("");
+
+    /* Stream data: add the resolutions between each stream */
+    textData.append("1. Stream\t2.Stream\tR₁₂");
+    for(int i = 0; i < streams.length(); ++i) {
+        for(int j = (i+1); j < streams.length(); ++j) {
+            QString line;
+            line.sprintf("%d\t%d\t%.2f", i+1, j+1, TopinoTools::calculateResolution(
+                             streams[i].pos, streams[i].width,
+                             streams[j].pos, streams[j].width));
+            textData.append(line);
+        }
+    }
+}
+
+void TopinoDocument::createDataTable(QStringList& textData) const {
+    /* For each point in data points, we add the respective raw data point and the
+    * stream fits. */
+    QVector<TopinoTools::Lorentzian> parameters = data.getStreamParameters();
+    int fits = parameters.length();
+
+    /* Header of table */
+    textData.append(QObject::tr("All data intensities are in arbitrary units."));
+    QString header = "𝜑 (°)\traw data int";
+    for (int i = 0; i < fits; ++i) {
+        header += "\tStream " + QString::number(i+1);
+    }
+    textData.append(header);
+
+    /* Contents of table */
+    QVector<QPointF> points = data.getAngulagramPoints();
+    for(int i = 0; i < points.length(); ++i) {
+        QStringList line;
+
+        /* Raw data */
+        line.append(QString::number(points[i].x()));
+        line.append(QString::number(points[i].y()));
+
+        /* Data for the fits */
+        for(int j = 0; j < fits; ++j) {
+            line.append(QString::number(parameters[j].f(points[i].x())));
+        }
+
+        textData.append(line.join("\t"));
+    }
+
+}
+
+void TopinoDocument::exportDataToText(const QString& filename) const {
+    qDebug("Exporting data to %s", filename.toStdString().c_str());
+
+    /* Prepare all the data in text form, line by line */
+    QStringList textdata;
+    createDataHeader(textdata);
+    textdata.append("");
+    createDataTable(textdata);
+
+    /* Write it to the given file */
+    QFile file(filename);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
+        file.write(textdata.join("\n").toUtf8());
+        file.close();
+    } else {
+        qDebug("Could not open file %s", filename.toStdString().c_str());
+    }
+}
+
 TopinoDocument::FileError TopinoDocument::readTopinoXML(QXmlStreamReader& xml) {
     /* Read all elements */
     while (xml.readNextStartElement()) {
