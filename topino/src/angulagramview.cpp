@@ -191,7 +191,9 @@ void AngulagramView::createAxes() {
         xaxis->setTitleText("Angle (°)");
         xaxis->setLabelFormat("%+.1f");
 
-        xaxis->setRange(document.getData().getCoordMinAngle(), document.getData().getCoordMaxAngle());
+        qreal factor = document.getData().getCoordCounterClockwise() ? -1.0 : 1.0;
+        xaxis->setRange(factor * qAbs(document.getData().getCoordMinAngle()),
+                        -1.0 * factor * qAbs(document.getData().getCoordMaxAngle()));
 
         xaxis->setMinorTickCount(3);
         xaxis->setReverse(document.getData().getCoordCounterClockwise());
@@ -244,9 +246,9 @@ void AngulagramView::createDataSeries() {
      * factor to just get relative numbers. */
     QtCharts::QLineSeries *series = new QtCharts::QLineSeries(chart);
 
-    qreal xFactor = document.getData().getCoordCounterClockwise() ? 1.0 : -1.0;
+    //qreal xFactor = document.getData().getCoordCounterClockwise() ? 1.0 : -1.0;
     for (auto iter = dataPoints.begin(); iter != dataPoints.end(); ++iter) {
-        series->append(iter->x() * xFactor, iter->y() / scalingFactor);
+        series->append(iter->x(), iter->y() / scalingFactor);
     }
 
     /* Third, let's create an area series based on this line series to fill the area
@@ -277,7 +279,7 @@ void AngulagramView::createDataSeries() {
 
         /* Calculate data based on the x-values of the smoothened data */
         for(int j = 0; j < dataPoints.length(); ++j) {
-            qreal x = dataPoints[j].x() * xFactor;
+            qreal x = dataPoints[j].x();
             qreal y = lorentzians[i].f(x) / scalingFactor;
             lorentzLine->append(x, y);
         }

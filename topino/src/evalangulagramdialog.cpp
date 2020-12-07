@@ -147,7 +147,8 @@ void EvalAngulagramDialog::createAxes() {
         xaxis->setTitleText("Angle (°)");
         xaxis->setLabelFormat("%+.1f");
 
-        xaxis->setRange(angularRange.first, angularRange.second);
+        qreal factor = orientationRTL ? -1.0 : 1.0;
+        xaxis->setRange(factor * qAbs(angularRange.first), -1.0 * factor * qAbs(angularRange.second));
 
         xaxis->setMinorTickCount(3);
         xaxis->setReverse(orientationRTL);
@@ -185,8 +186,9 @@ void EvalAngulagramDialog::createDataSeries() {
 
     /* Let's create a mini-series for the "threshold" bar */
     QtCharts::QLineSeries *threshSeries = new QtCharts::QLineSeries(chart);
-    threshSeries->append(angularRange.first, ui->spinThreshold->value() / 100.0);
-    threshSeries->append(angularRange.second, ui->spinThreshold->value() / 100.0);
+    qreal factor = orientationRTL ? -1.0 : 1.0;
+    threshSeries->append(factor * qAbs(angularRange.first), ui->spinThreshold->value() / 100.0);
+    threshSeries->append(-1.0 * factor * qAbs(angularRange.second), ui->spinThreshold->value() / 100.0);
     threshSeries->setPen(TopinoTools::colorsTableau10[4]);
     chart->addSeries(threshSeries);
 
@@ -204,9 +206,9 @@ void EvalAngulagramDialog::createDataSeries() {
      * factor to just get relative numbers. */
     QtCharts::QLineSeries *series = new QtCharts::QLineSeries(chart);
 
-    qreal xFactor = orientationRTL ? 1.0 : -1.0;
+    //qreal xFactor = orientationRTL ? 1.0 : -1.0;
     for (auto iter = smoothenedDataPoints.begin(); iter != smoothenedDataPoints.end(); ++iter) {
-        series->append(iter->x() * xFactor, iter->y() / scalingFactor);
+        series->append(iter->x(), iter->y() / scalingFactor);
     }
 
     /* Let's create an area series based on this line series to fill the area
@@ -262,7 +264,7 @@ void EvalAngulagramDialog::createDataSeries() {
 
         /* Calculate data based on the x-values of the smoothened data */
         for(int j = 0; j < smoothenedDataPoints.length(); ++j) {
-            qreal x = smoothenedDataPoints[j].x() * xFactor;
+            qreal x = smoothenedDataPoints[j].x();
             qreal y = lorentzians[i].f(x) / scalingFactor;
             lorentzLine->append(x, y);
         }

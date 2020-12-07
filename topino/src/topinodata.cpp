@@ -545,6 +545,10 @@ void TopinoData::calculateAngulagramPoints() {
     int width = polarImage.width();
     int height = polarImage.height();
 
+    /* Factor to multiply into the points. Min angle could be plus or negative depending
+     * on counterclockwise */
+    qreal xFactor = counterClockwise ? 1.0 : -1.0;
+
     for (int y = 0; y < height; ++y) {
         /* Integrate over x-axis (radius). Again, the intensities of each channel
          * should be the same, so we just take the green channel here. */
@@ -557,7 +561,7 @@ void TopinoData::calculateAngulagramPoints() {
         /* Finally, add the data point to the angulagram data. The angle is
          * minAngle + y * 0.1° - this is how we created the image in the
          * previous step (see calculatePolarImage() above). */
-        angulagramPoints.append(QPointF(minAngle + y * 0.1, intensity));
+        angulagramPoints.append(QPointF((minAngle + y * 0.1) * xFactor, intensity));
     }
 
     qDebug("Angulagram has been calculated");
