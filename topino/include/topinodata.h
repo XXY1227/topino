@@ -94,6 +94,9 @@ class TopinoData {
     ParsingError loadInletObject(QXmlStreamReader& xml);
     void saveInletObject(QXmlStreamWriter& xml, const InletData &data);
 
+    ParsingError loadStreamParameters(QXmlStreamReader& xml);
+    void saveStreamParameters(QXmlStreamWriter& xml);
+
     bool getInversion() const;
     void setInversion(bool value);
 
@@ -137,6 +140,12 @@ class TopinoData {
 
     QImage getPolarImage() const;
 
+    int getCoordDiffAngle() const;
+    void setCoordDiffAngle(int value);
+
+    int getCoordSectors() const;
+    void setCoordSectors(int value);
+
   private:
     /* Image and image editing data */
     QImage sourceImage;
@@ -154,8 +163,10 @@ class TopinoData {
     int neutralAngle;
     int minAngle;
     int maxAngle;
+    int diffAngle;
     int outerRadius;
     bool counterClockwise;
+    int sectors;
 
     /* List of inlets */
     QList<InletData> inlets;

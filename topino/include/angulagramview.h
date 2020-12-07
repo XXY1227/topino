@@ -53,6 +53,9 @@ class AngulagramView : public TopinoAbstractView {
     };
     QVector<LegendItem> getLegendItems() const;
 
+    /* Reset view */
+    void resetView() override;
+
   protected:
     void resizeEvent(QResizeEvent *event) override;
 

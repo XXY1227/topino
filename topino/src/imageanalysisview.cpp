@@ -626,9 +626,11 @@ void ImageAnalysisView::createToolsFromDocument() {
         if (data.getMainInletID() == (*iter).ID) {
             tool->setMinAngle(data.getCoordMinAngle());
             tool->setMaxAngle(data.getCoordMaxAngle());
+            tool->setDiffAngle(data.getCoordDiffAngle());
             tool->setOuterRadius(data.getCoordOuterRadius());
             tool->setZeroAngle(data.getCoordNeutralAngle());
             tool->setCounterClockwise(data.getCoordCounterClockwise());
+            tool->setSegments(data.getCoordSectors());
             tool->showSegments(true);
         } else {
             tool->showSegments(false);
@@ -999,6 +1001,8 @@ PolarCircleToolItem* ImageAnalysisView::createInletToolItem(QPointF srcPoint, in
             data.setCoordMinAngle(tool->getMinAngle());
             data.setCoordMaxAngle(tool->getMaxAngle());
             data.setCoordNeutralAngle(tool->getZeroAngle());
+            data.setCoordDiffAngle(tool->getDiffAngle());
+            data.setCoordSectors(tool->getSegments());
             data.setCoordCounterClockwise(tool->getCounterClockwise());
             data.setCoordOuterRadius(tool->getOuterRadius());
         }
@@ -1036,8 +1040,10 @@ void ImageAnalysisView::synchronizeInletToolItem(const PolarCircleToolItem* item
         data.setCoordNeutralAngle(item->getZeroAngle());
         data.setCoordMinAngle(item->getMinAngle());
         data.setCoordMaxAngle(item->getMaxAngle());
+        data.setCoordDiffAngle(item->getDiffAngle());
         data.setCoordOuterRadius(item->getOuterRadius());
         data.setCoordCounterClockwise(item->getCounterClockwise());
+        data.setCoordSectors(item->getSegments());
     }
 
     /* Update */

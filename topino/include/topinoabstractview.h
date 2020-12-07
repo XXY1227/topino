@@ -63,6 +63,9 @@ class TopinoAbstractView : public QGraphicsView, public IObserver {
     void setZoomFactor(const double zoomTo);
     void zoomByFactor(const double factor);
 
+    /* Resets the view */
+    virtual void resetView() = 0;
+
   signals:
     /* Called by the every function that changes somehow the view(port) of the scene, e.g. by zooming. */
     void viewHasChanged();

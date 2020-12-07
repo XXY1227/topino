@@ -371,8 +371,15 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
         }
         break;
 
+    /* Fifth page: angulagram properties */
     case angulagramProps:
-        /* Fifth page: angulagram properties */
+        /* Clear all data in the table first */
+        ui->tableAnguStreams->clearContents();
+        ui->tableAnguStreams->setRowCount(0);
+        ui->tableAnguResolution->clearContents();
+        ui->tableAnguResolution->setRowCount(0);
+
+        /* Visible? */
         if(viewManager.currentIndex() == viewPages::angulagram) {
             ui->propAnguDataPoints->setText(QString::number(document.getData().getAngulagramPoints().length()));
             ui->propAnguStreams->setText(QString::number(document.getData().getStreamParameters().length()));
@@ -382,10 +389,6 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
             if (legendItems.length() == 0) {
                 break;
             }
-
-            /* Clear all data in the table first */
-            ui->tableAnguStreams->clearContents();
-            ui->tableAnguResolution->clearContents();
 
             /* For each item, we create a row and include all the data */
             ui->tableAnguStreams->setRowCount(legendItems.length());
@@ -533,7 +536,8 @@ void MainWindow::onNew() {
     }
 
     /* Create an empty document, override the old one, reset the view, notify everyone */
-    imageView.resetView();
+    imageView.resetView();    
+    angulagramView.resetView();
     changeToView(viewPages::image);
 
     document = TopinoDocument();
@@ -580,6 +584,7 @@ void MainWindow::onOpen() {
     /* Only override the open document if loading of the new document was successful; don't forget to reset
      * the view! */
     imageView.resetView();
+    angulagramView.resetView();
     changeToView(viewPages::image);
 
     document = newdoc;
@@ -1147,8 +1152,10 @@ void MainWindow::onToolSetMainInlet() {
     inlet->setZeroAngle(data.getCoordNeutralAngle());
     inlet->setMinAngle(data.getCoordMinAngle());
     inlet->setMaxAngle(data.getCoordMaxAngle());
+    inlet->setDiffAngle(data.getCoordDiffAngle());
     inlet->setCounterClockwise(data.getCoordCounterClockwise());
     inlet->setOuterRadius(data.getCoordOuterRadius());
+    inlet->setSegments(data.getCoordSectors());
 
     /* Transfer diff angle and segments if possible */
     if (segments > 0) {

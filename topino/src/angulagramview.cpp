@@ -163,6 +163,15 @@ QVector<AngulagramView::LegendItem> AngulagramView::getLegendItems() const {
     return legendItems;
 }
 
+void AngulagramView::resetView() {
+    /* Reset chart */
+    chart->createDefaultAxes();
+    chart->removeAllSeries();
+
+    /* Remove all data we might have here */
+    legendItems.clear();
+}
+
 qreal AngulagramView::getScalingFactor() const {
     return scalingFactor;
 }

@@ -10,8 +10,10 @@ TopinoData::TopinoData() {
     neutralAngle = -90;
     minAngle = -30;
     maxAngle = +30;
+    diffAngle = 15;
     outerRadius = 120;
     counterClockwise = false;
+    sectors = 3;
 }
 
 TopinoData::~TopinoData() {
@@ -164,6 +166,8 @@ TopinoData::ParsingError TopinoData::loadObject(QXmlStreamReader& xml) {
         return loadCoordinateObject(xml);
     } else if (xml.name() == "inlets") {
         return loadInletsObject(xml);
+    } else if (xml.name() == "stream") {
+        return loadStreamParameters(xml);
     }
 
     /* Ignored an element */
@@ -228,10 +232,14 @@ TopinoData::ParsingError TopinoData::loadCoordinateObject(QXmlStreamReader& xml)
             minAngle = content.toInt();
         } else if (xml.name() == "maxAngle") {
             maxAngle = content.toInt();
+        } else if (xml.name() == "diffAngle") {
+            diffAngle = content.toInt();
         } else if (xml.name() == "outerRadius") {
             outerRadius = content.toInt();
         } else if (xml.name() == "counterClockwise") {
             counterClockwise = (content.compare("true") == 0);
+        } else if (xml.name() == "sectors") {
+            sectors = content.toInt();
         } else {
             xml.skipCurrentElement();
         }
@@ -248,8 +256,10 @@ void TopinoData::saveCoordinateObject(QXmlStreamWriter& xml) {
     xml.writeTextElement("neutralAngle", QString::number(neutralAngle));
     xml.writeTextElement("minAngle", QString::number(minAngle));
     xml.writeTextElement("maxAngle", QString::number(maxAngle));
+    xml.writeTextElement("diffAngle", QString::number(diffAngle));
     xml.writeTextElement("outerRadius", QString::number(outerRadius));
     xml.writeTextElement("counterClockwise", counterClockwise ? "true" : "false");
+    xml.writeTextElement("sectors", QString::number(sectors));
 
     xml.writeEndElement();
 }
@@ -344,6 +354,55 @@ void TopinoData::saveInletObject(QXmlStreamWriter& xml, const InletData &data) {
     xml.writeTextElement("radius", QString::number(data.radius));
 
     xml.writeEndElement();
+}
+
+TopinoData::ParsingError TopinoData::loadStreamParameters(QXmlStreamReader& xml) {
+    /* Read all elements of the stream object and fill in the respective members */
+    TopinoTools::Lorentzian data;
+
+    while (xml.readNextStartElement()) {
+        /* Read content of element and parse it */
+        QString content = xml.readElementText().toLower();
+
+        qDebug("Found element %s in stream object: %s.",
+               xml.name().toString().toStdString().c_str(),
+               content.toStdString().c_str());
+
+        if (xml.name() == "pos") {
+            data.pos = content.toDouble();
+        } else if (xml.name() == "width") {
+            data.width = content.toDouble();
+        } else if (xml.name() == "height") {
+            data.height = content.toDouble();
+        } else if (xml.name() == "offset") {
+            data.offset = content.toDouble();
+        } else if (xml.name() == "rsquare") {
+            data.rsquare = content.toDouble();
+        } else {
+            xml.skipCurrentElement();
+        }
+    }
+
+    /* Add to data */
+    streamParameters.append(data);
+
+    /* No parsing error while loading the image */
+    return ParsingError::NoFailure;
+}
+
+void TopinoData::saveStreamParameters(QXmlStreamWriter& xml) {
+    /* Save the stream parameters */
+    for(auto it = streamParameters.begin(); it != streamParameters.end(); ++it) {
+        xml.writeStartElement("stream");
+
+        xml.writeTextElement("pos", QString::number(it->pos));
+        xml.writeTextElement("width", QString::number(it->width));
+        xml.writeTextElement("height", QString::number(it->height));
+        xml.writeTextElement("offset", QString::number(it->offset));
+        xml.writeTextElement("rsquare", QString::number(it->rsquare));
+
+        xml.writeEndElement();
+    }
 }
 
 bool TopinoData::getInversion() const {
@@ -633,6 +692,22 @@ void TopinoData::setStreamParameters(const QVector<TopinoTools::Lorentzian>& val
 
 QImage TopinoData::getPolarImage() const {
     return polarImage;
+}
+
+int TopinoData::getCoordDiffAngle() const {
+    return diffAngle;
+}
+
+void TopinoData::setCoordDiffAngle(int value) {
+    diffAngle = value;
+}
+
+int TopinoData::getCoordSectors() const {
+    return sectors;
+}
+
+void TopinoData::setCoordSectors(int value) {
+    sectors = value;
 }
 
 
