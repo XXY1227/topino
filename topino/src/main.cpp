@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
     a.setStyle(new DarkStyle());
+    a.setWindowIcon(QIcon(QPixmap(":ui/toolicons/inlet.png")));
 
     QFile f(":ui/darkstyle/darkstyle.qss");
     if (f.exists()) {

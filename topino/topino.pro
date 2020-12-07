@@ -14,6 +14,16 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets charts
 # not allowing the user to double click the file
 QMAKE_LFLAGS += -no-pie
 
+# Version of Topino
+VERSION = 1.0.0
+
+# Add an icon for the Windows exe file and the definitions for the
+# resource file
+RC_ICONS = ui/topino.ico
+VERSION_PE_HEADER = 1.0
+QMAKE_TARGET_DESCRIPTION = "Program to create and evaluate angulagrams"
+QMAKE_TARGET_COPYRIGHT = "Sven Kochmann, 2020"
+
 # Adding the include path for eigen3, which is in parallel to the topino
 # source directory. Please see license, etc. in the eigen3 directory.
 INCLUDEPATH += ../eigen3
