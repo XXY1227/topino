@@ -216,7 +216,9 @@ void PolarCircleToolItem::updateScale() {
     double scaling = getScaling();
 
     offset = offset * scaling;
-    coordlineWidth = coordlineWidth * scaling;
+
+    /* Scale and make sure that the line width is always > 0. */
+    coordlineWidth = qMax(qRound(coordlineWidth * scaling), 1);
     coordlinePen.setWidth(coordlineWidth);
     grabLinePen.setWidth(coordlineWidth);
 

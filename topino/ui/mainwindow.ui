@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>944</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -150,7 +150,7 @@
     <bool>false</bool>
    </property>
    <property name="features">
-    <set>QDockWidget::AllDockWidgetFeatures</set>
+    <set>QDockWidget::DockWidgetMovable</set>
    </property>
    <property name="allowedAreas">
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
@@ -201,6 +201,15 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="dockObjectProperties">
+   <property name="minimumSize">
+    <size>
+     <width>250</width>
+     <height>38</height>
+    </size>
+   </property>
+   <property name="features">
+    <set>QDockWidget::DockWidgetMovable</set>
+   </property>
    <property name="windowTitle">
     <string>Object properties</string>
    </property>
@@ -228,7 +237,7 @@
      </property>
      <property name="minimumSize">
       <size>
-       <width>0</width>
+       <width>250</width>
        <height>0</height>
       </size>
      </property>
