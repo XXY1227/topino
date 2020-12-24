@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/272819321.svg)](https://zenodo.org/badge/latestdoi/272819321)
+
 # Topino: A graphical tool for quantitative assessment of molecular stream separations
 
 ![](doc/topinologo.png)
