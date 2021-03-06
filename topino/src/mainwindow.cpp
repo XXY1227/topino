@@ -702,8 +702,8 @@ void MainWindow::onAboutQt() {
 void MainWindow::onAboutTopino() {
     /* About text of Topino */
     const QString aboutTopinoText = tr(
-                                        "<p><b>Topino 1.0</b></p>"
-                                        "<p><b>Copyright (C) 2020 by Sven Kochmann</b></p>"
+                                        "<p><b>Topino 1.1</b></p>"
+                                        "<p><b>Copyright (C) 2021 by Sven Kochmann</b></p>"
                                         "<p>Topino is an analysis tool for continuous flow electrophoresis (CFE). It provides an easy "
                                         "to use graphical user-interface (GUI) for assessing CFE images by angulagrams [1].</p>"
                                         "<p>Topino was developed by <b>Sven Kochmann</b> in the research group of <b>Prof. Sergey N. "
