@@ -86,6 +86,9 @@ TopinoDocument::FileError TopinoDocument::loadFromXML(const QString& xmlfilename
     filename = fi.fileName();
     path = fi.absolutePath();
 
+    /* Apply processing parameters */
+    data.processImage();
+
     /* Freshly opened files are not changed (yet) */
     changed = false;
 

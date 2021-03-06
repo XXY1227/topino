@@ -178,6 +178,7 @@ TopinoData::ParsingError TopinoData::loadImageObject(QXmlStreamReader& xml) {
     /* Read all elements of an image object and fill in the respective members; the data of
      * source image is saved as base64 encoded PNG */
     while (xml.readNextStartElement()) {
+
         qDebug("Found element %s in image object...", xml.name().toString().toStdString().c_str());
 
         if(xml.name() == "data") {
@@ -190,6 +191,23 @@ TopinoData::ParsingError TopinoData::loadImageObject(QXmlStreamReader& xml) {
 
             if (sourceImage.isNull())
                 return ParsingError::CouldNotLoadImage;
+
+            continue;
+        }
+
+        /* If not image data -> read content of element and parse it */
+        QString content = xml.readElementText().toLower();
+
+        if (xml.name() == "desatmode") {
+            int value = content.toInt();
+            if (value < TopinoTools::desaturationModes::desatCOUNT)
+                desatMode = static_cast<TopinoTools::desaturationModes>(value);
+        } else if (xml.name() == "inversion") {
+            inversion = content.toInt() > 0;
+        } else if (xml.name() == "levelMin") {
+            levelMin = content.toInt();
+        } else if (xml.name() == "levelMax") {
+            levelMax = content.toInt();
         } else {
             xml.skipCurrentElement();
         }
@@ -212,6 +230,16 @@ void TopinoData::saveImageObject(QXmlStreamWriter& xml) {
     QBuffer buffer(&bytes);
     sourceImage.save(&buffer, "PNG");
     xml.writeTextElement("data", bytes.toBase64());
+
+    /* Save the processing data, i.e. mode, min and max level; here, we also add a description
+     * for the mode enum, so that the XML can be read by humans */
+    xml.writeStartElement ("desatmode");
+        xml.writeAttribute ("desc", TopinoTools::getDesaturationModeName(desatMode));
+        xml.writeCharacters(QString::number(desatMode));
+    xml.writeEndElement ();
+    xml.writeTextElement("inversion", QString::number(inversion));
+    xml.writeTextElement("levelMin", QString::number(levelMin));
+    xml.writeTextElement("levelMax", QString::number(levelMax));
 
     xml.writeEndElement();
 }
