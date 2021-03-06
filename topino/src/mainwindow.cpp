@@ -625,7 +625,9 @@ void MainWindow::onSaveAs() {
 
 void MainWindow::onImportImage() {
     QString filename = QFileDialog::getOpenFileName(this, tr("Open file to analyze"), "",
-                       tr("Image files/CFE image files (*.png *.jpg *.bmp *.FFE.png *.CFE.png);;All files (*.*)"));
+                       tr("Image files/CFE image files (*.png *.jpg *.FFE.png *.CFE.png "
+                          "*.bmp *.gif *.jpeg *.tga *.tiff *.pbm *.pgm *.ppm *.xbm "
+                          "*.xpm);;All files (*.*)"));
 
     if (filename.length() == 0)
         return;
@@ -634,7 +636,7 @@ void MainWindow::onImportImage() {
     QImage img(filename);
 
     if (img.isNull()) {
-        QMessageBox::critical(this, tr("Failed to load image file"), tr("The image file could not be loaded."));
+        QMessageBox::critical(this, tr("Failed to load image file"), tr("The image file could not be loaded."));        
         return;
     }
 
