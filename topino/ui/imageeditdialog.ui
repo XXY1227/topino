@@ -394,6 +394,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>levelMin</sender>
+   <signal>editingFinished()</signal>
+   <receiver>ImageEditDialog</receiver>
+   <slot>spinEditFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>565</x>
+     <y>281</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>395</x>
+     <y>190</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>levelMax</sender>
+   <signal>editingFinished()</signal>
+   <receiver>ImageEditDialog</receiver>
+   <slot>spinEditFinished()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>754</x>
+     <y>281</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>395</x>
+     <y>190</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>checkBoxChanged(int)</slot>
@@ -402,5 +434,6 @@
   <slot>maxLevelChanged(int)</slot>
   <slot>previewModeChanged(int)</slot>
   <slot>desaturationModeChanged(int)</slot>
+  <slot>spinEditFinished()</slot>
  </slots>
 </ui>

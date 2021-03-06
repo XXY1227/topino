@@ -52,6 +52,8 @@ class ImageEditDialog : public QDialog {
     void minLevelChanged(int value);
     void maxLevelChanged(int value);
 
+    void spinEditFinished();
+
   private:
     /* All the UI data */
     Ui::ImageEditDialog *ui;

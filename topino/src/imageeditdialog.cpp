@@ -80,6 +80,14 @@ void ImageEditDialog::levelsChanged(int min, int max) {
 }
 
 void ImageEditDialog::minLevelChanged(int value) {
+    /* A legit value should be between 0 (inclusive) and levelMax exclusive. If not,
+     * we do nothing here. That avoids "strange" behaviour of the spinbox edit, e.g.
+     * when the user is still typing a number. */
+    if (value < 0 || value >= ui->levelMax->value()) {
+        spinChanged = false;
+        return;
+    }
+
     /* Setting the value to the histogram */
     ui->histogram->setMinSelValue(value);
 
@@ -99,6 +107,14 @@ void ImageEditDialog::minLevelChanged(int value) {
 }
 
 void ImageEditDialog::maxLevelChanged(int value) {
+    /* A legit value should be between levelMin (exclusive) and 255 inclusive. If not,
+     * we do nothing here. That avoids "strange" behaviour of the spinbox edit, e.g.
+     * when the user is still typing a number. */
+    if (value <= ui->levelMin->value() || value > 255) {
+        spinChanged = false;
+        return;
+    }
+
     /* Setting the value to the histogram */
     ui->histogram->setMaxSelValue(value);
 
@@ -115,6 +131,14 @@ void ImageEditDialog::maxLevelChanged(int value) {
     }
 
     spinChanged = false;
+}
+
+void ImageEditDialog::spinEditFinished() {
+    /* Make the spinbox values the same as the histogram's ones */
+    spinChanged = true;
+    ui->levelMin->setValue(ui->histogram->getMinSelValue());
+    spinChanged = true;
+    ui->levelMax->setValue(ui->histogram->getMaxSelValue());
 }
 
 bool ImageEditDialog::getInvert() const {
