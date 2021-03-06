@@ -640,6 +640,18 @@ void MainWindow::onImportImage() {
         return;
     }
 
+    /* Check if the new image dimensions are the same as the old ones (but only if another image is
+     * loaded of course!) - if not, we have to reset the view (remove all inlets, etc.) to avoid
+     * some glitches. */
+    const QImage &docimage = document.getData().getImage();
+    if (!docimage.isNull() && ((docimage.width() != img.width()) || (docimage.height() != img.height()))) {
+        qDebug("New image has different dimensions. Resetting free.");
+
+        imageView.resetView();
+        angulagramView.resetView();
+        changeToView(viewPages::image);
+    }
+
     /* Modify data */
     TopinoData data;
     document.getData(data);
