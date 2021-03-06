@@ -735,6 +735,52 @@ void MainWindow::onToolInputImage() {
 void MainWindow::onToolAngulagram() {
     qDebug("Angulagram");
     changeToView(viewPages::angulagram);
+
+    /* Calculate the integral of the angulagram points and see if it is above
+     * 80% of the integral of (maxAngle-minAngle) × maxIntensity. If yes, this
+     * means that the user probably did NOT prepare the image before proceeding. */
+    QVector<QPointF> dataPoints = document.getData().getAngulagramPoints();
+
+    if (dataPoints.length() == 0)
+        return;
+
+    /* Integral and maximum of data points */
+    qreal int_datapoints = 0.0;
+    qreal maximum = 0.0;
+    for(auto it = dataPoints.begin(); it != dataPoints.end(); ++it) {
+        int_datapoints += it->y();
+
+        if (it->y() > maximum)
+            maximum = it->y();
+    }
+
+    /* Divide by 10 because dataPoints are divided in 0.1° steps not 1.0° */
+    int_datapoints /= 10.0;
+
+    qDebug("Maximum: %.2f", maximum);
+    qDebug("Integral datapoints: %.2f", int_datapoints);
+
+    /* Integral of integral of (maxAngle-minAngle) × maxIntensity */
+    qreal int_rectangle = (dataPoints.last().x() - dataPoints.first().x()) * maximum;
+    qDebug("Integral rectangle: %.2f (x1: %.2f, x2: %.2f)", int_rectangle, dataPoints.first().x(), dataPoints.last().x());
+
+    if (int_rectangle == 0.0)
+        return;
+
+    /* Ratio between both integrals should ba above > 0.90 */
+    qreal ratio = int_datapoints / int_rectangle;
+    qDebug("Ratio: %.2f", ratio);
+
+    if (ratio >= 0.80) {
+        qDebug("Ratio is above 80%%. user probably did not adjust the image.");
+
+        QMessageBox::information(nullptr, tr("High background detected (integral > 80%)"),
+                                 tr("It seems that the angulagram contains a huge amount of background (and probably"
+                                    "negative peaks). Usually, such background is caused by not selecting any or "
+                                    "non-optimal desaturation parameters.\n\n"
+                                    "Please change back to the image view and select 'Preprocess image' from "
+                                    "the object properties of the image."));
+    }
 }
 
 void MainWindow::onToolEditImage() {
