@@ -379,6 +379,10 @@ void MainWindow::updateObjectPage(MainWindow::objectPages page) {
         ui->tableAnguResolution->clearContents();
         ui->tableAnguResolution->setRowCount(0);
 
+        /* Fix the header height (dynamic headers might grow very large on some platforms as Windows for some reasons) */
+        ui->tableAnguStreams->horizontalHeader()->setFixedHeight(20);
+        ui->tableAnguResolution->horizontalHeader()->setFixedHeight(20);
+
         /* Visible? */
         if(viewManager.currentIndex() == viewPages::angulagram) {
             ui->propAnguDataPoints->setText(QString::number(document.getData().getAngulagramPoints().length()));
