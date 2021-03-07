@@ -346,7 +346,7 @@ qreal TopinoTools::centerMaxDistance(const QPointF& center, const QList<QPointF>
 void TopinoTools::calculateSmallestCircle(const QList<QPointF>& points, QPointF& center, qreal& radius) {
     /* Copy list and shuffle in random order */
     QList<QPointF> circlePoints = points;
-    std::random_shuffle(circlePoints.begin(), circlePoints.end());
+    //std::random_shuffle(circlePoints.begin(), circlePoints.end());
 
     /* Initialize center and radius */
     center = QPointF(0.0, 0.0);
