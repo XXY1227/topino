@@ -62,6 +62,28 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
+void MainWindow::closeEvent(QCloseEvent *event) {
+    /* If the document has changed the user needs to be asked if to proceed */
+    if (document.hasChanged()) {
+        QMessageBox::StandardButton ret;
+        ret = QMessageBox::question(this, tr("The current document was not saved."),
+                                    tr("Do you want to save it before creating a new one?"),
+                                    QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Abort)
+                                   );
+
+        if (ret == QMessageBox::Yes) {
+            onSave();
+        } else if (ret == QMessageBox::Abort) {
+            /* Ignoring this event means that we do NOT close this window */
+            event->ignore();
+            return;
+        }
+    }
+
+    /* Accepting this event means that we continue with closing the window */
+    event->accept();
+}
+
 bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
     /* Events for the miniview */
     if (dynamic_cast<QGraphicsView*>(watched) && (watched == ui->miniView)) {
@@ -667,7 +689,8 @@ void MainWindow::onImportImage() {
     changeToView(viewPages::image);
 }
 
-void MainWindow::onQuit() {
+void MainWindow::onQuit() {    
+    /* Closing the main window will end the application */
     this->close();
 }
 

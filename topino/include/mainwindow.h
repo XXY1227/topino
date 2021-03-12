@@ -31,7 +31,8 @@ class MainWindow : public QMainWindow, public IObserver {
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    bool eventFilter(QObject *watched, QEvent *event) override;
+    void closeEvent(QCloseEvent *event) override;
+    bool eventFilter(QObject *watched, QEvent *event) override;    
 
     void modelHasChanged() final;
 
