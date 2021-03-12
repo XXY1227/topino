@@ -581,7 +581,7 @@ void ImageAnalysisView::selectNext() {
          * has a low stacking index. We use the first non-selected item that is also NOT
          * the background image. */
         QList<QGraphicsItem *> items = scene()->items(Qt::AscendingOrder);
-        QListIterator iter(items);
+        QListIterator<QGraphicsItem *> iter(items);
         while(iter.hasNext()) {
             QGraphicsItem *item = iter.next();
 
@@ -736,7 +736,7 @@ void ImageAnalysisView::selectItem(TopinoGraphicsItem* item) {
      * NOTE: Stack _before_ means to the _BACKGROUND_! Therefore, we need to
      * call the function of the foreground item! */
     if (items.size() > 0) {
-        QListIterator iter(items);
+        QListIterator<QGraphicsItem *> iter(items);
         iter.toBack();
         while(iter.hasPrevious()) {
             QGraphicsItem *stackItem = iter.previous();
