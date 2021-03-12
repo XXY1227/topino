@@ -12,7 +12,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets charts
 # binary files. Such shared object files are wrongly identfied as
 # shared libraries in desktop based file managers (e.g. Linux Mint/Caja)
 # not allowing the user to double click the file
-QMAKE_LFLAGS += -no-pie
+*linux* {
+    message("Setting no-pie flag to avoid position independent executables.")
+    QMAKE_LFLAGS += -no-pie
+}
 
 # Version of Topino
 VERSION = 1.1.0
@@ -28,8 +31,17 @@ QMAKE_TARGET_COPYRIGHT = "Sven Kochmann, 2021"
 # source directory. Please see license, etc. in the eigen3 directory.
 INCLUDEPATH += ../eigen3
 
-# Select C++17
-QMAKE_CXXFLAGS += -std=c++17
+# Select C++17 for non-MSVC compilers (gcc, etc.)
+!*msvc* {
+    message("Selecting C++17")
+    QMAKE_CXXFLAGS += -std=c++17
+}
+
+# Select C++17 for MSVC compiler
+*msvc* {
+    message("Selecting C++17 for MSVC compiler.")
+    QMAKE_CXXFLAGS += /std:c++17
+}
 
 TARGET = topino
 TEMPLATE = app
@@ -39,6 +51,10 @@ TEMPLATE = app
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
+
+# Suppress debug output in release configuration (in Qt this is not
+# default, so we have to define it here)
+CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
