@@ -515,7 +515,7 @@ int PolarCircleToolItem::inSector(const QPointF& pos) const {
     double length = qSqrt(qPow(relPos.x(), 2.0) + qPow(relPos.y(), 2.0));
 
     /* Get angle relative to 12'o clock */
-    double angle = ((relPos.x() > 0)/0.5 - 1) *
+    double angle = (double(relPos.x() > 0)/0.5 - 1) *
                    qRadiansToDegrees(qAcos(QPointF::dotProduct(relPos, QPointF(0.0, 1.0)) / (length * 1.0))) + 180.0;
 
     /* Shift angle by 22.5 */
