@@ -1,4 +1,4 @@
-# User guide v.1.0 by Nikita A. Ivanov
+# User guide v.1.1 by Ivanov N.A.
 
 ## Welcome to Topino!
 
@@ -13,6 +13,7 @@ Whether it’s your first time analyzing Molecular Stream Separations (MMS) or s
     1. [Image file import](#image-file-import)
     2. [Inlet tool](#inlet-tool)
     3. [Object properties bar](#object-properties-bar)
+    4. [Image Preprocessing](#image-preprocessing)
 
 2. [Analyzing the angulagram](#analyzing-the-angulagram)
     1. [Understanding your preprocessed data](#understanding-your-preprocessed-data)
@@ -26,15 +27,15 @@ Whether it’s your first time analyzing Molecular Stream Separations (MMS) or s
 
 ### Image file import
 
-In order to begin your journey with _Topino_, click on the _File_ in the the top left and select the _Import image..._ option from the drop-down menu.
+In order to begin your journey with _Topino_, click on _File_ in the the top left corner of the menu bar and select the _Import image..._ option from the drop-down menu.
 
 ![](image1.png)
 
-_Topino_ accepts most popular image files formats such as PNG (default) and JPEG. You can attempt to import a non-supported format by select the _All Files_ option from the drop-down menu in the _Open_-dialog.
+_Topino_ accepts most popular image files formats such as PNG (default) and JPEG. You can attempt to import a non-supported format by selecting the _All Files_ option from the drop-down menu in the _Open_-dialog.
 
 ![](image2.png)
 
-It is not guaranteed that the import will be successful. In principle, _Topino_ supports all [formats that are supported by the Qt framework]. However, the import might produce artifacts or the like, _e.g._ with RAW files. Future version of _Topino_ might support more image formats.
+It is not guaranteed that the import will be successful. In principle, _Topino_ supports all formats that are supported by the Qt framework. However, the import might produce artifacts or the like, _e.g._ with RAW files. Future version of _Topino_ might support more image formats.
 
 
 ### Inlet tool
@@ -52,7 +53,7 @@ Select the _Inlet Tool_ and position your mouse cursor at the center of your inl
 
 ### Object properties bar
 
-On the right side of the _Topino_ interface, you can find the _Object Properties_. It can display either object properties of the imported image (if nothing is selected) or properties of objects on the image such as the inlet depending on what is currently selected. 
+On the right side of the _Topino_ interface, you can find the _Object Properties_. It can display either object properties of the imported image (if nothing is selected) or properties of objects (e.g. inlet positioning grid) depending on what is currently selected. 
 
 Let us explore _Inlet properties_ first. For this, make sure that the inlet you created in the previous step is selected:
 
@@ -61,7 +62,7 @@ Let us explore _Inlet properties_ first. For this, make sure that the inlet you 
 
 | Button   | Function  |
 |----------|-----------------------------------------------------------------------------------------|
-| ![](../topino/ui/toolicons/inlet_maininlet.png)    | Sets your currently selected inlet as the _Main Inlet_ if multiple sample inlets are specified. Only one _Main inlet_ can be designated at a time because the polar coordinate system can have only one origin.    |
+| ![](../topino/ui/toolicons/inlet_maininlet.png)| Sets your currently selected inlet as the _Main Inlet_ if multiple sample inlets are specified. Only one _Main inlet_ can be designated at a time because the polar coordinate system can have only one origin.    |
 | ![](../topino/ui/toolicons/inlet_signs.png)    | Reverses positive and negative annular values on the displayed grid.   |
 | ![](../topino/ui/toolicons/inlet_props.png)    | Shows a dialog that allows modification of the parameters of the annular grid. This dialog has the advantages of holding additional parameters, as well as their exact numerical values, not accessible through direct cursor interaction with the grid. One can use it to fine-tune a quickly placed annular grid.  |
 
@@ -76,6 +77,16 @@ Let us explore _Image properties_. For this, make sure that nothing is selected 
 | ![](../topino/ui/toolicons/image_switch.png)    | Swaps between preprocessed and the original imported image   |
 | ![](../topino/ui/toolicons/image_reset.png)    | Resets the image to its original state.  |
 | ![](../topino/ui/toolicons/image_export.png)    | Exports the preprocessed image as PNG file. |
+
+
+### Image preprocessing
+
+Once an image is imported and the inlet tool has been properly positioned we can begin preprocessing our image. 
+
+Topino works by integrating the intesity signal over radius of the previously positioned inlet tool in 0.1 degree increments. Therefore, it is important to convolute the imported RGB intensities into a single intesity value during the preprocessing step. To begin click on your imported image and then on the _Preprocess image_ button. This menu will allow you to select from a multitude of Desaturation\Convolution modes. Assuming that the contrast of an imported image is good, the default _Lightness_ desaturation mode will do the job. We recommend to use _Lightness_ desaturation mode without any modifications to the histogram setting (_Adjust levels_) whenever possible to minimise user-to-user analysis variability. However, certain cases of poor image contrast would require the user to modify the histogram setting to achieve the best results.
+
+Topino is designed to work with both Fluorescence and Light Absorbance based molecular stream imaging techniques.  Absorbance based images need to be color inverted during the preprocessing step to avoid generating negative peaks. This option is available when selecting a desaturation mode in the _Preprocess image_ menu.   
+
 
 
 
@@ -96,7 +107,7 @@ The polar image is then integrated over the radius for each angle and the prelim
 
 ### Analyzing the angulagram by fitting peaks 
 
-Click on the _Evaluate angulagram_ button on the right side of _Topino_ to start the fitting process. Fitting is done mostly automatically in three steps: First, data is smoothed by a [Gaussian kernel](https://en.wikipedia.org/wiki/Kernel_smoother#Gaussian_kernel_smoother). Second, _Topino_ detects maxmima and minima to split the angulagram into sections (ideally: one peak per section). Third, each section is fitted to a Lorentzian function by the [Levenberg-Marquardt algorithm](https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm).
+Click on the _Evaluate angulagram_ button on the right side of _Topino_ to start the fitting process. Fitting is done mostly automatically in three steps: First, data is smoothed by a [Gaussian kernel](https://en.wikipedia.org/wiki/Kernel_smoother#Gaussian_kernel_smoother). Second, _Topino_ detects maxmima (peaks) and minima (valleys between peaks) to split the angulagram into sections (ideally: one peak per section). Third, each section is fitted to a Lorentzian function by the [Levenberg-Marquardt algorithm](https://en.wikipedia.org/wiki/Levenberg%E2%80%93Marquardt_algorithm).
 
 In the preview dialog, you can adjust some of the fitting parameters such as the Gaussian noise and threshold. For instance, adjusting the threshold will allow to remove the noise on the left and right side of the angulagram, which is often incorrectly identified as peaks. Adjusting the smoothing parameters will remove false-positive peaks (small minima/maxima). If you are happy with the fit preview, simply press _Ok_ to accept these parameters and fitting.
 
